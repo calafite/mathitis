@@ -457,16 +457,22 @@ CREATE INDEX idx_audit_logs_actor ON audit_logs(actor_id, created_at DESC);
 
 ---
 
-## 8.5 Algorithmic Mentor Matching Engine
 
-To assist freshmen in discovering the most compatible mentors during the early matching phase, *Mathitis* implements a lightweight, analytical scoring engine:
 
-$$\text{Profile Compatibility Score} = w_1 \cdot T_o + w_2 \cdot E_p + w_3 \cdot V_p + w_4 \cdot B_p$$
+## 8.5 **Algorithmic Mentor Matching**
 
-* **1. Tag Overlap ($T_o$ - Weight: 40%)**: Counts shared tag items (e.g., matching courses, tech stacks, or interest categories) between the Freshman's profile and the Senior's profile.
-* **2. Profile Effort & Complexity ($E_p$ - Weight: 30%)**: Derived from the richness of the Senior's profile. Computed based on biography word-count, markdown complexity (use of custom headers, badges, colors, and blocks), and the total number of customized Rich Cards added (up to a max-cap score of 100).
-* **3. Profile Popularity / Views ($V_p$ - Weight: 10%)**: Logarithmically scaled count of unique student biography views (`profile_views`) to prevent popular seniors from locking out others while still surfacing highly sought-after profiles.
-* **4. Freshman Bumps ($B_p$ - Weight: 20%)**: Total number of high-affinity "bumps" (`bump_count`) received by the senior from browsing freshmen. Freshmen can hit the "Bump/Like" button once per senior profile.
+To assist freshmen in discovering the most compatible mentors during the early matching phase, Mathitis implements a lightweight, analytical scoring engine:
+
+Profile Compatibility Score = w₁ · Tₒ + w₂ · Eₚ + w₃ · Vₚ + w₄ · Bₚ
+
+1. Tag Overlap (Tₒ - Weight: 40%): Counts shared tag items (e.g., matching courses, tech stacks, or interest categories) between the Freshman's profile and the Senior's profile.
+
+2. Profile Effort & Complexity (Eₚ - Weight: 30%): Derived from the richness of the Senior's profile. Computed based on biography word-count, markdown complexity (use of custom headers, badges, colors, and blocks), and the total number of customized Rich Cards added (up to a max-cap score of 100).
+
+3. Profile Popularity / Views (Vₚ - Weight: 10%): Logarithmically scaled count of unique student biography views (profile_views) to prevent popular seniors from locking out others while still surfacing highly sought-after profiles.
+
+4. Freshman Bumps (Bₚ - Weight: 20%): Total number of high-affinity "bumps" (bump_count) received by the senior from browsing freshmen. Freshmen can hit the "Bump/Like" button once per senior profile.
+
 
 The matching score is computed in-memory or via simple SQL formulas during catalog query runs, returning dynamic, personalized mentor recommendations on the Freshman Discovery Hub.
 
