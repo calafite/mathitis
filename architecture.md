@@ -93,7 +93,7 @@ The platform balances visual freedom with strict backend-enforced RBAC permissio
   * **Prisma ORM**: Type-safe relational database queries, migration engine, and JSONB column support for rich card metadata.
   * **PostgreSQL 16**: Relational integrity, row-level locking for concurrency control, full-text search, and JSONB indices.
   * **Redis + BullMQ**: Asynchronous background workers for email dispatch, notifications, and scheduled request cleanup.
-  * **Sharp & S3 / MinIO**: Pre-signed upload URLs with server-side image processing, thumbnail generation, and metadata stripping.
+  * **Image Upload Pipeline (Server-Side Sanitization)**: Frontend uploads to Fastify (`POST /api/profiles/me/avatar|banner`) → Fastify processes with **Sharp** (re-encode, strip EXIF, convert to WebP, enforce size limits) → Fastify uploads sanitized result to S3/MinIO. **No direct pre-signed URLs** — this guarantees server-side validation and sanitization before any object reaches object storage.
 
 ---
 
@@ -155,10 +155,11 @@ To render custom colors and rich callouts safely:
 CREATE TYPE user_role AS ENUM ('freshman', 'senior', 'administrator', 'developer');
 CREATE TYPE account_status AS ENUM ('pending_verification', 'active', 'suspended', 'deactivated');
 CREATE TYPE request_status AS ENUM ('pending', 'pending_admin_approval', 'accepted', 'rejected', 'cancelled');
-CREATE TYPE mentorship_status AS ENUM ('active', 'completed', 'terminated');
+CREATE TYPE mentorship_status AS ENUM ('active'); -- Family-like relationship; no completion/termination state
+CREATE TYPE token_type AS ENUM ('email_verification', 'password_reset');
 CREATE TYPE rich_card_type AS ENUM ('song', 'game', 'film', 'book', 'project', 'custom');
 
--- Users Core
+-- Users Core (Soft Delete for Lineage Preservation)
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     handle VARCHAR(32) UNIQUE NOT NULL,
@@ -167,9 +168,22 @@ CREATE TABLE users (
     role user_role NOT NULL DEFAULT 'freshman',
     semester SMALLINT NOT NULL, -- e.g. 1 to 12
     status account_status NOT NULL DEFAULT 'pending_verification',
+    deleted_at TIMESTAMPTZ, -- Soft delete: preserves lineage graph when users leave
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Secure Tokens (Email Verification, Password Reset)
+CREATE TABLE user_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash VARCHAR(255) NOT NULL, -- Argon2id hash of the token sent via email
+    type token_type NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    consumed_at TIMESTAMPTZ, -- Null until used; prevents token reuse
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_user_tokens_user_type ON user_tokens(user_id, type) WHERE consumed_at IS NULL;
 
 -- Rich Profiles
 CREATE TABLE profiles (
@@ -197,14 +211,17 @@ CREATE TABLE profiles (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_profiles_discoverable ON profiles(is_discoverable) WHERE is_discoverable = true;
 
--- Freshmen Bumps / Likes (Interest Signal for Seniors)
+-- Freshmen Bumps / Likes (Max 4 active per freshman; reallocatable)
 CREATE TABLE profile_bumps (
     freshman_id UUID REFERENCES users(id) ON DELETE CASCADE,
     senior_id UUID REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (freshman_id, senior_id)
 );
+-- Application enforces: COUNT(*) WHERE freshman_id = $1 <= 4
+-- Reallocation: DELETE old bump, INSERT new one (single transaction)
 
 -- Tag Taxonomy
 CREATE TABLE tags (
@@ -239,7 +256,7 @@ CREATE TABLE rich_cards (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Mentorship Requests
+-- Mentorship Requests (Partial Unique Index: allows re-apply after rejection)
 CREATE TABLE mentorship_requests (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     freshman_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -249,22 +266,24 @@ CREATE TABLE mentorship_requests (
     rejection_reason TEXT,
     reviewed_by_admin_id UUID REFERENCES users(id),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT unique_active_request UNIQUE (freshman_id, senior_id)
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- Only one ACTIVE request per pair at a time
+CREATE UNIQUE INDEX unique_active_request ON mentorship_requests (freshman_id, senior_id)
+WHERE status IN ('pending', 'pending_admin_approval', 'accepted');
 
 -- Active & Historical Mentorship Relationships (Powers Lineage Graph)
+-- NO CASCADE DELETE on user FKs: preserves lineage when users are soft-deleted
 CREATE TABLE mentorships (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     request_id UUID UNIQUE NOT NULL REFERENCES mentorship_requests(id),
-    freshman_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    senior_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    freshman_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    senior_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
     semester SMALLINT NOT NULL, -- e.g. 1 to 12
     academic_year VARCHAR(10) NOT NULL, -- e.g. "2025-2026"
     status mentorship_status NOT NULL DEFAULT 'active',
-    started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    ended_at TIMESTAMPTZ,
-    termination_reason TEXT
+    started_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    -- No ended_at / termination_reason: mentorship is a permanent family link
 );
 
 -- In-App Notifications
@@ -301,11 +320,14 @@ CREATE TABLE audit_logs (
 );
 
 -- Performance Indexes
-CREATE INDEX idx_users_role_status ON users(role, status);
+CREATE INDEX idx_users_role_status ON users(role, status) WHERE deleted_at IS NULL;
+CREATE INDEX idx_users_deleted ON users(deleted_at) WHERE deleted_at IS NOT NULL;
 CREATE INDEX idx_profiles_accepting ON profiles(is_accepting_requests);
+CREATE INDEX idx_profiles_discoverable ON profiles(is_discoverable) WHERE is_discoverable = true;
 CREATE INDEX idx_requests_freshman ON mentorship_requests(freshman_id, status);
 CREATE INDEX idx_requests_senior ON mentorship_requests(senior_id, status);
 CREATE INDEX idx_mentorships_senior_status ON mentorships(senior_id, status);
+CREATE INDEX idx_mentorships_freshman ON mentorships(freshman_id, status);
 CREATE INDEX idx_notifications_user_read ON notifications(user_id, is_read);
 CREATE INDEX idx_rich_cards_profile ON rich_cards(profile_id, display_order);
 CREATE INDEX idx_audit_logs_actor ON audit_logs(actor_id, created_at DESC);
@@ -511,10 +533,9 @@ POST   /api/requests/:id/accept         # Senior accepts (with row-lock & config
 POST   /api/requests/:id/reject         # Senior declines request
 POST   /api/requests/:id/cancel         # Freshman cancels pending request
 
-# Mentorships Active & Historical Records
+# Mentorships Active & Historical Records (Family-Like: Permanent)
 GET    /api/mentorships/active          # Get active mentorship relationship & details
-POST   /api/mentorships/:id/complete    # Mark mentorship as successfully completed (recorded for lineage)
-POST   /api/mentorships/:id/terminate   # Early termination with reason code
+# No completion/termination endpoints: mentorship is a permanent family link recorded for lineage
 
 # Notifications
 GET    /api/notifications               # List user notifications
@@ -563,14 +584,24 @@ To ensure the system remains robust, maintainable, and secure as it scales, *Mat
   * Sanitize user-curated profiles against cross-site scripting (XSS) via a tailored Markdown parser combined with secondary sanitization (DOMPurify/rehype-sanitize).
 * **Rate Limiting**:
   * Implemented at the API layer with different thresholds (e.g., login/register endpoints have strict IP and handle limits, while profile browsing allows moderate concurrency).
-* **Secure File Upload Pipeline**:
-  * Image uploads (avatars/banners) undergo multi-layered checks: size limits, verification of magic bytes (MIME sniffing), EXIF metadata scrubbing, and conversion to standardized WebP formats using **Sharp** before storage in S3/MinIO bucket.
+* **Secure File Upload Pipeline (Server-Side Sanitization)**:
+  * Image uploads (avatars/banners) go to Fastify first → **Sharp** processes (re-encode, strip EXIF, convert to WebP, enforce size limits) → Fastify uploads sanitized result to S3/MinIO. **No direct pre-signed URLs** — guarantees server-side validation before object storage.
 * **Least Privilege Credentials**:
   * Application and CI/CD runners use separated database users. The application database user has only `SELECT`, `INSERT`, `UPDATE`, and `DELETE` permissions, whereas schema migrations are performed by a migration user with administrative schema controls.
 * **Secrets Management**:
   * Secrets are separated from code and loaded exclusively from environment variables. These are validated *at process startup* using a Zod schema config validator. The application will immediately crash and refuse to start if any crucial secret is missing or malformed.
 * **Secret Rotation**:
   * Session keys and JWT tokens are designed to support seamless rotation by accepting key rings/arrays of valid secrets.
+* **Idempotency Key TTL Enforcement**:
+  * All `X-Idempotency-Key` entries in Redis are stored with a mandatory **24-hour TTL** (`SETEX key 86400 value`). Automatic expiry prevents memory leaks from abandoned client requests.
+* **Email Enumeration Prevention**:
+  * `POST /api/auth/recover` and `POST /api/auth/register` **always return `200 OK` with identical generic messaging** regardless of whether the email/handle exists. Valid accounts receive the token via email silently; invalid accounts are discarded without disclosure.
+* **Bump Allocation Limit**:
+  * Freshmen may hold **maximum 4 active bumps** simultaneously (`profile_bumps` count per `freshman_id` ≤ 4). Reallocation is supported: `DELETE` an existing bump and `INSERT` a new one in a single transaction to "move" the bump to a different senior.
+* **Soft Delete for Lineage Preservation**:
+  * `users.deleted_at` timestamp implements soft deletion. Hard deletes are forbidden. When a user requests account removal, their profile is anonymized and `deleted_at` is set, preserving `mentorships` foreign key integrity for the lineage graph. Queries default to `WHERE deleted_at IS NULL`.
+* **Partial Unique Index for Re-Applications**:
+  * `mentorship_requests` uses a partial unique index `WHERE status IN ('pending', 'pending_admin_approval', 'accepted')` so that `rejected` or `cancelled` requests do not block future applications to the same senior in later semesters.
 
 ### 10.3 CI/CD & Automated Quality Gates
 Every single Pull Request (PR) automatically executes an integrated GitHub Actions pipeline to prevent regression and maintain visual/logic quality:

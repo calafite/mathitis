@@ -1,13 +1,15 @@
 # Phase 2: Expressive Profiles, Custom Markdown & Rich Cards
 
 ## Objective
-Deliver full profile curation capabilities: custom banners, theme palettes/color accents, sanitized rich Markdown with colored text and callouts, public-optional contact links, and rich interactive media cards (songs, games, films, projects) with rigorous upload validation, EXIF metadata stripping, and profile effort scoring.
+Deliver full profile curation capabilities: custom banners, theme palettes/color accents, sanitized rich Markdown with colored text and callouts, public-optional contact links, and rich interactive media cards (songs, games, films, projects) with **server-side upload pipeline** (Fastify → Sharp → S3) for guaranteed EXIF stripping and sanitization, and profile effort scoring.
 
 ## Tasks
-- [ ] **2.1 Secure Media Upload Service & Sharp Sanitization**
-  - Implement S3/MinIO upload service with short-lived pre-signed URL generation for avatars and banners to keep storage endpoints private.
-  - Build upload validation middleware enforcing strict file size limits (max 2MB avatar, 5MB banner) and content-type verification via file signature analysis (magic-byte image verification).
-  - Integrate **Sharp** image processing worker to sanitize files: re-encode incoming image pixels, strip all EXIF/GPS metadata (preventing user geolocation leakage), and output optimized responsive formats in `.webp`.
+- [ ] **2.1 Server-Side Image Upload Pipeline (Fastify → Sharp → S3/MinIO)**
+  - **No direct pre-signed URLs**: Frontend uploads multipart/form-data to Fastify endpoints (`POST /api/profiles/me/avatar`, `POST /api/profiles/me/banner`).
+  - Fastify validates: strict file size limits (max 2MB avatar, 5MB banner), magic-byte MIME verification (file signature analysis).
+  - Fastify processes with **Sharp**: re-encode pixels, strip ALL EXIF/GPS metadata (preventing geolocation leakage), convert to standardized `.webp` format, generate responsive variants.
+  - Fastify uploads sanitized result to S3/MinIO; returns final CDN URL to frontend.
+  - This guarantees server-side validation/sanitization before any object reaches object storage.
 - [ ] **2.2 Profile Management, Public-Optional Contact & Privacy API**
   - Build `GET /api/profiles/:handle` and `PATCH /api/profiles/me` endpoints.
   - Support profile attributes: `social_name`, `pronouns`, `tagline`, `biography_markdown`, `banner_url`, `banner_preset`, `theme_palette`, `social_links`, `contact_email`, `max_mentees`.
