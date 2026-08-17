@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  freshman
+  senior
+  administrator
+  developer
+}
+
+enum AccountStatus {
+  pending_verification
+  active
+  suspended
+  deactivated
+}
+
+enum TokenType {
+  email_verification
+  password_reset
+}
+
+model User {
+  id           String        @id @default(uuid()) @db.Uuid
+  handle       String        @unique @db.VarChar(32)
+  email        String        @unique @db.VarChar(255)
+  passwordHash String        @map("password_hash") @db.VarChar(255)
+  role         UserRole      @default(freshman)
+  semester     Int           @db.SmallInt
+  status       AccountStatus @default(pending_verification)
+  deletedAt    DateTime?     @map("deleted_at") @db.Timestamptz(6)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tokens   UserToken[]
+  profile  Profile?
+  auditLogs AuditLog[]
+
+  @@index([role, status], map: "idx_users_role_status")
+  @@index([deletedAt], map: "idx_users_deleted")
+
+  @@map("users")
+}
+
+model UserToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @map("token_hash") @db.VarChar(255)
+  type      TokenType
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  consumedAt DateTime? @map("consumed_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type], map: "idx_user_tokens_user_type")
+
+  @@map("user_tokens")
+}
+
+model Profile {
+  userId              String   @id @map("user_id") @db.Uuid
+  socialName          String?  @map("social_name") @db.VarChar(60)
+  pronouns            String?  @db.VarChar(30)
+  tagline             String?  @db.VarChar(120)
+  biographyMarkdown   String?  @map("biography_markdown") @db.Text
+  avatarUrl           String?  @map("avatar_url") @db.VarChar(512)
+  avatarThumbnailUrl  String?  @map("avatar_thumbnail_url") @db.VarChar(512)
+  bannerUrl           String?  @map("banner_url") @db.VarChar(512)
+  bannerThumbnailUrl  String?  @map("banner_thumbnail_url") @db.VarChar(512)
+  bannerPreset        String?  @map("banner_preset") @db.VarChar(40)
+  themePalette        Json?    @map("theme_palette")
+  socialLinks         Json?    @map("social_links")
+  contactEmail        String?  @map("contact_email") @db.VarChar(255)
+  maxMentees          Int      @default(3) @map("max_mentees") @db.SmallInt
+  isDiscoverable      Boolean  @default(false) @map("is_discoverable")
+  isAcceptingRequests Boolean  @default(true) @map("is_accepting_requests")
+  profileViews        Int      @default(0) @map("profile_views")
+  effortScore         Int      @default(0) @map("effort_score")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags        ProfileTag[]
+  richCards   RichCard[]
+
+  @@index([isDiscoverable], map: "idx_profiles_discoverable")
+
+  @@map("profiles")
+}
+
+model Tag {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique @db.VarChar(60)
+  category  String   @db.VarChar(60)
+  color     String   @db.VarChar(7)
+  icon      String?  @db.VarChar(60)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  profiles ProfileTag[]
+
+  @@index([category], map: "idx_tags_category")
+
+  @@map("tags")
+}
+
+model ProfileTag {
+  profileId String @map("profile_id") @db.Uuid
+  tagId     String @map("tag_id") @db.Uuid
+
+  profile Profile @relation(fields: [profileId], references: [userId], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, tagId])
+
+  @@map("profile_tags")
+}
+
+model RichCard {
+  id          String    @id @default(uuid()) @db.Uuid
+  profileId   String    @map("profile_id") @db.Uuid
+  cardType    String    @map("card_type") @db.VarChar(30)
+  title       String    @db.VarChar(150)
+  subtitle    String?   @db.VarChar(150)
+  description String?   @db.Text
+  imageUrl    String?   @map("image_url") @db.VarChar(512)
+  externalUrl String?   @map("external_url") @db.VarChar(512)
+  embedUrl    String?   @map("embed_url") @db.VarChar(512)
+  accentColor String    @default("#6366f1") @map("accent_color") @db.VarChar(7)
+  metadata    Json?     @default("{}")
+  displayOrder Int      @default(0) @map("display_order") @db.SmallInt
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  profile Profile @relation(fields: [profileId], references: [userId], onDelete: Cascade)
+
+  @@index([profileId, displayOrder], map: "idx_rich_cards_profile")
+
+  @@map("rich_cards")
+}
+
+model SystemConfig {
+  key       String   @id @db.VarChar(100)
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("system_config")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  actorId      String?  @map("actor_id") @db.Uuid
+  action       String   @db.VarChar(100)
+  targetEntity String   @map("target_entity") @db.VarChar(50)
+  targetId     String?  @map("target_id") @db.VarChar(255)
+  details      Json?    @default("{}")
+  ipAddress    String?  @map("ip_address") @db.VarChar(45)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt(sort: Desc)], map: "idx_audit_logs_actor")
+
+  @@map("audit_logs")
+}
