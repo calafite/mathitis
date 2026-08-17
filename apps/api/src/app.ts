@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import Fastify, { type FastifyInstance } from 'fastify';
+import Redis from 'ioredis';
 import cookie from '@fastify/cookie';
 import helmet from '@fastify/helmet';
 import cors from '@fastify/cors';
@@ -14,8 +15,10 @@ import { createPrismaClient } from './db/client.js';
 import { registerErrorHandler } from './plugins/error-handler.js';
 import { registerAuthPlugin } from './plugins/auth-plugin.js';
 import { registerProfilesPlugin } from './plugins/profiles-plugin.js';
+import { registerDiscoveryPlugin } from './plugins/discovery-plugin.js';
 import { createSessionManager } from './plugins/session.js';
 import { createStorage } from './storage/storage-service.js';
+import { createRedisIdempotencyStore } from './lib/idempotency.js';
 import { createUserRepository } from './repositories/user-repository.js';
 import { createTokenRepository } from './repositories/token-repository.js';
 import { createSystemConfigRepository } from './repositories/system-config-repository.js';
@@ -57,12 +60,14 @@ function createLoggerOptions(logLevel: string): false | Record<string, unknown> 
 export interface BuildAppOptions {
   env: Env;
   prisma?: PrismaClient;
+  redis?: Redis;
   mailer?: Parameters<typeof registerAuthPlugin>[1]['mailer'];
 }
 
 export async function buildApp(options: BuildAppOptions): Promise<FastifyInstance> {
   const { env } = options;
   const prisma = options.prisma ?? createPrismaClient(env.DATABASE_URL);
+  const redis = options.redis ?? new Redis(env.REDIS_URL);
 
   const app = Fastify({
     logger: createLoggerOptions(env.LOG_LEVEL),
@@ -130,6 +135,11 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
 
   const session = createSessionManager(env.JWT_SECRET, env.SESSION_MAX_AGE_DAYS);
   const storage = createStorage(env);
+  const idempotencyStore = createRedisIdempotencyStore(redis);
+
+  app.addHook('onClose', async () => {
+    await redis.quit();
+  });
 
   if (!env.S3_ENDPOINT || !env.S3_BUCKET) {
     const uploadDir = resolve(env.UPLOAD_DIR);
@@ -171,6 +181,12 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     storage,
     uploadDir: resolve(env.UPLOAD_DIR),
     publicBaseUrl: env.PUBLIC_BASE_URL,
+  });
+
+  await app.register(registerDiscoveryPlugin, {
+    prisma,
+    session,
+    idempotencyStore,
   });
 
   return app;
