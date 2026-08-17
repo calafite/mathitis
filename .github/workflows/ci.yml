@@ -1,0 +1,56 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.22.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Code Formatting Check
+        run: pnpm format:check
+
+      - name: Static Analysis & Linting
+        run: pnpm lint
+
+      - name: Type Checking
+        run: pnpm typecheck
+
+      - name: Security & Dependency Vulnerability Audit
+        run: pnpm audit --audit-level=high
+
+      - name: Unit & Domain Logic Tests
+        run: pnpm test:unit
+
+      - name: API Integration Tests
+        run: pnpm test:integration
+
+      - name: Frontend Component & E2E Tests
+        run: pnpm test:e2e
+
+      - name: Production Build Verification
+        run: pnpm build

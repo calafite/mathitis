@@ -1,0 +1,13 @@
+node_modules
+dist
+build
+coverage
+.env
+.env.*
+pnpm-lock.yaml
+
+# Specification documents (authored by hand)
+architecture.md
+design.md
+docs/
+tasks/

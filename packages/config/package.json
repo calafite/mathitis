@@ -1,0 +1,13 @@
+{
+  "name": "@mathitis/tsconfig",
+  "version": "0.1.0",
+  "private": true,
+  "files": [
+    "base.json",
+    "web.json",
+    "api.json"
+  ],
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
