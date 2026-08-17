@@ -1,0 +1,4 @@
+{
+  "extends": "@mathitis/tsconfig/base.json",
+  "include": ["src"]
+}
