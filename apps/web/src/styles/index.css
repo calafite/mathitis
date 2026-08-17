@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  color-scheme: light dark;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Radix Dialog overlay */
+[data-overlay] {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 50;
+}
+
+[data-content] {
+  position: fixed;
+  z-index: 51;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---- Profile markdown body ---- */
+.markdown-body {
+  line-height: 1.7;
+  color: var(--text, #1e293b);
+}
+.markdown-body > :first-child {
+  margin-top: 0;
+}
+.markdown-body > :last-child {
+  margin-bottom: 0;
+}
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  margin: 1.2em 0 0.5em;
+  line-height: 1.3;
+}
+.markdown-body h1 {
+  font-size: 1.5em;
+}
+.markdown-body h2 {
+  font-size: 1.25em;
+}
+.markdown-body h3 {
+  font-size: 1.1em;
+}
+.markdown-body p {
+  margin: 0.6em 0;
+}
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0.6em 0;
+  padding-left: 1.4em;
+}
+.markdown-body li {
+  margin: 0.2em 0;
+}
+.markdown-body a {
+  color: #4f46e5;
+  text-decoration: underline;
+}
+.markdown-body pre {
+  margin: 0.8em 0;
+  padding: 0.9em 1em;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+}
+.markdown-body code:not(pre code) {
+  background: rgba(99, 102, 241, 0.12);
+  padding: 0.1em 0.35em;
+  border-radius: 0.3rem;
+  font-size: 0.875em;
+}
+.markdown-body table {
+  border-collapse: collapse;
+  margin: 0.8em 0;
+  width: 100%;
+}
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  padding: 0.4em 0.7em;
+  text-align: left;
+}
+.markdown-body blockquote {
+  margin: 0.8em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid rgba(148, 163, 184, 0.5);
+  color: #475569;
+}
+.markdown-body .badge {
+  display: inline-block;
+  padding: 0.05em 0.55em;
+  margin: 0 0.15em;
+  border-radius: 9999px;
+  font-size: 0.75em;
+  font-weight: 600;
+  background: #3b82f6;
+  color: #fff;
+}
+.markdown-body .callout {
+  border-left: 4px solid #6366f1;
+  background: rgba(99, 102, 241, 0.08);
+  padding: 0.7em 1em;
+  border-radius: 0.4rem;
+}
+.markdown-body .callout-title {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75em;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.3em;
+  color: #4f46e5;
+}
+.markdown-body .callout-note {
+  border-left-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+}
+.markdown-body .callout-tip {
+  border-left-color: #22c55e;
+  background: rgba(34, 197, 94, 0.08);
+}
+.markdown-body .callout-warning {
+  border-left-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+.markdown-body .callout-quote {
+  border-left-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.08);
+}
+.markdown-body iframe {
+  max-width: 100%;
+  border: 0;
+  border-radius: 0.5rem;
+}
