@@ -1,0 +1,206 @@
+import type { FastifyInstance, FastifyReply } from 'fastify';
+import {
+  genericSuccessResponseSchema,
+  loginBodySchema,
+  loginResponseSchema,
+  meResponseSchema,
+  recoverBodySchema,
+  registerBodySchema,
+  resetPasswordBodySchema,
+  verifyEmailParamsSchema,
+  type AuthUser,
+  type LoginBody,
+  type RecoverBody,
+  type RegisterBody,
+  type ResetPasswordBody,
+  type VerifyEmailParams,
+} from '@mathitis/schemas';
+import { createAuthService, type AuthService, type Mailer } from '../services/auth-service.js';
+import type { UserRepository } from '../repositories/user-repository.js';
+import type { TokenRepository } from '../repositories/token-repository.js';
+import type { SystemConfigRepository } from '../repositories/system-config-repository.js';
+import { createSessionManager, type SessionManager } from './session.js';
+import { createRequireAuth } from './auth-guard.js';
+
+const GENERIC_OK = {
+  ok: true,
+  message: 'If an account with that information exists, you will receive an email shortly.',
+};
+
+function toAuthUser(user: {
+  id: string;
+  handle: string;
+  email: string;
+  role: AuthUser['role'];
+  semester: number;
+  status: AuthUser['status'];
+  profile?: { socialName: string | null } | null;
+}): AuthUser {
+  return {
+    id: user.id,
+    handle: user.handle,
+    email: user.email,
+    role: user.role,
+    semester: user.semester,
+    status: user.status,
+    socialName: user.profile?.socialName ?? null,
+    createdAt: new Date(),
+  };
+}
+
+export interface AuthPluginOptions {
+  jwtSecret: string;
+  cookieSecret: string;
+  sessionMaxAgeDays: number;
+  userRepository: UserRepository;
+  tokenRepository: TokenRepository;
+  systemConfigRepository: SystemConfigRepository;
+  mailer?: Mailer;
+  session?: SessionManager;
+}
+
+export async function registerAuthPlugin(app: FastifyInstance, options: AuthPluginOptions) {
+  const authService: AuthService = createAuthService({
+    userRepository: options.userRepository,
+    tokenRepository: options.tokenRepository,
+    systemConfigRepository: options.systemConfigRepository,
+    mailer: options.mailer,
+  });
+
+  const session: SessionManager =
+    options.session ??
+    createSessionManager(options.jwtSecret, options.sessionMaxAgeDays);
+
+  const requireAuth = createRequireAuth(session);
+
+  async function setSessionCookie(
+    reply: FastifyReply,
+    userId: string,
+    role: AuthUser['role'],
+    handle: string,
+  ) {
+    const token = await session.createSessionCookie({ sub: userId, role, handle });
+    reply.setCookie('mathitis_session', token, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: app.env.NODE_ENV === 'production',
+      maxAge: options.sessionMaxAgeDays * 24 * 60 * 60,
+    });
+  }
+
+  app.register(
+    async (authRoutes) => {
+      authRoutes.post<{ Body: RegisterBody }>(
+        '/register',
+        {
+          schema: {
+            body: registerBodySchema,
+            response: { 200: genericSuccessResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          const { handle, email, password, semester, socialName } = request.body;
+          await authService.register({ handle, email, password, semester, socialName });
+          return reply.code(200).send(GENERIC_OK);
+        },
+      );
+
+      authRoutes.post<{ Body: LoginBody }>(
+        '/login',
+        {
+          schema: {
+            body: loginBodySchema,
+            response: { 200: loginResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          const { identifier, password } = request.body;
+          const user = await authService.login(identifier, password);
+          await setSessionCookie(reply, user.id, user.role, user.handle);
+          return reply.send({ user: toAuthUser(user) });
+        },
+      );
+
+      authRoutes.post(
+        '/logout',
+        {
+          schema: {
+            response: { 200: genericSuccessResponseSchema },
+          },
+        },
+        async (_request, reply) => {
+          session.clearSession(reply);
+          return reply.send({ ok: true, message: 'Logged out successfully' });
+        },
+      );
+
+      authRoutes.get(
+        '/me',
+        {
+          preHandler: requireAuth,
+          schema: {
+            response: { 200: meResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          const user = await authService.getCurrentUser(request.sessionUser!.sub);
+          return reply.send({ user: toAuthUser(user) });
+        },
+      );
+
+      authRoutes.post<{ Body: RecoverBody }>(
+        '/recover',
+        {
+          schema: {
+            body: recoverBodySchema,
+            response: { 200: genericSuccessResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          const { email } = request.body;
+          await authService.recover(email);
+          return reply.code(200).send(GENERIC_OK);
+        },
+      );
+
+      authRoutes.post<{ Body: ResetPasswordBody }>(
+        '/reset-password',
+        {
+          schema: {
+            body: resetPasswordBodySchema,
+            response: { 200: genericSuccessResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          const { token, password } = request.body;
+          await authService.resetPassword(token, password);
+          return reply.send({ ok: true, message: 'Password reset successfully' });
+        },
+      );
+
+      authRoutes.get<{ Params: VerifyEmailParams }>(
+        '/verify-email/:token',
+        {
+          schema: {
+            params: verifyEmailParamsSchema,
+            response: { 200: genericSuccessResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          await authService.verifyEmail(request.params.token);
+          return reply.send({ ok: true, message: 'Email verified successfully' });
+        },
+      );
+    },
+    { prefix: '/api/auth' },
+  );
+
+  app.decorateRequest('sessionUser', null);
+}
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    sessionUser: { sub: string; role: AuthUser['role']; handle: string } | null;
+  }
+}

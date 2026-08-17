@@ -1,0 +1,10 @@
+{
+  "extends": "@mathitis/tsconfig/api.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "prisma", "tests"]
+}
