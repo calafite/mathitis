@@ -1,0 +1,117 @@
+import { useRef } from 'react';
+
+export interface BioEditorProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+interface ToolButton {
+  label: string;
+  title: string;
+  insert: (current: string, start: number, end: number) => string;
+  selectAfter?: (inserted: string) => [number, number];
+}
+
+const TOOLS: ToolButton[] = [
+  {
+    label: 'B',
+    title: 'Bold',
+    insert: (c, s, e) => `${c.slice(0, s)}**${c.slice(s, e)}**${c.slice(e)}`,
+    selectAfter: (ins) => [ins.indexOf('**') + 2, ins.indexOf('**', 2)],
+  },
+  {
+    label: 'I',
+    title: 'Italic',
+    insert: (c, s, e) => `${c.slice(0, s)}*${c.slice(s, e)}*${c.slice(e)}`,
+    selectAfter: (ins) => [ins.indexOf('*') + 1, ins.indexOf('*', 1)],
+  },
+  {
+    label: 'H',
+    title: 'Header',
+    insert: (c, s, _e) => {
+      const lineStart = c.lastIndexOf('\n', s - 1) + 1;
+      return `${c.slice(0, lineStart)}## ${c.slice(lineStart)}`;
+    },
+    selectAfter: (ins) => [ins.lastIndexOf('## ') + 3, ins.length],
+  },
+  {
+    label: '</>',
+    title: 'Code block',
+    insert: (c, s, e) => `${c.slice(0, s)}\n\`\`\`\n${c.slice(s, e)}\n\`\`\`\n${c.slice(e)}`,
+    selectAfter: (ins) => [ins.lastIndexOf('```\n') + 4, ins.lastIndexOf('\n```')],
+  },
+  {
+    label: 'Clr',
+    title: 'Coloured text',
+    insert: (c, s, e) => `${c.slice(0, s)}[${c.slice(s, e) || 'coloured text'}]{color=#ec4899}${c.slice(e)}`,
+    selectAfter: (ins) => [ins.lastIndexOf('{color=') - 0, ins.lastIndexOf('}')],
+  },
+  {
+    label: 'Badge',
+    title: 'Badge',
+    insert: (c, s, e) => `${c.slice(0, s)}[${c.slice(s, e) || 'tag'}]{badge=Tag}${c.slice(e)}`,
+    selectAfter: (ins) => [ins.lastIndexOf('{badge=') , ins.lastIndexOf('}')],
+  },
+  {
+    label: 'Note',
+    title: 'Callout',
+    insert: (c, s, e) => {
+      const before = c.slice(0, s);
+      const after = c.slice(e);
+      const block = `> [!NOTE]\n> ${c.slice(s, e) || 'A note worth sharing.'}`;
+      return `${before}${block}${after}`;
+    },
+    selectAfter: (ins) => [ins.lastIndexOf('> '), ins.length],
+  },
+  {
+    label: '•',
+    title: 'List',
+    insert: (c, s, e) => `${c.slice(0, s)}- ${c.slice(s, e)}${c.slice(e)}`,
+    selectAfter: (ins) => [ins.lastIndexOf('- ') + 2, ins.length],
+  },
+];
+
+export function BioEditor({ value, onChange }: BioEditorProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function applyTool(tool: ToolButton) {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const inserted = tool.insert(value, start, end);
+    onChange(inserted);
+
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const [selStart, selEnd] = tool.selectAfter?.(inserted) ?? [inserted.length, inserted.length];
+      textarea.setSelectionRange(selStart, selEnd);
+    });
+  }
+
+  return (
+    <div className="overflow-hidden rounded-md border border-input bg-white">
+      <div className="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 px-2 py-1.5">
+        {TOOLS.map((tool) => (
+          <button
+            key={tool.title}
+            type="button"
+            title={tool.title}
+            onClick={() => applyTool(tool)}
+            className="rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200"
+          >
+            {tool.label}
+          </button>
+        ))}
+      </div>
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={10}
+        placeholder={'Tell your story in markdown…\n\n[Highlight me]{color=#ec4899}  [math lover]{badge=Algebra}\n\n> [!TIP]\n> A tip worth sharing.'}
+        className="w-full resize-y bg-white px-3 py-2 font-mono text-sm text-slate-800 outline-none"
+      />
+    </div>
+  );
+}

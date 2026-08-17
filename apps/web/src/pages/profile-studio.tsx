@@ -1,0 +1,270 @@
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import type { Profile, ThemePalette, UpdateProfileBody } from '@mathitis/schemas';
+import { useAuth } from '@/contexts/auth-context';
+import { profileApi } from '@/lib/profile-api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ThemePicker } from '@/components/profile/theme-picker';
+import { BioEditor } from '@/components/profile/bio-editor';
+import { MediaUpload } from '@/components/profile/media-upload';
+import { RichCardManager } from '@/components/profile/rich-card-manager';
+import { ProfilePreview, type ProfileDraft } from '@/components/profile/profile-preview';
+
+const DEFAULT_THEME: ThemePalette = {
+  primaryColor: '#6366f1',
+  accentColor: '#ec4899',
+  badgeColor: '#3b82f6',
+  cardStyle: 'glassmorphic',
+};
+
+function toDraft(profile: Profile): ProfileDraft {
+  return {
+    socialName: profile.socialName ?? '',
+    pronouns: profile.pronouns ?? '',
+    tagline: profile.tagline ?? '',
+    biographyMarkdown: profile.biographyMarkdown ?? '',
+    themePalette: profile.themePalette ?? DEFAULT_THEME,
+    contactEmail: profile.contactEmail ?? '',
+    socialLinks: {
+      github: profile.socialLinks?.github ?? '',
+      discord: profile.socialLinks?.discord ?? '',
+      linkedin: profile.socialLinks?.linkedin ?? '',
+      website: profile.socialLinks?.website ?? '',
+    },
+    maxMentees: profile.maxMentees,
+    isAcceptingRequests: profile.isAcceptingRequests,
+    isDiscoverable: profile.isDiscoverable,
+  };
+}
+
+function toUpdateBody(draft: ProfileDraft): UpdateProfileBody {
+  return {
+    socialName: draft.socialName || undefined,
+    pronouns: draft.pronouns || null,
+    tagline: draft.tagline || null,
+    biographyMarkdown: draft.biographyMarkdown || null,
+    themePalette: draft.themePalette,
+    contactEmail: draft.contactEmail || null,
+    socialLinks: {
+      github: draft.socialLinks.github || undefined,
+      discord: draft.socialLinks.discord || undefined,
+      linkedin: draft.socialLinks.linkedin || undefined,
+      website: draft.socialLinks.website || undefined,
+    },
+    maxMentees: draft.maxMentees,
+    isAcceptingRequests: draft.isAcceptingRequests,
+    isDiscoverable: draft.isDiscoverable,
+  };
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-medium text-slate-600">{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h3 className="border-b border-slate-200 pb-2 text-sm font-semibold text-slate-800">{children}</h3>;
+}
+
+export function ProfileStudioPage() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const profileQuery = useQuery({
+    queryKey: ['profile', 'me'],
+    queryFn: () => profileApi.getMe().then((r) => r.profile),
+  });
+
+  const [draft, setDraft] = useState<ProfileDraft | null>(null);
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    if (profileQuery.data && !draft) {
+      setDraft(toDraft(profileQuery.data));
+    }
+  }, [profileQuery.data, draft]);
+
+  const saveMutation = useMutation({
+    mutationFn: (body: UpdateProfileBody) => profileApi.updateMe(body),
+    onSuccess: () => {
+      setDirty(false);
+      void queryClient.invalidateQueries({ queryKey: ['profile', 'me'] });
+    },
+  });
+
+  const avatarMutation = useMutation({
+    mutationFn: (file: File) => profileApi.uploadAvatar(file),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['profile', 'me'] }),
+  });
+
+  const bannerMutation = useMutation({
+    mutationFn: (file: File) => profileApi.uploadBanner(file),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['profile', 'me'] }),
+  });
+
+  const profile = profileQuery.data;
+  const set = (patch: Partial<ProfileDraft>) => {
+    setDraft((prev) => (prev ? { ...prev, ...patch } : prev));
+    setDirty(true);
+  };
+
+  if (!profile || !draft) {
+    return <p className="px-4 py-10 text-center text-slate-500">Loading your profile…</p>;
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="text-lg font-semibold text-slate-900">
+              Mathitis
+            </Link>
+            <span className="text-sm text-slate-500">Profile Studio</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-slate-600">{user?.handle}</span>
+            <Button size="sm" disabled={!dirty || saveMutation.isPending} onClick={() => saveMutation.mutate(toUpdateBody(draft))}>
+              {saveMutation.isPending ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-2">
+        <div className="space-y-6">
+          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+            <SectionTitle>Header &amp; media</SectionTitle>
+            <div className="space-y-3">
+              <Field label="Avatar">
+                <MediaUpload
+                  kind="avatar"
+                  url={profile.avatarUrl}
+                  uploading={avatarMutation.isPending}
+                  onUpload={(file) => avatarMutation.mutate(file)}
+                />
+              </Field>
+              <Field label="Banner">
+                <MediaUpload
+                  kind="banner"
+                  url={profile.bannerUrl}
+                  uploading={bannerMutation.isPending}
+                  onUpload={(file) => bannerMutation.mutate(file)}
+                />
+              </Field>
+            </div>
+          </section>
+
+          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+            <SectionTitle>Identity</SectionTitle>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Social name">
+                <Input value={draft.socialName} onChange={(e) => set({ socialName: e.target.value })} placeholder="How you want to be known" />
+              </Field>
+              <Field label="Pronouns">
+                <Input value={draft.pronouns} onChange={(e) => set({ pronouns: e.target.value })} placeholder="she/her" />
+              </Field>
+            </div>
+            <Field label="Tagline">
+              <Input value={draft.tagline} onChange={(e) => set({ tagline: e.target.value })} placeholder="A short one-liner" />
+            </Field>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Max mentees">
+                <Input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={draft.maxMentees}
+                  onChange={(e) => set({ maxMentees: Math.min(10, Math.max(1, Number(e.target.value) || 1)) })}
+                />
+              </Field>
+              <Field label="Availability">
+                <button
+                  type="button"
+                  onClick={() => set({ isAcceptingRequests: !draft.isAcceptingRequests })}
+                  className={`flex h-10 w-full items-center justify-between rounded-md border px-3 text-sm ${
+                    draft.isAcceptingRequests ? 'border-green-300 bg-green-50 text-green-700' : 'border-slate-300 bg-slate-50 text-slate-500'
+                  }`}
+                >
+                  {draft.isAcceptingRequests ? 'Accepting mentees' : 'Capacity full'}
+                </button>
+              </Field>
+            </div>
+            <label className="flex items-center gap-2 text-sm text-slate-600">
+              <input
+                type="checkbox"
+                checked={draft.isDiscoverable}
+                onChange={(e) => set({ isDiscoverable: e.target.checked })}
+                className="h-4 w-4 rounded"
+              />
+              Show my profile in discovery ({user?.role === 'freshman' ? 'freshmen stay hidden by default' : 'seniors are discoverable'})
+            </label>
+          </section>
+
+          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+            <SectionTitle>Theme &amp; palette</SectionTitle>
+            <ThemePicker value={draft.themePalette} onChange={(themePalette) => set({ themePalette })} />
+          </section>
+
+          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+            <SectionTitle>Contact (optional — shown publicly if added)</SectionTitle>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Contact email">
+                <Input value={draft.contactEmail} onChange={(e) => set({ contactEmail: e.target.value })} placeholder="me@example.com" />
+              </Field>
+              <Field label="Discord">
+                <Input value={draft.socialLinks.discord} onChange={(e) => set({ socialLinks: { ...draft.socialLinks, discord: e.target.value } })} placeholder="username" />
+              </Field>
+              <Field label="GitHub">
+                <Input value={draft.socialLinks.github} onChange={(e) => set({ socialLinks: { ...draft.socialLinks, github: e.target.value } })} placeholder="https://github.com/you" />
+              </Field>
+              <Field label="LinkedIn">
+                <Input value={draft.socialLinks.linkedin} onChange={(e) => set({ socialLinks: { ...draft.socialLinks, linkedin: e.target.value } })} placeholder="https://linkedin.com/in/you" />
+              </Field>
+              <Field label="Website">
+                <Input value={draft.socialLinks.website} onChange={(e) => set({ socialLinks: { ...draft.socialLinks, website: e.target.value } })} placeholder="https://you.dev" />
+              </Field>
+            </div>
+          </section>
+
+          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+            <SectionTitle>Biography (markdown)</SectionTitle>
+            <BioEditor value={draft.biographyMarkdown} onChange={(biographyMarkdown) => set({ biographyMarkdown })} />
+          </section>
+
+          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+            <SectionTitle>Rich cards</SectionTitle>
+            <RichCardManager />
+          </section>
+        </div>
+
+        <div className="lg:sticky lg:top-6 lg:self-start">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-700">Live preview</h2>
+            {dirty ? <span className="text-xs text-amber-600">Unsaved changes</span> : null}
+          </div>
+          <ProfilePreview
+            draft={draft}
+            avatarUrl={profile.avatarUrl}
+            bannerUrl={profile.bannerUrl}
+            bannerPreset={profile.bannerPreset}
+            cards={profile.richCards}
+            effortScore={profile.effortScore}
+          />
+        </div>
+      </main>
+    </div>
+  );
+}
