@@ -2,14 +2,18 @@ import { execSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { afterAll } from 'vitest';
+import Redis from 'ioredis';
 import { createPrismaClient, type PrismaClient } from '../../src/db/client.js';
 import type { Env } from '../../src/config/env.js';
 import { buildApp } from '../../src/app.js';
 import type { FastifyInstance } from 'fastify';
 
 const CONTAINER = `mathitis-test-pg-${randomUUID().slice(0, 8)}`;
+const REDIS_CONTAINER = `mathitis-test-redis-${randomUUID().slice(0, 8)}`;
 const POSTGRES_IMAGE = 'postgres:16-alpine';
+const REDIS_IMAGE = 'redis:7-alpine';
 const PORT = 55000 + Math.floor(Math.random() * 500);
+const REDIS_PORT = 56000 + Math.floor(Math.random() * 500);
 const DB_USER = 'mathitis_app';
 const DB_PASS = 'test_password';
 const DB_NAME = 'mathitis_test';
@@ -19,6 +23,7 @@ const API_DIR = fileURLToPath(new URL('../..', import.meta.url));
 export interface TestContext {
   app: FastifyInstance;
   prisma: PrismaClient;
+  redis: Redis;
   env: Env;
 }
 
@@ -30,6 +35,9 @@ export async function startTestEnvironment(): Promise<TestContext> {
       `docker run -d --name ${CONTAINER} -e POSTGRES_USER=${DB_USER} -e POSTGRES_PASSWORD=${DB_PASS} -e POSTGRES_DB=${DB_NAME} -p ${PORT}:5432 ${POSTGRES_IMAGE}`,
       { stdio: 'pipe' },
     );
+    execSync(`docker run -d --name ${REDIS_CONTAINER} -p ${REDIS_PORT}:6379 ${REDIS_IMAGE}`, {
+      stdio: 'pipe',
+    });
     started = true;
 
     const deadline = Date.now() + 30_000;
@@ -39,6 +47,7 @@ export async function startTestEnvironment(): Promise<TestContext> {
         execSync(`docker exec ${CONTAINER} pg_isready -U ${DB_USER} -d ${DB_NAME} -h localhost`, {
           stdio: 'pipe',
         });
+        execSync(`docker exec ${REDIS_CONTAINER} redis-cli ping`, { stdio: 'pipe' });
         ready = true;
         break;
       } catch {
@@ -46,12 +55,14 @@ export async function startTestEnvironment(): Promise<TestContext> {
       }
     }
     if (!ready) {
-      throw new Error('PostgreSQL test container did not become ready in time');
+      throw new Error('PostgreSQL/Redis test containers did not become ready in time');
     }
   }
 
   const databaseUrl = `postgresql://${DB_USER}:${DB_PASS}@localhost:${PORT}/${DB_NAME}`;
+  const redisUrl = `redis://localhost:${REDIS_PORT}`;
   const prisma = createPrismaClient(databaseUrl);
+  const redis = new Redis(redisUrl);
 
   execSync(`${API_DIR}/node_modules/.bin/prisma migrate deploy`, {
     env: { ...process.env, DATABASE_URL: databaseUrl },
@@ -61,7 +72,7 @@ export async function startTestEnvironment(): Promise<TestContext> {
 
   // Wipe all data for a clean slate
   await prisma.$executeRawUnsafe(
-    'TRUNCATE TABLE audit_logs, user_tokens, profiles, users, profile_tags, rich_cards, tags, system_config RESTART IDENTITY CASCADE',
+    'TRUNCATE TABLE audit_logs, user_tokens, profiles, users, profile_tags, rich_cards, tags, profile_bumps, mentorship_requests, mentorships, system_config RESTART IDENTITY CASCADE',
   );
 
   const env: Env = {
@@ -72,7 +83,7 @@ export async function startTestEnvironment(): Promise<TestContext> {
     COOKIE_SECRET: 'test_cookie_secret_that_is_at_least_32_chars_long',
     SESSION_MAX_AGE_DAYS: 7,
     DATABASE_URL: databaseUrl,
-    REDIS_URL: 'redis://localhost:6379',
+    REDIS_URL: redisUrl,
     S3_ENDPOINT: undefined,
     S3_BUCKET: undefined,
     S3_ACCESS_KEY: undefined,
@@ -90,9 +101,9 @@ export async function startTestEnvironment(): Promise<TestContext> {
     SMTP_FROM: undefined,
   };
 
-  const app = await buildApp({ env, prisma });
+  const app = await buildApp({ env, prisma, redis });
 
-  return { app, prisma, env };
+  return { app, prisma, redis, env };
 }
 
 export async function stopTestEnvironment(context: TestContext) {
@@ -103,6 +114,7 @@ export async function stopTestEnvironment(context: TestContext) {
 export async function teardown() {
   if (started) {
     execSync(`docker rm -f ${CONTAINER}`, { stdio: 'pipe' });
+    execSync(`docker rm -f ${REDIS_CONTAINER}`, { stdio: 'pipe' });
     started = false;
   }
 }
