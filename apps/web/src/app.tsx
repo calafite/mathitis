@@ -7,6 +7,9 @@ import { LoginPage } from '@/pages/login';
 import { RegisterPage } from '@/pages/register';
 import { PasswordRecoveryPage } from '@/pages/password-recovery';
 import { ProfileStudioPage } from '@/pages/profile-studio';
+import { DiscoveryPage } from '@/pages/discovery';
+import { RequestsPage } from '@/pages/requests';
+import { LineagePage } from '@/pages/lineage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,6 +33,10 @@ export function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/profile/studio" element={<ProfileStudioPage />} />
+              <Route path="/discovery" element={<DiscoveryPage />} />
+              <Route path="/requests" element={<RequestsPage />} />
+              <Route path="/lineage" element={<LineagePage />} />
+              <Route path="/lineage/:handle" element={<LineagePage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

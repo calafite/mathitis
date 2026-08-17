@@ -14,6 +14,21 @@ export function HomePage() {
             <span className="text-sm text-slate-600">
               {user?.socialName ?? user?.handle} · {user?.role}
             </span>
+            <Link to="/discovery">
+              <Button variant="outline" size="sm">
+                Discovery
+              </Button>
+            </Link>
+            <Link to="/requests">
+              <Button variant="outline" size="sm">
+                Requests
+              </Button>
+            </Link>
+            <Link to="/lineage">
+              <Button variant="outline" size="sm">
+                Lineage
+              </Button>
+            </Link>
             <Link to="/profile/studio">
               <Button variant="outline" size="sm">
                 Profile studio
@@ -28,7 +43,7 @@ export function HomePage() {
       <main className="mx-auto w-full max-w-5xl px-4 py-12">
         <h1 className="text-3xl font-bold text-slate-900">Welcome to the mathematics lineage.</h1>
         <p className="mt-2 text-slate-600">
-          Discovery, requests, and mentorship tools are coming in the next phases.
+          Explore the discovery catalog, manage mentorship requests, and browse the lineage graph.
         </p>
       </main>
     </div>
