@@ -1,0 +1,112 @@
+import { execSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
+import { afterAll } from 'vitest';
+import { createPrismaClient, type PrismaClient } from '../../src/db/client.js';
+import type { Env } from '../../src/config/env.js';
+import { buildApp } from '../../src/app.js';
+import type { FastifyInstance } from 'fastify';
+
+const CONTAINER = `mathitis-test-pg-${randomUUID().slice(0, 8)}`;
+const POSTGRES_IMAGE = 'postgres:16-alpine';
+const PORT = 55000 + Math.floor(Math.random() * 500);
+const DB_USER = 'mathitis_app';
+const DB_PASS = 'test_password';
+const DB_NAME = 'mathitis_test';
+
+const API_DIR = fileURLToPath(new URL('../..', import.meta.url));
+
+export interface TestContext {
+  app: FastifyInstance;
+  prisma: PrismaClient;
+  env: Env;
+}
+
+let started = false;
+
+export async function startTestEnvironment(): Promise<TestContext> {
+  if (!started) {
+    execSync(
+      `docker run -d --name ${CONTAINER} -e POSTGRES_USER=${DB_USER} -e POSTGRES_PASSWORD=${DB_PASS} -e POSTGRES_DB=${DB_NAME} -p ${PORT}:5432 ${POSTGRES_IMAGE}`,
+      { stdio: 'pipe' },
+    );
+    started = true;
+
+    const deadline = Date.now() + 30_000;
+    let ready = false;
+    while (Date.now() < deadline) {
+      try {
+        execSync(`docker exec ${CONTAINER} pg_isready -U ${DB_USER} -d ${DB_NAME} -h localhost`, {
+          stdio: 'pipe',
+        });
+        ready = true;
+        break;
+      } catch {
+        await new Promise((r) => setTimeout(r, 500));
+      }
+    }
+    if (!ready) {
+      throw new Error('PostgreSQL test container did not become ready in time');
+    }
+  }
+
+  const databaseUrl = `postgresql://${DB_USER}:${DB_PASS}@localhost:${PORT}/${DB_NAME}`;
+  const prisma = createPrismaClient(databaseUrl);
+
+  execSync(`${API_DIR}/node_modules/.bin/prisma migrate deploy`, {
+    env: { ...process.env, DATABASE_URL: databaseUrl },
+    stdio: 'inherit',
+    cwd: API_DIR,
+  });
+
+  // Wipe all data for a clean slate
+  await prisma.$executeRawUnsafe(
+    'TRUNCATE TABLE audit_logs, user_tokens, profiles, users, profile_tags, rich_cards, tags, system_config RESTART IDENTITY CASCADE',
+  );
+
+  const env: Env = {
+    NODE_ENV: 'development',
+    PORT: 4000,
+    HOST: '0.0.0.0',
+    JWT_SECRET: 'test_jwt_secret_that_is_at_least_32_characters_long',
+    COOKIE_SECRET: 'test_cookie_secret_that_is_at_least_32_chars_long',
+    SESSION_MAX_AGE_DAYS: 7,
+    DATABASE_URL: databaseUrl,
+    REDIS_URL: 'redis://localhost:6379',
+    S3_ENDPOINT: undefined,
+    S3_BUCKET: undefined,
+    S3_ACCESS_KEY: undefined,
+    S3_SECRET_KEY: undefined,
+    S3_USE_SSL: false,
+    S3_PUBLIC_BASE_URL: undefined,
+    PUBLIC_BASE_URL: 'http://localhost:4000',
+    UPLOAD_DIR: '/tmp/mathitis-test-uploads',
+    SENTRY_DSN: undefined,
+    LOG_LEVEL: 'trace',
+    SMTP_HOST: undefined,
+    SMTP_PORT: undefined,
+    SMTP_USER: undefined,
+    SMTP_PASS: undefined,
+    SMTP_FROM: undefined,
+  };
+
+  const app = await buildApp({ env, prisma });
+
+  return { app, prisma, env };
+}
+
+export async function stopTestEnvironment(context: TestContext) {
+  await context.app.close();
+  await context.prisma.$disconnect();
+}
+
+export async function teardown() {
+  if (started) {
+    execSync(`docker rm -f ${CONTAINER}`, { stdio: 'pipe' });
+    started = false;
+  }
+}
+
+afterAll(async () => {
+  await teardown();
+});
