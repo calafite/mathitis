@@ -26,6 +26,15 @@ enum TokenType {
   password_reset
 }
 
+enum MentorshipRequestStatus {
+  pending
+  pending_admin_approval
+  accepted
+  rejected
+  cancelled
+  cancelled_capacity_filled
+}
+
 model User {
   id           String        @id @default(uuid()) @db.Uuid
   handle       String        @unique @db.VarChar(32)
@@ -38,29 +47,34 @@ model User {
   createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tokens   UserToken[]
-  profile  Profile?
-  auditLogs AuditLog[]
+  tokens              UserToken[]
+  profile             Profile?
+  auditLogs           AuditLog[]
+  freshmanRequests    MentorshipRequest[] @relation("FreshmanRequests")
+  seniorRequests      MentorshipRequest[] @relation("SeniorRequests")
+  adminReviews        MentorshipRequest[] @relation("AdminReviews")
+  freshmanBumps       ProfileBump[]       @relation("FreshmanBumps")
+  seniorBumps         ProfileBump[]       @relation("SeniorBumps")
+  freshmanMentorships Mentorship[]        @relation("FreshmanMentorships")
+  seniorMentorships   Mentorship[]        @relation("SeniorMentorships")
 
   @@index([role, status], map: "idx_users_role_status")
   @@index([deletedAt], map: "idx_users_deleted")
-
   @@map("users")
 }
 
 model UserToken {
-  id        String    @id @default(uuid()) @db.Uuid
-  userId    String    @map("user_id") @db.Uuid
-  tokenHash String    @map("token_hash") @db.VarChar(255)
-  type      TokenType
-  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  tokenHash  String    @map("token_hash") @db.VarChar(255)
+  type       TokenType
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(6)
   consumedAt DateTime? @map("consumed_at") @db.Timestamptz(6)
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, type], map: "idx_user_tokens_user_type")
-
   @@map("user_tokens")
 }
 
@@ -86,12 +100,11 @@ model Profile {
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tags        ProfileTag[]
-  richCards   RichCard[]
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags      ProfileTag[]
+  richCards RichCard[]
 
   @@index([isDiscoverable], map: "idx_profiles_discoverable")
-
   @@map("profiles")
 }
 
@@ -106,7 +119,6 @@ model Tag {
   profiles ProfileTag[]
 
   @@index([category], map: "idx_tags_category")
-
   @@map("tags")
 }
 
@@ -118,29 +130,27 @@ model ProfileTag {
   tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([profileId, tagId])
-
   @@map("profile_tags")
 }
 
 model RichCard {
-  id          String    @id @default(uuid()) @db.Uuid
-  profileId   String    @map("profile_id") @db.Uuid
-  cardType    String    @map("card_type") @db.VarChar(30)
-  title       String    @db.VarChar(150)
-  subtitle    String?   @db.VarChar(150)
-  description String?   @db.Text
-  imageUrl    String?   @map("image_url") @db.VarChar(512)
-  externalUrl String?   @map("external_url") @db.VarChar(512)
-  embedUrl    String?   @map("embed_url") @db.VarChar(512)
-  accentColor String    @default("#6366f1") @map("accent_color") @db.VarChar(7)
-  metadata    Json?     @default("{}")
+  id           String   @id @default(uuid()) @db.Uuid
+  profileId    String   @map("profile_id") @db.Uuid
+  cardType     String   @map("card_type") @db.VarChar(30)
+  title        String   @db.VarChar(150)
+  subtitle     String?  @db.VarChar(150)
+  description  String?  @db.Text
+  imageUrl     String?  @map("image_url") @db.VarChar(512)
+  externalUrl  String?  @map("external_url") @db.VarChar(512)
+  embedUrl     String?  @map("embed_url") @db.VarChar(512)
+  accentColor  String   @default("#6366f1") @map("accent_color") @db.VarChar(7)
+  metadata     Json?    @default("{}")
   displayOrder Int      @default(0) @map("display_order") @db.SmallInt
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   profile Profile @relation(fields: [profileId], references: [userId], onDelete: Cascade)
 
   @@index([profileId, displayOrder], map: "idx_rich_cards_profile")
-
   @@map("rich_cards")
 }
 
@@ -165,6 +175,59 @@ model AuditLog {
   actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
 
   @@index([actorId, createdAt(sort: Desc)], map: "idx_audit_logs_actor")
-
   @@map("audit_logs")
+}
+
+model ProfileBump {
+  freshmanId String   @map("freshman_id") @db.Uuid
+  seniorId   String   @map("senior_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  freshman User @relation("FreshmanBumps", fields: [freshmanId], references: [id], onDelete: Cascade)
+  senior   User @relation("SeniorBumps", fields: [seniorId], references: [id], onDelete: Cascade)
+
+  @@id([freshmanId, seniorId])
+  @@index([seniorId], map: "idx_profile_bumps_senior")
+  @@map("profile_bumps")
+}
+
+model MentorshipRequest {
+  id                String                  @id @default(uuid()) @db.Uuid
+  freshmanId        String                  @map("freshman_id") @db.Uuid
+  seniorId          String                  @map("senior_id") @db.Uuid
+  status            MentorshipRequestStatus @default(pending)
+  message           String                  @db.Text
+  rejectionReason   String?                 @map("rejection_reason") @db.Text
+  reviewedByAdminId String?                 @map("reviewed_by_admin_id") @db.Uuid
+  createdAt         DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  freshman        User        @relation("FreshmanRequests", fields: [freshmanId], references: [id], onDelete: Cascade)
+  senior          User        @relation("SeniorRequests", fields: [seniorId], references: [id], onDelete: Cascade)
+  reviewedByAdmin User?       @relation("AdminReviews", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  mentorship      Mentorship?
+
+  @@index([seniorId, status], map: "idx_mentorship_requests_senior")
+  @@index([freshmanId, status], map: "idx_mentorship_requests_freshman")
+  @@index([status], map: "idx_mentorship_requests_status")
+  @@map("mentorship_requests")
+}
+
+model Mentorship {
+  id           String   @id @default(uuid()) @db.Uuid
+  requestId    String?  @unique @map("request_id") @db.Uuid
+  freshmanId   String   @map("freshman_id") @db.Uuid
+  seniorId     String   @map("senior_id") @db.Uuid
+  semester     Int      @db.SmallInt
+  academicYear String   @map("academic_year") @db.VarChar(20)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  freshman User               @relation("FreshmanMentorships", fields: [freshmanId], references: [id], onDelete: Restrict)
+  senior   User               @relation("SeniorMentorships", fields: [seniorId], references: [id], onDelete: Restrict)
+  request  MentorshipRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+
+  @@unique([freshmanId, seniorId], map: "idx_mentorships_pair")
+  @@index([seniorId], map: "idx_mentorships_senior")
+  @@index([freshmanId], map: "idx_mentorships_freshman")
+  @@map("mentorships")
 }
