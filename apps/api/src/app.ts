@@ -10,15 +10,19 @@ import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import { ZodError, type ZodSchema } from 'zod';
 import type { PrismaClient } from '@prisma/client';
+import type { Queue } from 'bullmq';
 import type { Env } from './config/env.js';
 import { createPrismaClient } from './db/client.js';
 import { registerErrorHandler } from './plugins/error-handler.js';
 import { registerAuthPlugin } from './plugins/auth-plugin.js';
 import { registerProfilesPlugin } from './plugins/profiles-plugin.js';
 import { registerDiscoveryPlugin } from './plugins/discovery-plugin.js';
+import { registerAdminPlugin } from './plugins/admin-plugin.js';
+import { registerDevPlugin } from './plugins/dev-plugin.js';
 import { createSessionManager } from './plugins/session.js';
 import { createStorage } from './storage/storage-service.js';
 import { createRedisIdempotencyStore } from './lib/idempotency.js';
+import { createEmailQueue } from './lib/queue.js';
 import { createUserRepository } from './repositories/user-repository.js';
 import { createTokenRepository } from './repositories/token-repository.js';
 import { createSystemConfigRepository } from './repositories/system-config-repository.js';
@@ -61,6 +65,7 @@ export interface BuildAppOptions {
   env: Env;
   prisma?: PrismaClient;
   redis?: Redis;
+  queue?: Queue;
   mailer?: Parameters<typeof registerAuthPlugin>[1]['mailer'];
 }
 
@@ -137,7 +142,10 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   const storage = createStorage(env);
   const idempotencyStore = createRedisIdempotencyStore(redis);
 
+  const queue = options.queue ?? createEmailQueue(new Redis(env.REDIS_URL));
+
   app.addHook('onClose', async () => {
+    await queue.close();
     await redis.quit();
   });
 
@@ -187,6 +195,19 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     prisma,
     session,
     idempotencyStore,
+  });
+
+  await app.register(registerAdminPlugin, {
+    prisma,
+    session,
+    idempotencyStore,
+  });
+
+  await app.register(registerDevPlugin, {
+    prisma,
+    session,
+    redis,
+    queue,
   });
 
   return app;
