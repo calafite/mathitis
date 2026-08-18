@@ -46,5 +46,10 @@ export default defineConfig({
     environment: 'node',
     include: ['apps/api/tests/**/*.test.ts'],
     globals: true,
+    // Integration tests each boot a PostgreSQL + Redis docker container pair.
+    // Running test files in parallel overloads container startup, so serialize
+    // file execution and give the startup hooks a generous timeout.
+    fileParallelism: false,
+    hookTimeout: 60_000,
   },
 });
