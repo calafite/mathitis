@@ -34,6 +34,22 @@ export function HomePage() {
                 Profile studio
               </Button>
             </Link>
+            {user && (user.role === 'administrator' || user.role === 'developer') && (
+              <>
+                {user.role === 'administrator' && (
+                  <Link to="/admin">
+                    <Button variant="outline" size="sm">
+                      Admin
+                    </Button>
+                  </Link>
+                )}
+                <Link to="/dev">
+                  <Button variant="outline" size="sm">
+                    Diagnostics
+                  </Button>
+                </Link>
+              </>
+            )}
             <Button variant="outline" size="sm" onClick={() => void logout()}>
               Sign out
             </Button>
