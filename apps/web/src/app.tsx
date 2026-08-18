@@ -39,19 +39,63 @@ export function App() {
               <Route path="/recover" element={<PasswordRecoveryPage />} />
 
               <Route element={<ProtectedRoute />}>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/profile/studio" element={<ProfileStudioPage />} />
-                <Route path="/discovery" element={<DiscoveryPage />} />
-                <Route path="/requests" element={<RequestsPage />} />
-                <Route path="/lineage" element={<LineagePage />} />
-                <Route path="/lineage/:handle" element={<LineagePage />} />
+                <Route
+                  path="/"
+                  element={
+                    <ErrorBoundary name="protected">
+                      <HomePage />
+                    </ErrorBoundary>
+                  }
+                />
+                <Route
+                  path="/profile/studio"
+                  element={
+                    <ErrorBoundary name="profile-studio">
+                      <ProfileStudioPage />
+                    </ErrorBoundary>
+                  }
+                />
+                <Route
+                  path="/discovery"
+                  element={
+                    <ErrorBoundary name="discovery">
+                      <DiscoveryPage />
+                    </ErrorBoundary>
+                  }
+                />
+                <Route
+                  path="/requests"
+                  element={
+                    <ErrorBoundary name="requests">
+                      <RequestsPage />
+                    </ErrorBoundary>
+                  }
+                />
+                <Route
+                  path="/lineage"
+                  element={
+                    <ErrorBoundary name="lineage">
+                      <LineagePage />
+                    </ErrorBoundary>
+                  }
+                />
+                <Route
+                  path="/lineage/:handle"
+                  element={
+                    <ErrorBoundary name="lineage">
+                      <LineagePage />
+                    </ErrorBoundary>
+                  }
+                />
               </Route>
 
               <Route
                 path="/admin"
                 element={
                   <RoleGuard requiredRole={['administrator']}>
-                    <AdminLayout />
+                    <ErrorBoundary name="admin">
+                      <AdminLayout />
+                    </ErrorBoundary>
                   </RoleGuard>
                 }
               >
@@ -65,7 +109,9 @@ export function App() {
                 path="/dev"
                 element={
                   <RoleGuard requiredRole={['developer', 'administrator']}>
-                    <DevDiagnosticsPage />
+                    <ErrorBoundary name="dev">
+                      <DevDiagnosticsPage />
+                    </ErrorBoundary>
                   </RoleGuard>
                 }
               />
