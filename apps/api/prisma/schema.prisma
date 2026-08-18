@@ -35,6 +35,15 @@ enum MentorshipRequestStatus {
   cancelled_capacity_filled
 }
 
+enum NotificationType {
+  request_received
+  request_accepted
+  request_rejected
+  request_cancelled
+  approval_required
+  approval_decision
+}
+
 model User {
   id           String        @id @default(uuid()) @db.Uuid
   handle       String        @unique @db.VarChar(32)
@@ -57,10 +66,28 @@ model User {
   seniorBumps         ProfileBump[]       @relation("SeniorBumps")
   freshmanMentorships Mentorship[]        @relation("FreshmanMentorships")
   seniorMentorships   Mentorship[]        @relation("SeniorMentorships")
+  notifications       Notification[]
 
   @@index([role, status], map: "idx_users_role_status")
   @@index([deletedAt], map: "idx_users_deleted")
   @@map("users")
+}
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType
+  title     String           @db.VarChar(200)
+  body      String           @db.VarChar(1000)
+  payload   Json?
+  readAt    DateTime?        @map("read_at") @db.Timestamptz(6)
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt], map: "idx_notifications_user_read")
+  @@index([userId, createdAt(sort: Desc)], map: "idx_notifications_user_created")
+  @@map("notifications")
 }
 
 model UserToken {
