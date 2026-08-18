@@ -4,6 +4,8 @@ export interface SystemConfigRepository {
   getConfig(key: string): Promise<unknown>;
   getBoolean(key: string, fallback: boolean): Promise<boolean>;
   getNumber(key: string, fallback: number): Promise<number>;
+  list(): Promise<Array<{ key: string; value: unknown }>>;
+  set(key: string, value: unknown): Promise<void>;
 }
 
 export function createSystemConfigRepository(prisma: PrismaClient): SystemConfigRepository {
@@ -28,5 +30,18 @@ export function createSystemConfigRepository(prisma: PrismaClient): SystemConfig
     return Number.isNaN(parsed) ? fallback : parsed;
   }
 
-  return { getConfig, getBoolean, getNumber };
+  async function list() {
+    const rows = await prisma.systemConfig.findMany();
+    return rows.map((row) => ({ key: row.key, value: row.value }));
+  }
+
+  async function set(key: string, value: unknown) {
+    await prisma.systemConfig.upsert({
+      where: { key },
+      update: { value: value as object },
+      create: { key, value: value as object },
+    });
+  }
+
+  return { getConfig, getBoolean, getNumber, list, set };
 }
