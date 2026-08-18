@@ -25,6 +25,8 @@ import { createStorage } from './storage/storage-service.js';
 import { createRedisIdempotencyStore } from './lib/idempotency.js';
 import { createEmailQueue } from './lib/queue.js';
 import { initSentry } from './lib/sentry.js';
+import { parseKeyring } from './lib/keyring.js';
+import { createCsrfGuard } from './plugins/csrf.js';
 import { createUserRepository } from './repositories/user-repository.js';
 import { createTokenRepository } from './repositories/token-repository.js';
 import { createSystemConfigRepository } from './repositories/system-config-repository.js';
@@ -130,6 +132,16 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   });
 
   await app.register(cookie, { secret: env.COOKIE_SECRET });
+  const allowedOrigins = new Set(
+    env.WEB_ORIGIN
+      ? env.WEB_ORIGIN.split(',')
+          .map((origin) => origin.trim())
+          .filter((origin) => origin.length > 0)
+      : [],
+  );
+  const csrfGuard = createCsrfGuard(allowedOrigins);
+  app.addHook('onRequest', csrfGuard);
+
   await app.register(helmet, {
     contentSecurityPolicy:
       env.NODE_ENV === 'production'
@@ -158,15 +170,25 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
         : false,
   });
   await app.register(cors, {
-    origin: env.NODE_ENV === 'production' ? false : true,
+    origin:
+      allowedOrigins.size > 0
+        ? [...allowedOrigins]
+        : env.NODE_ENV === 'production'
+          ? false
+          : true,
     credentials: true,
   });
   await app.register(rateLimit, {
-    global: false,
+    global: true,
+    max: env.RATE_LIMIT_GLOBAL_MAX,
+    timeWindow: '1 minute',
     cache: 5000,
   });
 
-  const session = createSessionManager(env.JWT_SECRET, env.SESSION_MAX_AGE_DAYS);
+  const session = createSessionManager(
+    parseKeyring(env.JWT_SECRET, env.JWT_KEYRING),
+    env.SESSION_MAX_AGE_DAYS,
+  );
   const storage = createStorage(env);
   const idempotencyStore = createRedisIdempotencyStore(redis);
 

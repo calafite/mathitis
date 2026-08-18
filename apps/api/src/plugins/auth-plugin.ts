@@ -21,6 +21,7 @@ import type { TokenRepository } from '../repositories/token-repository.js';
 import type { SystemConfigRepository } from '../repositories/system-config-repository.js';
 import { createSessionManager, type SessionManager } from './session.js';
 import { createRequireAuth } from './auth-guard.js';
+import { clearCsrfCookie, createCsrfToken, setCsrfCookie } from './csrf.js';
 
 const GENERIC_OK = {
   ok: true,
@@ -69,7 +70,10 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
 
   const session: SessionManager =
     options.session ??
-    createSessionManager(options.jwtSecret, options.sessionMaxAgeDays);
+    createSessionManager(
+      { current: options.jwtSecret, legacy: [] },
+      options.sessionMaxAgeDays,
+    );
 
   const requireAuth = createRequireAuth(session);
 
@@ -87,6 +91,7 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
       secure: app.env.NODE_ENV === 'production',
       maxAge: options.sessionMaxAgeDays * 24 * 60 * 60,
     });
+    setCsrfCookie(reply, createCsrfToken(), app.env.NODE_ENV === 'production');
   }
 
   app.register(
@@ -98,6 +103,7 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
             body: registerBodySchema,
             response: { 200: genericSuccessResponseSchema },
           },
+          config: { rateLimit: { max: app.env.RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
         },
         async (request, reply) => {
           const { handle, email, password, semester, socialName } = request.body;
@@ -113,6 +119,7 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
             body: loginBodySchema,
             response: { 200: loginResponseSchema },
           },
+          config: { rateLimit: { max: app.env.RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
         },
         async (request, reply) => {
           const { identifier, password } = request.body;
@@ -128,9 +135,11 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
           schema: {
             response: { 200: genericSuccessResponseSchema },
           },
+          config: { rateLimit: { max: app.env.RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
         },
         async (_request, reply) => {
           session.clearSession(reply);
+          clearCsrfCookie(reply);
           return reply.send({ ok: true, message: 'Logged out successfully' });
         },
       );
@@ -156,6 +165,7 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
             body: recoverBodySchema,
             response: { 200: genericSuccessResponseSchema },
           },
+          config: { rateLimit: { max: app.env.RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
         },
         async (request, reply) => {
           const { email } = request.body;
@@ -171,6 +181,7 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
             body: resetPasswordBodySchema,
             response: { 200: genericSuccessResponseSchema },
           },
+          config: { rateLimit: { max: app.env.RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
         },
         async (request, reply) => {
           const { token, password } = request.body;

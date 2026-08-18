@@ -30,6 +30,7 @@ import {
   profileHandleParamsSchema,
 } from '@mathitis/schemas';
 import type { SessionManager } from './session.js';
+import { SESSION_COOKIE } from './session.js';
 import { createRequireAuth, createRequireRole } from './auth-guard.js';
 import { createUserRepository } from '../repositories/user-repository.js';
 import { createProfileRepository } from '../repositories/profile-repository.js';
@@ -58,6 +59,13 @@ function requireIdempotencyKey(request: FastifyRequest): string {
     );
   }
   return key;
+}
+
+function createUserKeyGenerator(session: SessionManager) {
+  return async (request: FastifyRequest): Promise<string> => {
+    const sub = (await session.verifySessionCookie(request.cookies[SESSION_COOKIE]))?.sub;
+    return sub ? `user:${sub}` : `ip:${request.ip}`;
+  };
 }
 
 function coerceSeniorsQuery(query: SeniorsQuery): SeniorsQuery {
@@ -127,6 +135,8 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
   const requireSenior = createRequireRole(options.session, ['senior']);
   const requireStaff = createRequireRole(options.session, ['administrator', 'developer']);
 
+  const userKeyGenerator = createUserKeyGenerator(options.session);
+
   const mapSenior = (senior: SeniorSummary) => senior;
 
   app.register(
@@ -189,7 +199,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
             body: bumpBodySchema,
             response: { 200: bumpResponseSchema },
           },
-          config: { rateLimit: { max: 20, timeWindow: '1 minute' } },
+          config: {
+            rateLimit: {
+              max: app.env.RATE_LIMIT_REQUEST_MAX,
+              timeWindow: '1 hour',
+              keyGenerator: userKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const result = await bumpService.bump(
@@ -227,6 +243,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
           schema: {
             body: createMentorshipRequestBodySchema,
             response: { 200: requestResponseSchema },
+          },
+          config: {
+            rateLimit: {
+              max: app.env.RATE_LIMIT_REQUEST_MAX,
+              timeWindow: '1 hour',
+              keyGenerator: userKeyGenerator,
+            },
           },
         },
         async (request, reply) => {

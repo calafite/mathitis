@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { UserRole } from '@mathitis/schemas';
+import type { SessionSecrets } from '../lib/keyring.js';
 
 export interface SessionPayload {
   sub: string;
@@ -16,8 +17,12 @@ export interface SessionManager {
   clearSession(reply: FastifyReply): void;
 }
 
-export function createSessionManager(secret: string, maxAgeDays: number): SessionManager {
-  const secretKey = new TextEncoder().encode(secret);
+export function createSessionManager(secrets: SessionSecrets, maxAgeDays: number): SessionManager {
+  const currentKey = new TextEncoder().encode(secrets.current);
+  const verifyKeys = [
+    currentKey,
+    ...secrets.legacy.map((secret) => new TextEncoder().encode(secret)),
+  ];
 
   async function createSessionCookie(payload: SessionPayload): Promise<string> {
     return new SignJWT({ role: payload.role, handle: payload.handle })
@@ -25,26 +30,30 @@ export function createSessionManager(secret: string, maxAgeDays: number): Sessio
       .setSubject(payload.sub)
       .setIssuedAt()
       .setExpirationTime(`${maxAgeDays}d`)
-      .sign(secretKey);
+      .sign(currentKey);
   }
 
   async function verifySessionCookie(
     cookieValue: string | undefined,
   ): Promise<SessionPayload | null> {
     if (!cookieValue) return null;
-    try {
-      const { payload } = await jwtVerify(cookieValue, secretKey, {
-        algorithms: ['HS256'],
-      });
-      if (!payload.sub || typeof payload.role !== 'string') return null;
-      return {
-        sub: payload.sub,
-        role: payload.role as UserRole,
-        handle: String(payload.handle ?? ''),
-      };
-    } catch {
-      return null;
+    // Try the current key first, then any legacy rotation keys.
+    for (const key of verifyKeys) {
+      try {
+        const { payload } = await jwtVerify(cookieValue, key, {
+          algorithms: ['HS256'],
+        });
+        if (!payload.sub || typeof payload.role !== 'string') return null;
+        return {
+          sub: payload.sub,
+          role: payload.role as UserRole,
+          handle: String(payload.handle ?? ''),
+        };
+      } catch {
+        // Try the next key in the ring.
+      }
     }
+    return null;
   }
 
   function clearSession(reply: FastifyReply): void {

@@ -6,8 +6,14 @@ export const envSchema = z.object({
   HOST: z.string().default('0.0.0.0'),
 
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+  JWT_KEYRING: z.string().optional(),
   COOKIE_SECRET: z.string().min(32, 'COOKIE_SECRET must be at least 32 characters'),
   SESSION_MAX_AGE_DAYS: z.coerce.number().int().positive().default(7),
+  WEB_ORIGIN: z.string().optional(),
+
+  RATE_LIMIT_GLOBAL_MAX: z.coerce.number().int().positive().default(120),
+  RATE_LIMIT_AUTH_MAX: z.coerce.number().int().positive().default(5),
+  RATE_LIMIT_REQUEST_MAX: z.coerce.number().int().positive().default(10),
 
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),

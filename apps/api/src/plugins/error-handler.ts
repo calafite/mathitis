@@ -45,7 +45,12 @@ export function buildErrorHandler() {
       }
     }
 
-    const validationError = error as { validation?: Array<{ instancePath?: string; keyword?: string; message?: string }>; statusCode?: number };
+    const validationError = error as {
+      validation?: Array<{ instancePath?: string; keyword?: string; message?: string }>;
+      statusCode?: number;
+      code?: string;
+      message?: string;
+    };
     if (validationError.validation) {
       return reply.code(422).send({
         error: {
@@ -63,6 +68,20 @@ export function buildErrorHandler() {
           code: 'BAD_REQUEST',
           message: error instanceof Error ? error.message : 'Bad request',
           statusCode: 400,
+        },
+      });
+    }
+
+    // Preserve 4xx statuses raised by framework plugins (e.g. rate limiting).
+    if (validationError.statusCode && validationError.statusCode >= 400 && validationError.statusCode < 500) {
+      return reply.code(validationError.statusCode).send({
+        error: {
+          code: validationError.code ?? 'REQUEST_REJECTED',
+          message:
+            typeof validationError.message === 'string'
+              ? validationError.message
+              : 'Request rejected',
+          statusCode: validationError.statusCode,
         },
       });
     }
