@@ -94,6 +94,7 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
     profileRepository,
     bumpRepository,
     mentorshipRepository,
+    systemConfigRepository,
   );
   const bumpService = createBumpService(bumpRepository, userRepository);
   const requestService = createRequestService({

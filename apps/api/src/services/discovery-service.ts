@@ -3,6 +3,7 @@ import type { DiscoveryRepository, SeniorRow } from '../repositories/discovery-r
 import type { ProfileRepository } from '../repositories/profile-repository.js';
 import type { BumpRepository } from '../repositories/bump-repository.js';
 import type { MentorshipRepository } from '../repositories/mentorship-repository.js';
+import type { SystemConfigRepository } from '../repositories/system-config-repository.js';
 import { calculateMatchScore } from './matching-score.js';
 
 export interface SeniorFilters {
@@ -89,8 +90,17 @@ export function createDiscoveryService(
   profileRepository: ProfileRepository,
   bumpRepository: BumpRepository,
   mentorshipRepository: MentorshipRepository,
+  systemConfigRepository?: SystemConfigRepository,
 ): DiscoveryService {
+  async function isDiscoveryActive(): Promise<boolean> {
+    if (!systemConfigRepository) return true;
+    return systemConfigRepository.getBoolean('DISCOVERY_ACTIVE', true);
+  }
+
   async function listSeniors(filters: SeniorFilters) {
+    if (!(await isDiscoveryActive())) {
+      return { seniors: [], total: 0 };
+    }
     const [rows, total] = await Promise.all([
       discoveryRepository.listDiscoverableSeniors(filters),
       discoveryRepository.countDiscoverableSeniors(filters),
@@ -100,6 +110,9 @@ export function createDiscoveryService(
   }
 
   async function recommend(freshmanUserId: string, filters: Omit<SeniorFilters, 'offset'>) {
+    if (!(await isDiscoveryActive())) {
+      return [];
+    }
     const freshmanProfile = await profileRepository.findByUserId(freshmanUserId);
     const freshmanTagIds = freshmanProfile?.tags.map(({ tag }) => tag.id) ?? [];
 
