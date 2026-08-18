@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config';
 import type { Plugin } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-const ROOT_DIR = fileURLToPath(new URL('../../..', import.meta.url));
+const ROOT_DIR = fileURLToPath(new URL('.', import.meta.url));
 
 /**
  * Resolves `.js` import specifiers to their `.ts` source files.
@@ -51,5 +51,25 @@ export default defineConfig({
     // file execution and give the startup hooks a generous timeout.
     fileParallelism: false,
     hookTimeout: 60_000,
+    coverage: {
+      provider: 'v8',
+      all: true,
+      reporter: ['text', 'text-summary'],
+      include: ['apps/api/src/**/*.ts'],
+      exclude: [
+        '**/dist/**',
+        '**/node_modules/**',
+        'apps/api/src/main.ts',
+        'apps/api/src/db/**',
+        'apps/api/src/storage/**',
+        'apps/api/src/config/**',
+      ],
+      thresholds: {
+        lines: 85,
+        functions: 85,
+        statements: 85,
+        branches: 75,
+      },
+    },
   },
 });

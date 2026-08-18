@@ -3,9 +3,11 @@ packages:
   - packages/*
 
 allowBuilds:
+  '@prisma/client': true
   '@prisma/engines': false
   esbuild: false
   msgpackr-extract: false
+  prisma: true
 
 onlyBuiltDependencies:
   - '@prisma/client'
