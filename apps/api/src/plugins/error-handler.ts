@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { DomainError } from '../errors.js';
+import { captureRequestError } from '../lib/sentry.js';
 
 const knownPrismaCodes = new Map<string, { code: string; status: number; message: string }>([
   [
@@ -67,6 +68,12 @@ export function buildErrorHandler() {
     }
 
     request.log.error({ err: error }, 'Unhandled error');
+    captureRequestError(error, {
+      method: request.method,
+      url: request.url,
+      correlationId: request.correlationId,
+      sessionUser: request.sessionUser ?? undefined,
+    });
     reply.code(500).send({
       error: {
         code: 'INTERNAL_SERVER_ERROR',

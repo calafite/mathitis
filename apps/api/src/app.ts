@@ -24,6 +24,7 @@ import { createSessionManager } from './plugins/session.js';
 import { createStorage } from './storage/storage-service.js';
 import { createRedisIdempotencyStore } from './lib/idempotency.js';
 import { createEmailQueue } from './lib/queue.js';
+import { initSentry } from './lib/sentry.js';
 import { createUserRepository } from './repositories/user-repository.js';
 import { createTokenRepository } from './repositories/token-repository.js';
 import { createSystemConfigRepository } from './repositories/system-config-repository.js';
@@ -80,6 +81,8 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     disableRequestLogging: true,
     trustProxy: true,
   });
+
+  initSentry({ dsn: env.SENTRY_DSN, environment: env.NODE_ENV });
 
   // Zod-based validator and serializer compilers
   app.setValidatorCompiler<ZodSchema>(({ schema }) => {
@@ -169,7 +172,6 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
       throw new ValidationError('Invalid request payload');
     }
   });
-
   app.get('/health', async (_request, reply) => {
     return reply.send({ status: 'ok' });
   });
