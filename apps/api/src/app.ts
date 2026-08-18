@@ -131,7 +131,31 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
 
   await app.register(cookie, { secret: env.COOKIE_SECRET });
   await app.register(helmet, {
-    contentSecurityPolicy: env.NODE_ENV === 'production',
+    contentSecurityPolicy:
+      env.NODE_ENV === 'production'
+        ? {
+            directives: {
+              defaultSrc: ["'self'"],
+              scriptSrc: ["'self'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+              imgSrc: ["'self'", 'data:', 'https:'],
+              fontSrc: ["'self'", 'data:'],
+              connectSrc: ["'self'"],
+              objectSrc: ["'none'"],
+              baseUri: ["'self'"],
+              formAction: ["'self'"],
+              frameAncestors: ["'none'"],
+              // Rich cards embed media from these providers via iframes.
+              frameSrc: [
+                'https://open.spotify.com',
+                'https://www.youtube.com',
+                'https://www.youtube-nocookie.com',
+                'https://steamcommunity.com',
+              ],
+              upgradeInsecureRequests: [],
+            },
+          }
+        : false,
   });
   await app.register(cors, {
     origin: env.NODE_ENV === 'production' ? false : true,
