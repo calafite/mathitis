@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 
 export function HomePage() {
   const { user, logout } = useAuth();
@@ -34,6 +35,7 @@ export function HomePage() {
                 Profile studio
               </Button>
             </Link>
+            <NotificationBell />
             {user && (user.role === 'administrator' || user.role === 'developer') && (
               <>
                 {user.role === 'administrator' && (

@@ -4,7 +4,7 @@
 Implement in-app and background email notifications with BullMQ, integrate Sentry error monitoring across frontend and backend, establish comprehensive administrative audit logging, and enforce production network security hardening (TLS/HTTPS everywhere, WAF filtering, port exposure hardening, and strict CSP).
 
 ## Tasks
-- [ ] **5.1 Notification System & Resilient Background Workers**
+- [x] **5.1 Notification System & Resilient Background Workers**
   - Implement notifications database queries and API endpoints (`GET /api/notifications`, `PATCH /api/notifications/:id/read`, `PATCH /api/notifications/read-all`).
   - Implement Redis + BullMQ background queue for asynchronous email notification dispatch (e.g. on new request received, request accepted/rejected, admin decision).
   - Add resilient background worker error handling: automatic retries with exponential backoff and jitter, dead-letter queue (DLQ) for failed notifications, and worker telemetry logging.

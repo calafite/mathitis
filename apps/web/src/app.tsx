@@ -1,6 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/auth-context';
+import { NotificationsProvider } from '@/contexts/notifications-context';
+import { NotificationToastStack } from '@/components/notifications/toast-stack';
 import { ProtectedRoute, RoleGuard } from '@/components/auth/route-guards';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { HomePage } from '@/pages/home';
@@ -34,7 +36,8 @@ export function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AuthProvider>
-            <Routes>
+            <NotificationsProvider>
+              <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/recover" element={<PasswordRecoveryPage />} />
@@ -120,6 +123,8 @@ export function App() {
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+              <NotificationToastStack />
+            </NotificationsProvider>
           </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
