@@ -34,6 +34,12 @@ function createFakes() {
     async create(input) {
       audits.push(input);
     },
+    async list() {
+      return [];
+    },
+    async count() {
+      return 0;
+    },
   };
 
   const users: AdminUserRow[] = [

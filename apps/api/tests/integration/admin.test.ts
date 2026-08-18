@@ -411,4 +411,72 @@ describe('Admin API', () => {
     });
     expect(res.statusCode).toBe(409);
   });
+
+  // -- Audit log viewer -----------------------------------------------------
+
+  it('restricts the audit log viewer to administrators', async () => {
+    const res = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/admin/audit-logs',
+      headers: { cookie: freshmanCookie },
+    });
+    expect(res.statusCode).toBe(403);
+  });
+
+  it('lists audit logs with actor identity and pagination', async () => {
+    const res = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/admin/audit-logs?limit=10&offset=0',
+      headers: { cookie: adminCookie },
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.total).toBeGreaterThanOrEqual(1);
+    expect(body.auditLogs.length).toBeLessThanOrEqual(10);
+
+    const logs = body.auditLogs as Array<{
+      id: string;
+      action: string;
+      actor: { handle: string; role: string } | null;
+      details: unknown;
+      createdAt: string;
+    }>;
+    expect(logs[0]!.actor?.handle).toBe('root_admin');
+    expect(logs[0]!.actor?.role).toBe('administrator');
+    const times = logs.map((log) => new Date(log.createdAt).getTime());
+    expect(times).toEqual([...times].sort((a, b) => b - a));
+  });
+
+  it('filters audit logs by action and date range', async () => {
+    const filtered = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/admin/audit-logs?action=user.anonymize&actorId=${adminUserId}`,
+      headers: { cookie: adminCookie },
+    });
+    expect(filtered.statusCode).toBe(200);
+    const body = filtered.json();
+    expect(body.total).toBeGreaterThanOrEqual(1);
+    for (const log of body.auditLogs as Array<{ action: string; actorId: string | null }>) {
+      expect(log.action).toBe('user.anonymize');
+      expect(log.actorId).toBe(adminUserId);
+    }
+
+    const from = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const emptyRange = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/admin/audit-logs?from=${encodeURIComponent(from)}`,
+      headers: { cookie: adminCookie },
+    });
+    expect(emptyRange.statusCode).toBe(200);
+    expect(emptyRange.json().auditLogs).toHaveLength(0);
+  });
+
+  it('rejects malformed date range params', async () => {
+    const res = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/admin/audit-logs?from=not-a-date',
+      headers: { cookie: adminCookie },
+    });
+    expect(res.statusCode).toBe(422);
+  });
 });
