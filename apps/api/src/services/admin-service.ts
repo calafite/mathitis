@@ -6,7 +6,7 @@ import type {
   SystemConfig,
 } from '@mathitis/schemas';
 import type { AdminRepository, AdminUserFilters } from '../repositories/admin-repository.js';
-import type { AuditLogRepository } from '../repositories/audit-log-repository.js';
+import type { AuditLogRepository, AuditLogFilters, AuditLogRow } from '../repositories/audit-log-repository.js';
 import type { SystemConfigRepository } from '../repositories/system-config-repository.js';
 import type { RequestService } from './request-service.js';
 import {
@@ -25,6 +25,9 @@ export interface AdminService {
   anonymizeUser(actorId: string, ipAddress: string | null, id: string): Promise<{ user: AdminUser; lineagePreserved: boolean }>;
   moderateProfile(actorId: string, ipAddress: string | null, userId: string, action: ModerationAction): Promise<AdminUser>;
   listApprovals(status?: string): ReturnType<AdminRepository['listApprovals']>;
+  listAuditLogs(
+    filters: AuditLogFilters & { limit: number; offset: number },
+  ): Promise<{ auditLogs: AuditLogRow[]; total: number }>;
   decideApproval(
     actorId: string,
     ipAddress: string | null,
@@ -163,6 +166,17 @@ export function createAdminService(deps: {
     return adminRepository.listApprovals(status ?? 'pending_admin_approval');
   }
 
+  async function listAuditLogs(
+    filters: AuditLogFilters & { limit: number; offset: number },
+  ) {
+    const { limit, offset, ...whereFilters } = filters;
+    const [auditLogs, total] = await Promise.all([
+      auditLogRepository.list({ ...whereFilters, limit, offset }),
+      auditLogRepository.count(whereFilters),
+    ]);
+    return { auditLogs, total };
+  }
+
   async function decideApproval(
     actorId: string,
     ipAddress: string | null,
@@ -199,6 +213,7 @@ export function createAdminService(deps: {
     anonymizeUser,
     moderateProfile,
     listApprovals,
+    listAuditLogs,
     decideApproval,
   };
 }

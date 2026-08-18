@@ -157,6 +157,46 @@ export const decisionResponseSchema = z.object({
 export type DecisionResponse = z.infer<typeof decisionResponseSchema>;
 
 // ---------------------------------------------------------------------------
+// Audit log viewer
+// ---------------------------------------------------------------------------
+
+export const auditLogSchema = z.object({
+  id: z.string().uuid(),
+  actorId: z.string().uuid().nullable(),
+  action: z.string(),
+  targetEntity: z.string(),
+  targetId: z.string().nullable(),
+  details: z.record(z.string(), z.unknown()).nullable(),
+  ipAddress: z.string().nullable(),
+  createdAt: z.coerce.date(),
+  actor: z
+    .object({
+      id: z.string().uuid(),
+      handle: z.string(),
+      role: userRoleSchema,
+    })
+    .nullable(),
+});
+export type AuditLog = z.infer<typeof auditLogSchema>;
+
+export const auditLogsQuerySchema = z.object({
+  action: z.string().trim().max(100).optional(),
+  actorId: z.string().uuid().optional(),
+  targetEntity: z.string().trim().max(50).optional(),
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+export type AuditLogsQuery = z.infer<typeof auditLogsQuerySchema>;
+
+export const auditLogsResponseSchema = z.object({
+  auditLogs: z.array(auditLogSchema),
+  total: z.number(),
+});
+export type AuditLogsResponse = z.infer<typeof auditLogsResponseSchema>;
+
+// ---------------------------------------------------------------------------
 // Developer diagnostics
 // ---------------------------------------------------------------------------
 

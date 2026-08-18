@@ -5,6 +5,7 @@ import type {
   AdminUsersQuery,
   ApprovalParams,
   ApprovalsQuery,
+  AuditLogsQuery,
   ConfigPatch,
   DecisionBody,
   ModerationBody,
@@ -19,6 +20,8 @@ import {
   approvalParamsSchema,
   approvalsQuerySchema,
   approvalsResponseSchema,
+  auditLogsQuerySchema,
+  auditLogsResponseSchema,
   configPatchSchema,
   configResponseSchema,
   decisionBodySchema,
@@ -235,6 +238,31 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
             request.body.reason,
           );
           return reply.send({ request: result });
+        },
+      );
+
+      // -- Audit log viewer ---------------------------------------------------
+      adminRoutes.get<{ Querystring: AuditLogsQuery }>(
+        '/audit-logs',
+        {
+          preHandler: requireAdmin,
+          schema: {
+            querystring: auditLogsQuerySchema,
+            response: { 200: auditLogsResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          const raw = request.query as unknown as Record<string, string | undefined>;
+          const { auditLogs, total } = await adminService.listAuditLogs({
+            action: raw.action || undefined,
+            actorId: raw.actorId || undefined,
+            targetEntity: raw.targetEntity || undefined,
+            from: raw.from ? new Date(raw.from) : undefined,
+            to: raw.to ? new Date(raw.to) : undefined,
+            limit: Number(raw.limit ?? 50),
+            offset: Number(raw.offset ?? 0),
+          });
+          return reply.send({ auditLogs, total });
         },
       );
     },
