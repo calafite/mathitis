@@ -1,6 +1,9 @@
 import { Queue } from 'bullmq';
 import type { Redis } from 'ioredis';
 
+export const EMAIL_QUEUE_NAME = 'email';
+export const EMAIL_DLQ_NAME = 'email-dlq';
+
 export interface QueueStats {
   waiting: number;
   active: number;
@@ -16,7 +19,11 @@ export interface QueueStats {
  * without needing a running worker.
  */
 export function createEmailQueue(connection: Redis): Queue {
-  return new Queue('email', { connection });
+  return new Queue(EMAIL_QUEUE_NAME, { connection });
+}
+
+export function createEmailDlq(connection: Redis): Queue {
+  return new Queue(EMAIL_DLQ_NAME, { connection });
 }
 
 export async function getQueueStats(queue: Queue): Promise<QueueStats> {
