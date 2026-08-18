@@ -1,0 +1,14 @@
+**/node_modules
+**/dist
+.git
+.gitignore
+*.log
+dump.rdb
+.env
+.env.production
+apps/web/tests
+apps/api/tests
+docs
+tasks
+architecture.md
+design.md

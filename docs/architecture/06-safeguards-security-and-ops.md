@@ -31,8 +31,8 @@ server {
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
-    # CSP - strict nonce-based for inline scripts
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'nonce-$csp_nonce'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-src https://open.spotify.com https://www.youtube.com https://store.steampowered.com; connect-src 'self'; frame-ancestors 'none';" always;
+    # CSP - strict, embed providers whitelisted
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src https://open.spotify.com https://www.youtube.com https://www.youtube-nocookie.com https://steamcommunity.com; frame-ancestors 'none'; upgrade-insecure-requests;" always;
 
     location / {
         proxy_pass http://api:4000;
