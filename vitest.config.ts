@@ -63,6 +63,7 @@ export default defineConfig({
         'apps/api/src/db/**',
         'apps/api/src/storage/**',
         'apps/api/src/config/**',
+        'apps/api/src/lib/logger.ts',
       ],
       thresholds: {
         lines: 85,

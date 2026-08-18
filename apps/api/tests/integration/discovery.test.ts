@@ -85,6 +85,28 @@ describe('Discovery, Requests & Lineage API', () => {
     return String(res.headers['set-cookie']).split(';')[0] ?? '';
   }
 
+  async function createReapplyPair(): Promise<{ freshman: string; senior: string }> {
+    const seniorUser: TestUser = { handle: 'reapply_senior', email: 'reapply_senior@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 8 };
+    const freshUser: TestUser = { handle: 'reapply_fresh', email: 'reapply_fresh@cs.uni.edu', password: 'Pass12345!', role: 'freshman', semester: 2 };
+    for (const user of [seniorUser, freshUser]) {
+      const exists = await ctx.prisma.user.findUnique({ where: { handle: user.handle } });
+      if (!exists) await createUser(user);
+    }
+    const pair = await ctx.prisma.user.findUnique({ where: { handle: freshUser.handle } });
+    const seniorRow = await ctx.prisma.user.findUnique({ where: { handle: seniorUser.handle } });
+    await ctx.prisma.mentorshipRequest.updateMany({
+      where: {
+        freshmanId: pair!.id,
+        seniorId: seniorRow!.id,
+        status: { in: ['pending', 'pending_admin_approval'] },
+      },
+      data: { status: 'cancelled' },
+    });
+    const freshman = await login(freshUser.handle, freshUser.password);
+    const senior = await login(seniorUser.handle, seniorUser.password);
+    return { freshman, senior };
+  }
+
   beforeAll(async () => {
     ctx = await startTestEnvironment();
 
@@ -533,6 +555,130 @@ describe('Discovery, Requests & Lineage API', () => {
     expect(rejected.statusCode).toBe(200);
     expect(rejected.json().request.status).toBe('rejected');
     expect(rejected.json().request.rejectionReason).toBe('Already at capacity');
+  });
+
+  it('allows a new application to the same senior after a cancellation', async () => {
+    const { freshman: freshB, senior: seniorBcookie } = await createReapplyPair();
+    const first = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/requests',
+      headers: { cookie: freshB, 'x-idempotency-key': idemKey('reapply-cancel-1') },
+      payload: { seniorHandle: 'reapply_senior', message: 'First application' },
+    });
+    expect(first.statusCode, `Body: ${first.body}`).toBe(200);
+    const cancelled = await ctx.app.inject({
+      method: 'POST',
+      url: `/api/requests/${first.json().request.id as string}/cancel`,
+      headers: { cookie: freshB },
+    });
+    expect(cancelled.statusCode).toBe(200);
+
+    const again = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/requests',
+      headers: { cookie: freshB, 'x-idempotency-key': idemKey('reapply-cancel-2') },
+      payload: { seniorHandle: 'reapply_senior', message: 'Application after cancellation' },
+    });
+    expect(again.statusCode, `Body: ${again.body}`).toBe(200);
+    expect(again.json().request.status).toBe('pending');
+  });
+
+  it('allows a new application to the same senior after a rejection', async () => {
+    const { freshman: freshB, senior: seniorBcookie } = await createReapplyPair();
+    const first = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/requests',
+      headers: { cookie: freshB, 'x-idempotency-key': idemKey('reapply-reject-1') },
+      payload: { seniorHandle: 'reapply_senior', message: 'First attempt' },
+    });
+    expect(first.statusCode, `Body: ${first.body}`).toBe(200);
+    const rejected = await ctx.app.inject({
+      method: 'POST',
+      url: `/api/requests/${first.json().request.id as string}/reject`,
+      headers: { cookie: seniorBcookie },
+      payload: { reason: 'Try again next semester' },
+    });
+    expect(rejected.statusCode).toBe(200);
+
+    const again = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/requests',
+      headers: { cookie: freshB, 'x-idempotency-key': idemKey('reapply-reject-2') },
+      payload: { seniorHandle: 'reapply_senior', message: 'Second attempt' },
+    });
+    expect(again.statusCode, `Body: ${again.body}`).toBe(200);
+    expect(again.json().request.status).toBe('pending');
+  });
+
+  it('stores idempotency results in Redis under a 24-hour TTL', async () => {
+    const { freshman: freshB } = await createReapplyPair();
+    const key = idemKey('ttl');
+    const payload = { seniorHandle: 'reapply_senior', message: 'TTL check' };
+    const res = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/requests',
+      headers: { cookie: freshB, 'x-idempotency-key': key },
+      payload,
+    });
+    expect(res.statusCode, `Body: ${res.body}`).toBe(200);
+
+    const redisKey = `idem:request-submit:${key}`;
+    const cached = await ctx.redis.get(redisKey);
+    expect(cached).toBeTruthy();
+    const ttl = await ctx.redis.ttl(redisKey);
+    expect(ttl).toBeGreaterThan(86_000);
+    expect(ttl).toBeLessThanOrEqual(86_400);
+  });
+
+  it('serializes concurrent acceptances so capacity is never exceeded', async () => {
+    const seniorRow = await createUser(
+      { handle: 'race_senior', email: 'race_senior@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 8 },
+      { discoverable: true, maxMentees: 1 },
+    );
+    await createUser({ handle: 'race_fresh_a', email: 'race_fresh_a@cs.uni.edu', password: 'Pass12345!', role: 'freshman', semester: 2 });
+    await createUser({ handle: 'race_fresh_b', email: 'race_fresh_b@cs.uni.edu', password: 'Pass12345!', role: 'freshman', semester: 3 });
+
+    const seniorCookie = await login('race_senior', 'Pass12345!');
+    const freshA = await login('race_fresh_a', 'Pass12345!');
+    const freshB = await login('race_fresh_b', 'Pass12345!');
+
+    const reqA = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/requests',
+      headers: { cookie: freshA, 'x-idempotency-key': idemKey('race-req-a') },
+      payload: { seniorHandle: 'race_senior', message: 'Race applicant A' },
+    });
+    const reqB = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/requests',
+      headers: { cookie: freshB, 'x-idempotency-key': idemKey('race-req-b') },
+      payload: { seniorHandle: 'race_senior', message: 'Race applicant B' },
+    });
+    expect(reqA.statusCode).toBe(200);
+    expect(reqB.statusCode).toBe(200);
+    const idA = reqA.json().request.id as string;
+    const idB = reqB.json().request.id as string;
+
+    const [resA, resB] = await Promise.all([
+      ctx.app.inject({
+        method: 'POST',
+        url: `/api/requests/${idA}/accept`,
+        headers: { cookie: seniorCookie, 'x-idempotency-key': idemKey('race-accept-a') },
+      }),
+      ctx.app.inject({
+        method: 'POST',
+        url: `/api/requests/${idB}/accept`,
+        headers: { cookie: seniorCookie, 'x-idempotency-key': idemKey('race-accept-b') },
+      }),
+    ]);
+
+    const statuses = [resA.statusCode, resB.statusCode].sort();
+    expect(statuses).toEqual([200, 409]);
+
+    const mentorships = await ctx.prisma.mentorship.count({
+      where: { seniorId: seniorRow.id },
+    });
+    expect(mentorships).toBe(1);
   });
 
   // -- Lineage ----------------------------------------------------------------

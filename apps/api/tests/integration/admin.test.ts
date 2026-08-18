@@ -318,6 +318,46 @@ describe('Admin API', () => {
     expect(res.statusCode).toBe(409);
   });
 
+  it('excludes an anonymized user from discovery search and public profiles', async () => {
+    await ctx.prisma.systemConfig.upsert({
+      where: { key: 'DISCOVERY_ACTIVE' },
+      update: { value: 'true' },
+      create: { key: 'DISCOVERY_ACTIVE', value: 'true' },
+    });
+    const doomed: TestUser = { handle: 'senior_doomed', email: 'senior_doomed@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 6 };
+    const doomedUser = await createUser(doomed);
+
+    const before = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/seniors',
+      headers: { cookie: adminCookie },
+    });
+    expect(before.statusCode).toBe(200);
+    const handlesBefore = (before.json().seniors as Array<{ handle: string }>).map((s) => s.handle);
+    expect(handlesBefore).toContain(doomed.handle);
+
+    const res = await ctx.app.inject({
+      method: 'PATCH',
+      url: `/api/admin/users/${doomedUser.id}/anonymize`,
+      headers: { cookie: adminCookie },
+    });
+    expect(res.statusCode).toBe(200);
+
+    const after = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/seniors',
+      headers: { cookie: adminCookie },
+    });
+    const handlesAfter = (after.json().seniors as Array<{ handle: string }>).map((s) => s.handle);
+    expect(handlesAfter).not.toContain(doomed.handle);
+
+    const profile = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/profiles/${doomed.handle}`,
+    });
+    expect(profile.statusCode).toBe(404);
+  });
+
   it('returns 404 for unknown users', async () => {
     const res = await ctx.app.inject({
       method: 'PATCH',
