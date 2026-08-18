@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { createHash } from 'node:crypto';
 import {
   startTestEnvironment,
   stopTestEnvironment,
@@ -155,5 +156,109 @@ describe('Auth API', () => {
     });
 
     expect(res.statusCode).toBe(422);
+  });
+
+  // -- user_tokens flow -------------------------------------------------------
+
+  async function issueKnownToken(
+    userId: string,
+    type: 'email_verification' | 'password_reset',
+    plainToken: string,
+    expiresAt: Date = new Date(Date.now() + 24 * 60 * 60 * 1000),
+  ) {
+    const argon2 = await import('argon2');
+    const digest = createHash('sha256').update(plainToken).digest();
+    const tokenHash = await argon2.default.hash(digest, {
+      type: 2,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    });
+    return ctx.prisma.userToken.create({
+      data: { userId, type, tokenHash, expiresAt },
+    });
+  }
+
+  it('stores email verification tokens as hashes on registration', async () => {
+    const res = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/auth/register',
+      payload: {
+        handle: 'tokenuser',
+        email: 'tokenuser@cs.uni.edu',
+        password: 'StrongPassword123!',
+        semester: 1,
+      },
+    });
+    expect(res.statusCode).toBe(200);
+
+    const user = await ctx.prisma.user.findUnique({ where: { email: 'tokenuser@cs.uni.edu' } });
+    const tokens = await ctx.prisma.userToken.findMany({
+      where: { userId: user!.id, type: 'email_verification' },
+    });
+    expect(tokens).toHaveLength(1);
+    expect(tokens[0]!.consumedAt).toBeNull();
+    expect(tokens[0]!.tokenHash).toMatch(/^\$argon2/);
+    expect(tokens[0]!.expiresAt.getTime()).toBeGreaterThan(Date.now());
+  });
+
+  it('verifies email, activates the user, and consumes the token', async () => {
+    const user = await ctx.prisma.user.create({
+      data: {
+        handle: 'tokenverify',
+        email: 'tokenverify@cs.uni.edu',
+        passwordHash: 'irrelevant-for-login',
+        role: 'freshman',
+        semester: 1,
+        status: 'pending_verification',
+      },
+    });
+    const plain = 'cafebabe'.repeat(4);
+    await issueKnownToken(user.id, 'email_verification', plain);
+
+    const res = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${plain}` });
+    expect(res.statusCode).toBe(200);
+
+    const after = await ctx.prisma.user.findUnique({ where: { id: user.id } });
+    expect(after!.status).toBe('active');
+    const token = await ctx.prisma.userToken.findFirst({
+      where: { userId: user.id, type: 'email_verification' },
+    });
+    expect(token!.consumedAt).not.toBeNull();
+  });
+
+  it('rejects reuse of an already consumed token', async () => {
+    const plain = 'cafebabe'.repeat(4);
+    const again = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${plain}` });
+    expect(again.statusCode).toBe(400);
+    expect(again.json().error.code).toBe('TOKEN_INVALID');
+  });
+
+  it('rejects an expired verification token', async () => {
+    const user = await ctx.prisma.user.create({
+      data: {
+        handle: 'tokenexpired',
+        email: 'tokenexpired@cs.uni.edu',
+        passwordHash: 'irrelevant-for-login',
+        role: 'freshman',
+        semester: 1,
+        status: 'pending_verification',
+      },
+    });
+    const plain = 'deadbeef'.repeat(4);
+    await issueKnownToken(user.id, 'email_verification', plain, new Date(Date.now() - 1000));
+
+    const res = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${plain}` });
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error.code).toBe('TOKEN_INVALID');
+  });
+
+  it('rejects a forged token that does not match the stored hash', async () => {
+    const res = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/auth/verify-email/${'0badc0de'.repeat(4)}`,
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error.code).toBe('TOKEN_INVALID');
   });
 });
