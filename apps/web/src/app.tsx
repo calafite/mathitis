@@ -16,6 +16,7 @@ import { AdminDashboardPage } from '@/pages/admin/admin-dashboard';
 import { AdminUsersPage } from '@/pages/admin/admin-users';
 import { AdminApprovalsPage } from '@/pages/admin/admin-approvals';
 import { AdminConfigPage } from '@/pages/admin/admin-config';
+import { AdminAuditLogsPage } from '@/pages/admin/admin-audit-logs';
 import { DevDiagnosticsPage } from '@/pages/dev/dev-diagnostics';
 
 const queryClient = new QueryClient({
@@ -103,6 +104,7 @@ export function App() {
                 <Route path="users" element={<AdminUsersPage />} />
                 <Route path="approvals" element={<AdminApprovalsPage />} />
                 <Route path="config" element={<AdminConfigPage />} />
+                <Route path="audit-logs" element={<AdminAuditLogsPage />} />
               </Route>
 
               <Route
