@@ -19,6 +19,7 @@ import { registerProfilesPlugin } from './plugins/profiles-plugin.js';
 import { registerDiscoveryPlugin } from './plugins/discovery-plugin.js';
 import { registerAdminPlugin } from './plugins/admin-plugin.js';
 import { registerDevPlugin } from './plugins/dev-plugin.js';
+import { registerNotificationsPlugin } from './plugins/notifications-plugin.js';
 import { createSessionManager } from './plugins/session.js';
 import { createStorage } from './storage/storage-service.js';
 import { createRedisIdempotencyStore } from './lib/idempotency.js';
@@ -143,6 +144,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   const idempotencyStore = createRedisIdempotencyStore(redis);
 
   const queue = options.queue ?? createEmailQueue(new Redis(env.REDIS_URL));
+  app.decorate('emailQueue', queue);
 
   app.addHook('onClose', async () => {
     await queue.close();
@@ -195,12 +197,16 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     prisma,
     session,
     idempotencyStore,
+    emailQueue: queue,
+    logger: app.log,
   });
 
   await app.register(registerAdminPlugin, {
     prisma,
     session,
     idempotencyStore,
+    emailQueue: queue,
+    logger: app.log,
   });
 
   await app.register(registerDevPlugin, {
@@ -210,6 +216,13 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     queue,
   });
 
+  await app.register(registerNotificationsPlugin, {
+    prisma,
+    session,
+    emailQueue: queue,
+    logger: app.log,
+  });
+
   return app;
 }
 
@@ -217,6 +230,7 @@ declare module 'fastify' {
   interface FastifyInstance {
     env: Env;
     prisma: PrismaClient;
+    emailQueue: Queue;
   }
   interface FastifyRequest {
     correlationId: string;

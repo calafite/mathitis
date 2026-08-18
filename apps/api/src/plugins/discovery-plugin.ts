@@ -41,6 +41,10 @@ import { createSystemConfigRepository } from '../repositories/system-config-repo
 import { createDiscoveryService } from '../services/discovery-service.js';
 import { createBumpService } from '../services/bump-service.js';
 import { createRequestService } from '../services/request-service.js';
+import { createNotificationRepository } from '../repositories/notification-repository.js';
+import { createNotificationService } from '../services/notification-service.js';
+import type { LoggerLike } from '../lib/logger.js';
+import type { Queue } from 'bullmq';
 import { createLineageService } from '../services/lineage-service.js';
 import type { IdempotencyStore } from '../lib/idempotency.js';
 import type { RequestRow } from '../repositories/request-repository.js';
@@ -76,6 +80,8 @@ export interface DiscoveryPluginOptions {
   prisma: PrismaClient;
   session: SessionManager;
   idempotencyStore: IdempotencyStore;
+  emailQueue: Queue;
+  logger: LoggerLike;
 }
 
 export async function registerDiscoveryPlugin(app: FastifyInstance, options: DiscoveryPluginOptions) {
@@ -88,6 +94,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
   const requestRepository = createRequestRepository(prisma);
   const mentorshipRepository = createMentorshipRepository(prisma);
   const systemConfigRepository = createSystemConfigRepository(prisma);
+
+  const notificationService = createNotificationService({
+    notificationRepository: createNotificationRepository(prisma),
+    systemConfigRepository,
+    emailQueue: options.emailQueue,
+    logger: options.logger,
+  });
 
   const discoveryService = createDiscoveryService(
     discoveryRepository,
@@ -105,6 +118,7 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
     profileRepository,
     systemConfigRepository,
     idempotencyStore: options.idempotencyStore,
+    notificationService,
   });
   const lineageService = createLineageService(mentorshipRepository);
 

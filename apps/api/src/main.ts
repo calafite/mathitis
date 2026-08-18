@@ -1,6 +1,9 @@
 import { loadEnv } from './config/env.js';
 import { buildApp } from './app.js';
 import { createPrismaClient } from './db/client.js';
+import { createEmailSender } from './lib/mailer.js';
+import { createEmailWorker } from './lib/worker.js';
+import Redis from 'ioredis';
 
 async function main() {
   const env = loadEnv(process.env);
@@ -8,8 +11,16 @@ async function main() {
 
   const app = await buildApp({ env, prisma });
 
+  const emailWorker = createEmailWorker({
+    connection: new Redis(env.REDIS_URL, { maxRetriesPerRequest: null }),
+    emailSender: createEmailSender(env, app.log),
+    logger: app.log,
+  });
+  app.log.info('email worker started');
+
   const shutdown = async (signal: string) => {
     app.log.info({ signal }, 'Shutting down');
+    await emailWorker.close();
     await app.close();
     await prisma.$disconnect();
     process.exit(0);

@@ -37,12 +37,18 @@ import { createRequestRepository } from '../repositories/request-repository.js';
 import { createMentorshipRepository } from '../repositories/mentorship-repository.js';
 import { createAdminService } from '../services/admin-service.js';
 import { createRequestService } from '../services/request-service.js';
+import { createNotificationRepository } from '../repositories/notification-repository.js';
+import { createNotificationService } from '../services/notification-service.js';
 import type { IdempotencyStore } from '../lib/idempotency.js';
+import type { LoggerLike } from '../lib/logger.js';
+import type { Queue } from 'bullmq';
 
 export interface AdminPluginOptions {
   prisma: PrismaClient;
   session: SessionManager;
   idempotencyStore: IdempotencyStore;
+  emailQueue: Queue;
+  logger: LoggerLike;
 }
 
 export async function registerAdminPlugin(app: FastifyInstance, options: AdminPluginOptions) {
@@ -56,6 +62,13 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
   const userRepository = createUserRepository(prisma);
   const profileRepository = createProfileRepository(prisma);
 
+  const notificationService = createNotificationService({
+    notificationRepository: createNotificationRepository(prisma),
+    systemConfigRepository,
+    emailQueue: options.emailQueue,
+    logger: options.logger,
+  });
+
   const requestService = createRequestService({
     prisma,
     requestRepository,
@@ -64,6 +77,7 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
     profileRepository,
     systemConfigRepository,
     idempotencyStore: options.idempotencyStore,
+    notificationService,
   });
 
   const adminService = createAdminService({

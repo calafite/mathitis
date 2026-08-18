@@ -13,6 +13,7 @@ import {
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../errors.js';
 import { toProfileSchema } from './profile-mapper.js';
 import type { Profile } from '@mathitis/schemas';
+import type { NotificationService } from './notification-service.js';
 
 const DEFAULT_MAX_FRESHMAN_REQUESTS = 3;
 const REQUIRE_ADMIN_REQUEST_APPROVAL_KEY = 'REQUIRE_ADMIN_REQUEST_APPROVAL';
@@ -61,6 +62,7 @@ export function createRequestService(deps: {
   profileRepository: ProfileRepository;
   systemConfigRepository: SystemConfigRepository;
   idempotencyStore: IdempotencyStore;
+  notificationService?: NotificationService;
 }): RequestService {
   const {
     prisma,
@@ -70,6 +72,7 @@ export function createRequestService(deps: {
     profileRepository,
     systemConfigRepository,
     idempotencyStore,
+    notificationService,
   } = deps;
 
   async function requireRequest(id: string, tx?: Prisma.TransactionClient): Promise<RequestRow> {
@@ -130,6 +133,13 @@ export function createRequestService(deps: {
             freshmanId,
             seniorId: senior.id,
             message: input.message,
+          });
+          notificationService?.dispatch({
+            userId: senior.id,
+            type: 'request_received',
+            title: 'New mentorship request',
+            body: `${created.freshman.handle} wants to be mentored by you`,
+            payload: { requestId: created.id, freshmanId, seniorId: senior.id },
           });
           return await attachFreshmanProfile(created);
         } catch (error) {
@@ -216,6 +226,12 @@ export function createRequestService(deps: {
 
           if (requireAdminApproval) {
             await requestRepository.updateStatus(requestId, 'pending_admin_approval', undefined, tx);
+            notificationService?.dispatchToAdmins({
+              type: 'approval_required',
+              title: 'Mentorship request awaiting approval',
+              body: `${request.freshman.handle} was accepted by ${request.senior.handle} and needs admin approval`,
+              payload: { requestId },
+            });
           } else {
             await requestRepository.updateStatus(requestId, 'accepted', undefined, tx);
             await mentorshipRepository.create(
@@ -232,6 +248,14 @@ export function createRequestService(deps: {
             if (activeCount + 1 >= seniorProfile.maxMentees) {
               await requestRepository.cancelPendingBeyondCapacity(request.seniorId, tx);
             }
+
+            notificationService?.dispatch({
+              userId: request.freshmanId,
+              type: 'request_accepted',
+              title: 'Request accepted',
+              body: `${request.senior.handle} accepted your mentorship request`,
+              payload: { requestId },
+            });
           }
 
           const updated = await requireRequest(requestId, tx);
@@ -252,6 +276,13 @@ export function createRequestService(deps: {
     await requestRepository.updateStatus(requestId, 'rejected', {
       rejectionReason: reason ?? null,
     });
+    notificationService?.dispatch({
+      userId: request.freshmanId,
+      type: 'request_rejected',
+      title: 'Request declined',
+      body: `${request.senior.handle} declined your mentorship request`,
+      payload: { requestId },
+    });
     return requireRequest(requestId);
   }
 
@@ -264,6 +295,13 @@ export function createRequestService(deps: {
       throw new ConflictError('This request can no longer be cancelled', 'REQUEST_NOT_ACTIVE');
     }
     await requestRepository.updateStatus(requestId, 'cancelled', { rejectionReason: null });
+    notificationService?.dispatch({
+      userId: request.seniorId,
+      type: 'request_cancelled',
+      title: 'Request cancelled',
+      body: `${request.freshman.handle} cancelled their mentorship request`,
+      payload: { requestId },
+    });
     return requireRequest(requestId);
   }
 
@@ -310,6 +348,13 @@ export function createRequestService(deps: {
       }
 
       const updated = await requireRequest(requestId, tx);
+      notificationService?.dispatch({
+        userId: request.freshmanId,
+        type: 'approval_decision',
+        title: 'Request approved',
+        body: `${request.senior.handle}'s admin approved your mentorship request`,
+        payload: { requestId },
+      });
       return attachFreshmanProfile(updated);
     });
   }
@@ -322,6 +367,13 @@ export function createRequestService(deps: {
     await requestRepository.updateStatus(requestId, 'rejected', {
       rejectionReason: reason ?? 'Denied by administrator',
       reviewedByAdminId: adminId,
+    });
+    notificationService?.dispatch({
+      userId: request.freshmanId,
+      type: 'approval_decision',
+      title: 'Request denied',
+      body: `${request.senior.handle}'s admin denied your mentorship request`,
+      payload: { requestId },
     });
     return requireRequest(requestId);
   }
