@@ -10,7 +10,7 @@
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
-    "test": "vitest run --root ../..",
+    "test": "vitest run --root ../.. --no-file-parallelism",
     "test:unit": "vitest run --root ../.. apps/api/tests/unit",
     "test:integration": "vitest run --root ../.. --no-file-parallelism apps/api/tests/integration",
     "db:generate": "prisma generate",
