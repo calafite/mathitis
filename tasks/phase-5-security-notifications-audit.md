@@ -21,7 +21,7 @@ Implement in-app and background email notifications with BullMQ, integrate Sentr
   - Configure reverse proxy (Nginx/Caddy) to enforce **TLS 1.3 only**, automatic HTTP-to-HTTPS redirection, and HSTS (`Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`).
   - Configure Firewall & Port Isolation: Only ports 80/443 exposed publicly. Internal Fastify API, PostgreSQL, and Redis communicate exclusively over isolated internal Docker networks.
   - Apply HTTP security headers using `@fastify/helmet` with a strict Content Security Policy (CSP) allowing only whitelisted embed providers (Spotify, YouTube, Steam).
-- [ ] **5.5 Rate Limiting & Secret Rotation**
+- [x] **5.5 Rate Limiting & Secret Rotation**
   - Configure `@fastify/rate-limit` with tiered limits:
     - Auth endpoints: max 5 requests/minute per IP.
     - Request creation & Bumps: max 10 requests/hour per user.
