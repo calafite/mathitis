@@ -12,16 +12,16 @@ const sanitizeSchema: Options = {
   tagNames: [...(defaultSchema.tagNames ?? []), 'span', 'div', 'iframe'],
   attributes: {
     ...(defaultSchema.attributes ?? {}),
-    span: ['className', 'data-color', 'data-badge'],
+    span: ['className', 'data*'],
     div: ['className'],
     iframe: [
       [
         'src',
-        'https://open.spotify.com/embed/',
-        'https://w.soundcloud.com/player/',
-        'https://www.youtube.com/embed/',
-        'https://www.youtube-nocookie.com/embed/',
-        'https://player.vimeo.com/video/',
+        /^https:\/\/open\.spotify\.com\/embed\//,
+        /^https:\/\/w\.soundcloud\.com\/player\//,
+        /^https:\/\/www\.youtube\.com\/embed\//,
+        /^https:\/\/www\.youtube-nocookie\.com\/embed\//,
+        /^https:\/\/player\.vimeo\.com\/video\//,
       ],
       'width',
       'height',
@@ -103,14 +103,20 @@ const components: Components = {
   ),
   span: ({ node, children, ...props }) => {
     const attrs = (node?.properties ?? {}) as Record<string, string>;
-    if (attrs['data-badge']) {
+    const dataBadge = attrs['data-badge'] ?? attrs.dataBadge;
+    const dataColor = attrs['data-color'] ?? attrs.dataColor;
+    if (dataBadge) {
       return (
-        <span className="badge" data-badge={attrs['data-badge']} {...props}>
+        <span className="badge" data-badge={dataBadge} {...props}>
           {children}
         </span>
       );
     }
-    return <span style={attrs['data-color'] ? { color: attrs['data-color'] } : undefined} {...props}>{children}</span>;
+    return (
+      <span style={dataColor ? { color: dataColor } : undefined} data-color={dataColor} {...props}>
+        {children}
+      </span>
+    );
   },
   iframe: ({ node: _node, ...props }) => (
     <iframe
