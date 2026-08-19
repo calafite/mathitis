@@ -80,6 +80,7 @@ export type SeniorsResponse = z.infer<typeof seniorsResponseSchema>;
 
 export const scoredSeniorSchema = seniorSummarySchema.extend({
   score: z.number(),
+  matchReasons: z.array(z.string()),
 });
 export type ScoredSenior = z.infer<typeof scoredSeniorSchema>;
 

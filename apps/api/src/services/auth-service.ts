@@ -1,7 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import argon2 from 'argon2';
-import type { User } from '@prisma/client';
-import type { UserRepository } from '../repositories/user-repository.js';
+import type { UserRepository, UserWithProfile } from '../repositories/user-repository.js';
 import type { TokenRepository } from '../repositories/token-repository.js';
 import type { SystemConfigRepository } from '../repositories/system-config-repository.js';
 import { DomainError, UnauthorizedError } from '../errors.js';
@@ -37,8 +36,8 @@ export interface RegisterInput {
 
 export interface AuthService {
   register(input: RegisterInput): Promise<void>;
-  login(identifier: string, password: string): Promise<User & { profile: { socialName: string | null } | null }>;
-  getCurrentUser(userId: string): Promise<User & { profile: { socialName: string | null } | null }>;
+  login(identifier: string, password: string): Promise<UserWithProfile>;
+  getCurrentUser(userId: string): Promise<UserWithProfile>;
   recover(email: string): Promise<void>;
   resetPassword(token: string, newPassword: string): Promise<void>;
   verifyEmail(token: string): Promise<void>;
@@ -126,7 +125,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
     await mailer?.sendVerificationEmail(user.email, token);
   }
 
-  async function login(identifier: string, password: string): Promise<User> {
+  async function login(identifier: string, password: string): Promise<UserWithProfile> {
     const user = await userRepository.findByLoginIdentifier(identifier);
     if (!user || user.deletedAt !== null) {
       throw new UnauthorizedError('Invalid credentials');
@@ -148,7 +147,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
     return user;
   }
 
-  async function getCurrentUser(userId: string): Promise<User> {
+  async function getCurrentUser(userId: string): Promise<UserWithProfile> {
     const user = await userRepository.findActiveById(userId);
     if (!user) {
       throw new UnauthorizedError('Session is no longer valid');

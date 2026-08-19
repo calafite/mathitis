@@ -4,7 +4,7 @@ import type { ProfileRepository } from '../repositories/profile-repository.js';
 import type { BumpRepository } from '../repositories/bump-repository.js';
 import type { MentorshipRepository } from '../repositories/mentorship-repository.js';
 import type { SystemConfigRepository } from '../repositories/system-config-repository.js';
-import { calculateMatchScore } from './matching-score.js';
+import { createRecommendationEngine, type ScoredSenior } from './recommendation-engine.js';
 
 export interface SeniorFilters {
   semester?: number;
@@ -43,7 +43,7 @@ export interface DiscoveryService {
   recommend(
     freshmanUserId: string,
     filters: Omit<SeniorFilters, 'offset'>,
-  ): Promise<Array<SeniorSummaryResult & { score: number }>>;
+  ): Promise<Array<ScoredSenior<SeniorSummaryResult>>>;
   listTags(): Promise<Tag[]>;
 }
 
@@ -114,23 +114,12 @@ export function createDiscoveryService(
       return [];
     }
     const freshmanProfile = await profileRepository.findByUserId(freshmanUserId);
-    const freshmanTagIds = freshmanProfile?.tags.map(({ tag }) => tag.id) ?? [];
+    const freshmanTags = freshmanProfile?.tags.map(({ tag }) => tag) ?? [];
 
     const rows = await discoveryRepository.listDiscoverableSeniors({ ...filters, offset: 0 });
     const seniors = await mergeCounts(rows, bumpRepository, mentorshipRepository);
 
-    return seniors
-      .map((senior) => ({
-        ...senior,
-        score: calculateMatchScore({
-          freshmanTagIds,
-          seniorTagIds: senior.tags.map((tag) => tag.id),
-          effortScore: senior.effortScore,
-          profileViews: senior.profileViews,
-          bumpCount: senior.bumpCount,
-        }),
-      }))
-      .sort((a, b) => b.score - a.score);
+    return createRecommendationEngine().rank(freshmanTags, seniors);
   }
 
   async function listTags() {

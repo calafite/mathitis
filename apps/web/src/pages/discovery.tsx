@@ -23,6 +23,7 @@ function SeniorCard({
   senior,
   role,
   score,
+  matchReasons,
   onBump,
   onRequest,
   bumping,
@@ -31,6 +32,7 @@ function SeniorCard({
   senior: SeniorSummary;
   role?: string;
   score?: number;
+  matchReasons?: string[];
   onBump: () => void;
   onRequest: (senior: SeniorSummary) => void;
   bumping: boolean;
@@ -86,6 +88,19 @@ function SeniorCard({
           {senior.isAcceptingRequests ? 'Accepting requests' : 'Not accepting'}
         </span>
       </div>
+
+      {matchReasons && matchReasons.length > 0 && (
+        <ul className="mt-3 space-y-1 border-t border-slate-100 pt-2">
+          {matchReasons.map((reason) => (
+            <li key={reason} className="flex items-start gap-1.5 text-xs text-slate-600">
+              <span aria-hidden className="mt-0.5 text-indigo-500">
+                ✦
+              </span>
+              <span>{reason}</span>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {isFreshman && (
         <div className="mt-3 flex gap-2">
@@ -291,6 +306,11 @@ export function DiscoveryPage() {
             role={user?.role}
             score={
               'score' in senior ? (senior as SeniorSummary & { score: number }).score : undefined
+            }
+            matchReasons={
+              'matchReasons' in senior
+                ? (senior as SeniorSummary & { matchReasons: string[] }).matchReasons
+                : undefined
             }
             onBump={() => handleBumpClick(senior.handle)}
             onRequest={(s) => setRequestTarget(s)}

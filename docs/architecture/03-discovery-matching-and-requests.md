@@ -32,6 +32,23 @@ $$\text{Match Score} = (0.40 \times T_o) + (0.30 \times E_p) + (0.10 \times V_p)
 | **Profile Views ($V_p$)** | $\log_{10}(\text{views} + 1)$ Normalized | Prevents over-saturating popular profiles while reflecting student interest. |
 | **Freshman Bumps ($B_p$)** | Normalized Bump Count | Aggregated signal of student affinity from the bump mechanism. |
 
+### Recommendation Engine & Match Reasons
+
+The scoring and ranking logic lives in `apps/api/src/services/recommendation-engine.ts`, which implements the extensibility interface from `architecture.md` §11 (`IRecommendationEngine`). `createRecommendationEngine().rank(freshmanTags, seniors)` scores each senior with `calculateMatchScore` (`matching-score.ts`) and attaches **human-readable `matchReasons`** to every recommendation:
+
+| Signal | Reason emitted |
+| :--- | :--- |
+| Shared tags | `N shared tag(s): <names>` (capped at 3 listed, remainder summarized as `+N more`) |
+| Effort ≥ 60 | `Rich, highly detailed profile` |
+| Effort ≥ 40 | `Detailed profile` |
+| Views ≥ 120 | `In high demand among students` |
+| Views ≥ 40 | `Popular profile with students` |
+| Bumps ≥ 2 | `Frequently bumped by fellow freshmen` |
+| Bumps = 1 | `Recently bumped by a fellow freshman` |
+| Accepting requests | `Currently accepting new mentees` |
+
+Reasons are emitted only when the underlying signal is meaningful, so a zero-signal senior yields `matchReasons: []`. They are serialized as `matchReasons: string[]` in the `ScoredSenior` response schema and rendered on the freshman Discovery Hub recommendation cards.
+
 ---
 
 ## 👍 Freshman Bumps / Likes System

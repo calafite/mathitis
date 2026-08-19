@@ -10,11 +10,14 @@ export interface CreateUserInput {
   socialName?: string;
 }
 
+/** A `User` row with its `socialName` profile relation loaded. */
+export type UserWithProfile = User & { profile: { socialName: string | null } | null };
+
 export interface UserRepository {
   findByEmail(email: string): Promise<User | null>;
   findByHandle(handle: string): Promise<User | null>;
-  findActiveById(id: string): Promise<(User & { profile: { socialName: string | null } | null }) | null>;
-  findByLoginIdentifier(identifier: string): Promise<(User & { profile: { socialName: string | null } | null }) | null>;
+  findActiveById(id: string): Promise<UserWithProfile | null>;
+  findByLoginIdentifier(identifier: string): Promise<UserWithProfile | null>;
   create(input: CreateUserInput): Promise<User>;
   updatePassword(id: string, passwordHash: string): Promise<void>;
   activate(id: string): Promise<void>;

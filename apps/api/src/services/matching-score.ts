@@ -19,6 +19,90 @@ export const WEIGHTS = {
 } as const;
 
 /**
+ * Thresholds that decide which human-readable reasons are surfaced for a
+ * recommendation. Values are tuned to the score components they describe.
+ */
+export const REASON_THRESHOLDS = {
+  /** effortScore at which a profile is described as "detailed" */
+  effortDetailed: 40,
+  /** effortScore at which a profile is described as "rich" */
+  effortRich: 60,
+  /** profileViews at which a profile is described as "popular" */
+  viewsPopular: 40,
+  /** profileViews at which a profile is described as "in high demand" */
+  viewsHighDemand: 120,
+  /** bumpCount at which a senior is "recently bumped" */
+  bumpsNoticed: 1,
+  /** bumpCount at which a senior is "frequently bumped" */
+  bumpsFrequent: 2,
+} as const;
+
+const SHARED_TAGS_CAP = 3;
+
+export interface MatchReasonInput {
+  /** Tag entries on the freshman profile (id + name). */
+  freshmanTags: Array<{ id: string; name: string }>;
+  /** Tag entries on the senior profile (id + name). */
+  seniorTags: Array<{ id: string; name: string }>;
+  /** The senior's profile effort score (0-100). */
+  effortScore: number;
+  /** Number of profile views on the senior's profile. */
+  profileViews: number;
+  /** Number of bumps the senior has received. */
+  bumpCount: number;
+  /** Whether the senior is currently accepting mentorship requests. */
+  isAcceptingRequests?: boolean;
+}
+
+/**
+ * Builds the human-readable reasons explaining a senior's recommendation,
+ * derived from the same signals that drive the score.
+ *
+ * A reason is only emitted when the contributing signal is meaningful, so a
+ * senior with no overlap, a sparse profile, and no traffic yields `[]`.
+ */
+export function buildMatchReasons(input: MatchReasonInput): string[] {
+  const reasons: string[] = [];
+
+  const freshmanTagIds = new Set(input.freshmanTags.map((tag) => tag.id));
+  const shared = input.seniorTags.filter((tag) => freshmanTagIds.has(tag.id));
+  if (shared.length > 0) {
+    const shown = shared.slice(0, SHARED_TAGS_CAP).map((tag) => tag.name);
+    const extra = shared.length - shown.length;
+    const suffix = extra > 0 ? ` +${extra} more` : '';
+    reasons.push(
+      shared.length === 1
+        ? `1 shared tag: ${shown[0]}`
+        : `${shared.length} shared tags: ${shown.join(', ')}${suffix}`,
+    );
+  }
+
+  if (input.effortScore >= REASON_THRESHOLDS.effortRich) {
+    reasons.push('Rich, highly detailed profile');
+  } else if (input.effortScore >= REASON_THRESHOLDS.effortDetailed) {
+    reasons.push('Detailed profile');
+  }
+
+  if (input.profileViews >= REASON_THRESHOLDS.viewsHighDemand) {
+    reasons.push('In high demand among students');
+  } else if (input.profileViews >= REASON_THRESHOLDS.viewsPopular) {
+    reasons.push('Popular profile with students');
+  }
+
+  if (input.bumpCount >= REASON_THRESHOLDS.bumpsFrequent) {
+    reasons.push('Frequently bumped by fellow freshmen');
+  } else if (input.bumpCount >= REASON_THRESHOLDS.bumpsNoticed) {
+    reasons.push('Recently bumped by a fellow freshman');
+  }
+
+  if (input.isAcceptingRequests) {
+    reasons.push('Currently accepting new mentees');
+  }
+
+  return reasons;
+}
+
+/**
  * Pure weighted compatibility score used by the recommendation engine.
  *
  *   Match = 0.40*TagOverlap + 0.30*Effort + 0.10*Views + 0.20*Bumps

@@ -1,9 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  startTestEnvironment,
-  stopTestEnvironment,
-  type TestContext,
-} from './test-environment.js';
+import { startTestEnvironment, stopTestEnvironment, type TestContext } from './test-environment.js';
 
 type Role = 'senior' | 'freshman' | 'administrator';
 
@@ -23,27 +19,84 @@ describe('Discovery, Requests & Lineage API', () => {
   let ctx: TestContext;
   let tagIds: Record<TagName, string>;
 
-  const seniorA: TestUser = { handle: 'senior_a', email: 'senior_a@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 8 };
-  const seniorB: TestUser = { handle: 'senior_b', email: 'senior_b@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 6 };
-  const seniorC: TestUser = { handle: 'senior_c', email: 'senior_c@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 4 };
-  const seniorD: TestUser = { handle: 'senior_d', email: 'senior_d@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 7 };
-  const seniorE: TestUser = { handle: 'senior_e', email: 'senior_e@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 5 };
-  const hiddenSenior: TestUser = { handle: 'hidden_senior', email: 'hidden_senior@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 5 };
-  const freshmanA: TestUser = { handle: 'freshman_a', email: 'freshman_a@cs.uni.edu', password: 'Pass12345!', role: 'freshman', semester: 2 };
-  const freshmanB: TestUser = { handle: 'freshman_b', email: 'freshman_b@cs.uni.edu', password: 'Pass12345!', role: 'freshman', semester: 3 };
-  const admin: TestUser = { handle: 'admin_one', email: 'admin_one@cs.uni.edu', password: 'Pass12345!', role: 'administrator', semester: 10 };
+  const seniorA: TestUser = {
+    handle: 'senior_a',
+    email: 'senior_a@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'senior',
+    semester: 8,
+  };
+  const seniorB: TestUser = {
+    handle: 'senior_b',
+    email: 'senior_b@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'senior',
+    semester: 6,
+  };
+  const seniorC: TestUser = {
+    handle: 'senior_c',
+    email: 'senior_c@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'senior',
+    semester: 4,
+  };
+  const seniorD: TestUser = {
+    handle: 'senior_d',
+    email: 'senior_d@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'senior',
+    semester: 7,
+  };
+  const seniorE: TestUser = {
+    handle: 'senior_e',
+    email: 'senior_e@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'senior',
+    semester: 5,
+  };
+  const hiddenSenior: TestUser = {
+    handle: 'hidden_senior',
+    email: 'hidden_senior@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'senior',
+    semester: 5,
+  };
+  const freshmanA: TestUser = {
+    handle: 'freshman_a',
+    email: 'freshman_a@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'freshman',
+    semester: 2,
+  };
+  const freshmanB: TestUser = {
+    handle: 'freshman_b',
+    email: 'freshman_b@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'freshman',
+    semester: 3,
+  };
+  const admin: TestUser = {
+    handle: 'admin_one',
+    email: 'admin_one@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'administrator',
+    semester: 10,
+  };
 
   let seniorCookie = '';
   let freshmanCookie = '';
   let adminCookie = '';
 
-  async function createUser(user: TestUser, options?: {
-    discoverable?: boolean;
-    accepting?: boolean;
-    maxMentees?: number;
-    tags?: TagName[];
-    effortScore?: number;
-  }) {
+  async function createUser(
+    user: TestUser,
+    options?: {
+      discoverable?: boolean;
+      accepting?: boolean;
+      maxMentees?: number;
+      tags?: TagName[];
+      effortScore?: number;
+    },
+  ) {
     const argon2 = await import('argon2');
     const passwordHash = await argon2.default.hash(user.password, {
       type: 2,
@@ -86,8 +139,20 @@ describe('Discovery, Requests & Lineage API', () => {
   }
 
   async function createReapplyPair(): Promise<{ freshman: string; senior: string }> {
-    const seniorUser: TestUser = { handle: 'reapply_senior', email: 'reapply_senior@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 8 };
-    const freshUser: TestUser = { handle: 'reapply_fresh', email: 'reapply_fresh@cs.uni.edu', password: 'Pass12345!', role: 'freshman', semester: 2 };
+    const seniorUser: TestUser = {
+      handle: 'reapply_senior',
+      email: 'reapply_senior@cs.uni.edu',
+      password: 'Pass12345!',
+      role: 'senior',
+      semester: 8,
+    };
+    const freshUser: TestUser = {
+      handle: 'reapply_fresh',
+      email: 'reapply_fresh@cs.uni.edu',
+      password: 'Pass12345!',
+      role: 'freshman',
+      semester: 2,
+    };
     for (const user of [seniorUser, freshUser]) {
       const exists = await ctx.prisma.user.findUnique({ where: { handle: user.handle } });
       if (!exists) await createUser(user);
@@ -123,7 +188,12 @@ describe('Discovery, Requests & Lineage API', () => {
       geometry: tagRows[2]!.id,
     };
 
-    await createUser(seniorA, { discoverable: true, maxMentees: 1, tags: ['algebra', 'analysis'], effortScore: 80 });
+    await createUser(seniorA, {
+      discoverable: true,
+      maxMentees: 1,
+      tags: ['algebra', 'analysis'],
+      effortScore: 80,
+    });
     await createUser(seniorB, { discoverable: true, accepting: false, tags: ['geometry'] });
     await createUser(seniorC, { discoverable: true, maxMentees: 1, tags: ['algebra'] });
     await createUser(seniorD, { discoverable: true, tags: ['analysis'] });
@@ -147,9 +217,12 @@ describe('Discovery, Requests & Lineage API', () => {
   it('lists tags publicly', async () => {
     const res = await ctx.app.inject({ method: 'GET', url: '/api/tags' });
     expect(res.statusCode).toBe(200);
-    expect(res.json().tags.map((tag: { name: string }) => tag.name).sort()).toEqual(
-      [...tagNames].sort(),
-    );
+    expect(
+      res
+        .json()
+        .tags.map((tag: { name: string }) => tag.name)
+        .sort(),
+    ).toEqual([...tagNames].sort());
   });
 
   // -- Discovery catalog ---------------------------------------------------
@@ -166,7 +239,11 @@ describe('Discovery, Requests & Lineage API', () => {
       headers: { cookie: freshmanCookie },
     });
     expect(res.statusCode).toBe(200);
-    const seniors = res.json().seniors as Array<{ handle: string; bumpCount: number; activeMenteeCount: number }>;
+    const seniors = res.json().seniors as Array<{
+      handle: string;
+      bumpCount: number;
+      activeMenteeCount: number;
+    }>;
     const handles = seniors.map((s) => s.handle).sort();
     expect(handles).toEqual(['senior_a', 'senior_b', 'senior_c', 'senior_d', 'senior_e']);
     for (const senior of seniors) {
@@ -182,7 +259,9 @@ describe('Discovery, Requests & Lineage API', () => {
       headers: { cookie: freshmanCookie },
     });
     expect(bySemester.statusCode).toBe(200);
-    expect(bySemester.json().seniors.map((s: { handle: string }) => s.handle)).toEqual(['senior_a']);
+    expect(bySemester.json().seniors.map((s: { handle: string }) => s.handle)).toEqual([
+      'senior_a',
+    ]);
 
     const byAvailability = await ctx.app.inject({
       method: 'GET',
@@ -190,12 +269,12 @@ describe('Discovery, Requests & Lineage API', () => {
       headers: { cookie: freshmanCookie },
     });
     expect(byAvailability.statusCode).toBe(200);
-    expect(byAvailability.json().seniors.map((s: { handle: string }) => s.handle).sort()).toEqual([
-      'senior_a',
-      'senior_c',
-      'senior_d',
-      'senior_e',
-    ]);
+    expect(
+      byAvailability
+        .json()
+        .seniors.map((s: { handle: string }) => s.handle)
+        .sort(),
+    ).toEqual(['senior_a', 'senior_c', 'senior_d', 'senior_e']);
 
     const byTag = await ctx.app.inject({
       method: 'GET',
@@ -203,28 +282,40 @@ describe('Discovery, Requests & Lineage API', () => {
       headers: { cookie: freshmanCookie },
     });
     expect(byTag.statusCode).toBe(200);
-    expect(byTag.json().seniors.map((s: { handle: string }) => s.handle).sort()).toEqual([
-      'senior_a',
-      'senior_c',
-    ]);
+    expect(
+      byTag
+        .json()
+        .seniors.map((s: { handle: string }) => s.handle)
+        .sort(),
+    ).toEqual(['senior_a', 'senior_c']);
   });
 
   // -- Recommendations ------------------------------------------------------
 
-  it('recommends seniors ordered by compatibility score', async () => {
+  it('recommends seniors ordered by compatibility score with match reasons', async () => {
     const res = await ctx.app.inject({
       method: 'GET',
       url: '/api/recommendations',
       headers: { cookie: freshmanCookie },
     });
     expect(res.statusCode).toBe(200);
-    const recommendations = res.json().recommendations as Array<{ handle: string; score: number }>;
+    const recommendations = res.json().recommendations as Array<{
+      handle: string;
+      score: number;
+      matchReasons: string[];
+    }>;
     expect(recommendations.length).toBeGreaterThan(0);
     const scores = recommendations.map((r) => r.score);
     expect(scores).toEqual([...scores].sort((a, b) => b - a));
     // freshman_a tags = [algebra]; senior_a shares algebra + high effort score,
     // so it leads even though senior_c has full tag overlap.
     expect(recommendations[0]!.handle).toBe('senior_a');
+    for (const recommendation of recommendations) {
+      expect(Array.isArray(recommendation.matchReasons)).toBe(true);
+    }
+    // The leading senior shares the freshman's algebra tag, so its reasons
+    // explain that overlap.
+    expect(recommendations[0]!.matchReasons).toContain('1 shared tag: algebra');
   });
 
   // -- Bumps ---------------------------------------------------------------
@@ -310,7 +401,10 @@ describe('Discovery, Requests & Lineage API', () => {
 
   it('submits a request with an idempotency key', async () => {
     const key = idemKey('submit');
-    const payload = { seniorHandle: seniorA.handle, message: 'Hello, I would love to learn algebra.' };
+    const payload = {
+      seniorHandle: seniorA.handle,
+      message: 'Hello, I would love to learn algebra.',
+    };
     const first = await ctx.app.inject({
       method: 'POST',
       url: '/api/requests',
@@ -558,7 +652,7 @@ describe('Discovery, Requests & Lineage API', () => {
   });
 
   it('allows a new application to the same senior after a cancellation', async () => {
-    const { freshman: freshB, senior: seniorBcookie } = await createReapplyPair();
+    const { freshman: freshB } = await createReapplyPair();
     const first = await ctx.app.inject({
       method: 'POST',
       url: '/api/requests',
@@ -632,11 +726,29 @@ describe('Discovery, Requests & Lineage API', () => {
 
   it('serializes concurrent acceptances so capacity is never exceeded', async () => {
     const seniorRow = await createUser(
-      { handle: 'race_senior', email: 'race_senior@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 8 },
+      {
+        handle: 'race_senior',
+        email: 'race_senior@cs.uni.edu',
+        password: 'Pass12345!',
+        role: 'senior',
+        semester: 8,
+      },
       { discoverable: true, maxMentees: 1 },
     );
-    await createUser({ handle: 'race_fresh_a', email: 'race_fresh_a@cs.uni.edu', password: 'Pass12345!', role: 'freshman', semester: 2 });
-    await createUser({ handle: 'race_fresh_b', email: 'race_fresh_b@cs.uni.edu', password: 'Pass12345!', role: 'freshman', semester: 3 });
+    await createUser({
+      handle: 'race_fresh_a',
+      email: 'race_fresh_a@cs.uni.edu',
+      password: 'Pass12345!',
+      role: 'freshman',
+      semester: 2,
+    });
+    await createUser({
+      handle: 'race_fresh_b',
+      email: 'race_fresh_b@cs.uni.edu',
+      password: 'Pass12345!',
+      role: 'freshman',
+      semester: 3,
+    });
 
     const seniorCookie = await login('race_senior', 'Pass12345!');
     const freshA = await login('race_fresh_a', 'Pass12345!');
