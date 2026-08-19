@@ -158,6 +158,12 @@ function ResetPassword({ token }: { token: string }) {
             {isSubmitting ? 'Resetting…' : 'Reset password'}
           </Button>
         </form>
+
+        <div className="mt-4 text-center text-sm">
+          <Link to="/login" className="text-indigo-600 hover:underline">
+            Back to sign in
+          </Link>
+        </div>
       </div>
     </div>
   );
