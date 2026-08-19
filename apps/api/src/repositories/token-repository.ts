@@ -9,6 +9,7 @@ export interface TokenRepository {
   ): Promise<UserToken>;
   findActiveByType(type: TokenType): Promise<UserToken[]>;
   findActiveByUserAndType(userId: string, type: TokenType): Promise<UserToken[]>;
+  findAllByType(type: TokenType): Promise<UserToken[]>;
   consume(id: string): Promise<boolean>;
 }
 
@@ -42,6 +43,13 @@ export function createTokenRepository(prisma: PrismaClient): TokenRepository {
     });
   }
 
+  async function findAllByType(type: TokenType) {
+    return prisma.userToken.findMany({
+      where: { type },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async function consume(id: string) {
     const result = await prisma.userToken.updateMany({
       where: { id, consumedAt: null },
@@ -50,5 +58,5 @@ export function createTokenRepository(prisma: PrismaClient): TokenRepository {
     return result.count > 0;
   }
 
-  return { createToken, findActiveByType, findActiveByUserAndType, consume };
+  return { createToken, findActiveByType, findActiveByUserAndType, findAllByType, consume };
 }

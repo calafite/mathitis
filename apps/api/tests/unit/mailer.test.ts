@@ -58,7 +58,7 @@ describe('createEmailSender', () => {
 
     expect(createTransport).not.toHaveBeenCalled();
     expect(info).toHaveBeenCalledWith(
-      { to: 'senior@example.com', subject: 'Hi', transport: 'dev-noop' },
+      { to: 'senior@example.com', subject: 'Hi', body: 'Body', transport: 'dev-noop' },
       'email dispatched (no SMTP configured)',
     );
   });
@@ -92,10 +92,11 @@ describe('createEmailSender', () => {
   });
 
   it('uses TLS on port 465 and a default from address', async () => {
-    const sender = createEmailSender(
-      baseEnv({ SMTP_HOST: 'smtp.example.com', SMTP_PORT: 465 }),
-      { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-    );
+    const sender = createEmailSender(baseEnv({ SMTP_HOST: 'smtp.example.com', SMTP_PORT: 465 }), {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    });
 
     await sender.send({ to: 'x@example.com', subject: 'S', text: 'T' });
 
@@ -105,9 +106,7 @@ describe('createEmailSender', () => {
       secure: true,
       auth: undefined,
     });
-    expect(sendMail).toHaveBeenCalledWith(
-      expect.objectContaining({ from: 'mathitis@localhost' }),
-    );
+    expect(sendMail).toHaveBeenCalledWith(expect.objectContaining({ from: 'mathitis@localhost' }));
   });
 
   it('falls back to the dev logger when SMTP port is missing', async () => {

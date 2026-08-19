@@ -48,6 +48,10 @@ export const authApi = {
     });
   },
 
+  verifyEmail(token: string) {
+    return apiFetch<GenericResponse>(`/auth/verify-email/${encodeURIComponent(token)}`);
+  },
+
   resetPassword(input: { token: string; password: string }) {
     return apiFetch<GenericResponse>('/auth/reset-password', {
       method: 'POST',

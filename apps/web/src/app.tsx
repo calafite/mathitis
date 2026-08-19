@@ -9,6 +9,7 @@ import { HomePage } from '@/pages/home';
 import { LoginPage } from '@/pages/login';
 import { RegisterPage } from '@/pages/register';
 import { PasswordRecoveryPage } from '@/pages/password-recovery';
+import { VerifyEmailPage } from '@/pages/verify-email';
 import { ProfileStudioPage } from '@/pages/profile-studio';
 import { DiscoveryPage } from '@/pages/discovery';
 import { RequestsPage } from '@/pages/requests';
@@ -38,91 +39,92 @@ export function App() {
           <AuthProvider>
             <NotificationsProvider>
               <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/recover" element={<PasswordRecoveryPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/recover" element={<PasswordRecoveryPage />} />
+                <Route path="/verify-email" element={<VerifyEmailPage />} />
 
-              <Route element={<ProtectedRoute />}>
-                <Route
-                  path="/"
-                  element={
-                    <ErrorBoundary name="protected">
-                      <HomePage />
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/profile/studio"
-                  element={
-                    <ErrorBoundary name="profile-studio">
-                      <ProfileStudioPage />
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/discovery"
-                  element={
-                    <ErrorBoundary name="discovery">
-                      <DiscoveryPage />
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/requests"
-                  element={
-                    <ErrorBoundary name="requests">
-                      <RequestsPage />
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/lineage"
-                  element={
-                    <ErrorBoundary name="lineage">
-                      <LineagePage />
-                    </ErrorBoundary>
-                  }
-                />
-                <Route
-                  path="/lineage/:handle"
-                  element={
-                    <ErrorBoundary name="lineage">
-                      <LineagePage />
-                    </ErrorBoundary>
-                  }
-                />
-              </Route>
+                <Route element={<ProtectedRoute />}>
+                  <Route
+                    path="/"
+                    element={
+                      <ErrorBoundary name="protected">
+                        <HomePage />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/profile/studio"
+                    element={
+                      <ErrorBoundary name="profile-studio">
+                        <ProfileStudioPage />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/discovery"
+                    element={
+                      <ErrorBoundary name="discovery">
+                        <DiscoveryPage />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/requests"
+                    element={
+                      <ErrorBoundary name="requests">
+                        <RequestsPage />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/lineage"
+                    element={
+                      <ErrorBoundary name="lineage">
+                        <LineagePage />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/lineage/:handle"
+                    element={
+                      <ErrorBoundary name="lineage">
+                        <LineagePage />
+                      </ErrorBoundary>
+                    }
+                  />
+                </Route>
 
-              <Route
-                path="/admin"
-                element={
-                  <RoleGuard requiredRole={['administrator']}>
-                    <ErrorBoundary name="admin">
-                      <AdminLayout />
-                    </ErrorBoundary>
-                  </RoleGuard>
-                }
-              >
-                <Route index element={<AdminDashboardPage />} />
-                <Route path="users" element={<AdminUsersPage />} />
-                <Route path="approvals" element={<AdminApprovalsPage />} />
-                <Route path="config" element={<AdminConfigPage />} />
-                <Route path="audit-logs" element={<AdminAuditLogsPage />} />
-              </Route>
+                <Route
+                  path="/admin"
+                  element={
+                    <RoleGuard requiredRole={['administrator']}>
+                      <ErrorBoundary name="admin">
+                        <AdminLayout />
+                      </ErrorBoundary>
+                    </RoleGuard>
+                  }
+                >
+                  <Route index element={<AdminDashboardPage />} />
+                  <Route path="users" element={<AdminUsersPage />} />
+                  <Route path="approvals" element={<AdminApprovalsPage />} />
+                  <Route path="config" element={<AdminConfigPage />} />
+                  <Route path="audit-logs" element={<AdminAuditLogsPage />} />
+                </Route>
 
-              <Route
-                path="/dev"
-                element={
-                  <RoleGuard requiredRole={['developer', 'administrator']}>
-                    <ErrorBoundary name="dev">
-                      <DevDiagnosticsPage />
-                    </ErrorBoundary>
-                  </RoleGuard>
-                }
-              />
+                <Route
+                  path="/dev"
+                  element={
+                    <RoleGuard requiredRole={['developer', 'administrator']}>
+                      <ErrorBoundary name="dev">
+                        <DevDiagnosticsPage />
+                      </ErrorBoundary>
+                    </RoleGuard>
+                  }
+                />
 
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
               <NotificationToastStack />
             </NotificationsProvider>
           </AuthProvider>

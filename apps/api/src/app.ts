@@ -30,6 +30,7 @@ import { createCsrfGuard } from './plugins/csrf.js';
 import { createUserRepository } from './repositories/user-repository.js';
 import { createTokenRepository } from './repositories/token-repository.js';
 import { createSystemConfigRepository } from './repositories/system-config-repository.js';
+import { createAuthMailer } from './services/auth-mailer.js';
 import { ValidationError } from './errors.js';
 
 const redactPaths = [
@@ -171,11 +172,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   });
   await app.register(cors, {
     origin:
-      allowedOrigins.size > 0
-        ? [...allowedOrigins]
-        : env.NODE_ENV === 'production'
-          ? false
-          : true,
+      allowedOrigins.size > 0 ? [...allowedOrigins] : env.NODE_ENV === 'production' ? false : true,
     credentials: true,
   });
   await app.register(rateLimit, {
@@ -194,6 +191,15 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
 
   const queue = options.queue ?? createEmailQueue(new Redis(env.REDIS_URL));
   app.decorate('emailQueue', queue);
+
+  const mailer =
+    options.mailer ??
+    createAuthMailer({
+      publicBaseUrl: env.PUBLIC_BASE_URL,
+      webBaseUrl: env.WEB_ORIGIN ?? env.PUBLIC_BASE_URL,
+      emailQueue: queue,
+      logger: app.log,
+    });
 
   app.addHook('onClose', async () => {
     await queue.close();
@@ -230,7 +236,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     userRepository: createUserRepository(prisma),
     tokenRepository: createTokenRepository(prisma),
     systemConfigRepository: createSystemConfigRepository(prisma),
-    mailer: options.mailer,
+    mailer,
   });
 
   await app.register(registerProfilesPlugin, {

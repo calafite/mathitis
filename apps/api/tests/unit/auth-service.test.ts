@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createAuthService, type AuthService, type Mailer } from '../../src/services/auth-service.js';
+import {
+  createAuthService,
+  type AuthService,
+  type Mailer,
+} from '../../src/services/auth-service.js';
 import type { UserRepository } from '../../src/repositories/user-repository.js';
 import type { TokenRepository } from '../../src/repositories/token-repository.js';
 import type { SystemConfigRepository } from '../../src/repositories/system-config-repository.js';
@@ -37,9 +41,17 @@ interface Harness {
     findActiveByType: ReturnType<typeof vi.fn>;
     consume: ReturnType<typeof vi.fn>;
     findActiveByUserAndType: ReturnType<typeof vi.fn>;
+    findAllByType: ReturnType<typeof vi.fn>;
   };
-  mailer: { sendVerificationEmail: ReturnType<typeof vi.fn>; sendPasswordResetEmail: ReturnType<typeof vi.fn> };
-  config: { getBoolean: ReturnType<typeof vi.fn>; getNumber: ReturnType<typeof vi.fn>; getConfig: ReturnType<typeof vi.fn> };
+  mailer: {
+    sendVerificationEmail: ReturnType<typeof vi.fn>;
+    sendPasswordResetEmail: ReturnType<typeof vi.fn>;
+  };
+  config: {
+    getBoolean: ReturnType<typeof vi.fn>;
+    getNumber: ReturnType<typeof vi.fn>;
+    getConfig: ReturnType<typeof vi.fn>;
+  };
 }
 
 function createHarness(): Harness {
@@ -57,6 +69,7 @@ function createHarness(): Harness {
     createToken: vi.fn(),
     findActiveByType: vi.fn(),
     findActiveByUserAndType: vi.fn(),
+    findAllByType: vi.fn(),
     consume: vi.fn(),
   };
 
@@ -149,7 +162,12 @@ describe('AuthService.login', () => {
   it('rejects suspended accounts', async () => {
     const h = createHarness();
     const realHash = await import('argon2').then((m) =>
-      m.default.hash('StrongPassword123!', { type: 2, memoryCost: 65536, timeCost: 3, parallelism: 4 }),
+      m.default.hash('StrongPassword123!', {
+        type: 2,
+        memoryCost: 65536,
+        timeCost: 3,
+        parallelism: 4,
+      }),
     );
     h.userRepository.findByLoginIdentifier.mockResolvedValue(
       makeUser({ passwordHash: realHash, status: 'suspended' }),
@@ -201,7 +219,7 @@ describe('AuthService.resetPassword', () => {
 describe('AuthService.verifyEmail', () => {
   it('rejects an invalid verification token', async () => {
     const h = createHarness();
-    h.tokenRepository.findActiveByType.mockResolvedValue([]);
+    h.tokenRepository.findAllByType.mockResolvedValue([]);
 
     await expect(h.service.verifyEmail('a'.repeat(64))).rejects.toMatchObject({
       status: 400,

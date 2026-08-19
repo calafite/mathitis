@@ -1,10 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
-import {
-  startTestEnvironment,
-  stopTestEnvironment,
-  type TestContext,
-} from './test-environment.js';
+import { startTestEnvironment, stopTestEnvironment, type TestContext } from './test-environment.js';
 
 describe('Auth API', () => {
   let ctx: TestContext;
@@ -227,11 +223,12 @@ describe('Auth API', () => {
     expect(token!.consumedAt).not.toBeNull();
   });
 
-  it('rejects reuse of an already consumed token', async () => {
+  it('treats a re-verified (already consumed) token as an idempotent success', async () => {
     const plain = 'cafebabe'.repeat(4);
     const again = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${plain}` });
-    expect(again.statusCode).toBe(400);
-    expect(again.json().error.code).toBe('TOKEN_INVALID');
+    expect(again.statusCode).toBe(200);
+    const user = await ctx.prisma.user.findUnique({ where: { email: 'tokenverify@cs.uni.edu' } });
+    expect(user!.status).toBe('active');
   });
 
   it('rejects an expired verification token', async () => {

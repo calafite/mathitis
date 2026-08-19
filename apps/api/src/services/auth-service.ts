@@ -186,16 +186,37 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
   }
 
   async function verifyEmail(token: string): Promise<void> {
-    const match = await verifyPlainToken(token, 'email_verification');
+    const inputDigest = sha256(token);
+    const candidates = await tokenRepository.findAllByType('email_verification');
+    let match: { userId: string; id: string; consumedAt: Date | null; expiresAt: Date } | null =
+      null;
+    for (const candidate of candidates) {
+      try {
+        if (await argon2.verify(candidate.tokenHash, inputDigest)) {
+          match = candidate;
+          break;
+        }
+      } catch {
+        // hash format mismatch — ignore and continue
+      }
+    }
     if (!match) {
       throw new DomainError('TOKEN_INVALID', 400, 'Invalid or expired verification token');
     }
-
-    const consumed = await tokenRepository.consume(match.tokenId);
-    if (!consumed) {
-      throw new DomainError('TOKEN_ALREADY_USED', 400, 'This token has already been used');
+    if (match.consumedAt) {
+      // Already used. Verification only ever consumes this token after
+      // activation, so this is an idempotent success (link re-clicked or
+      // double-fired in dev StrictMode).
+      return;
     }
-
+    if (match.expiresAt <= new Date()) {
+      throw new DomainError('TOKEN_INVALID', 400, 'Invalid or expired verification token');
+    }
+    const consumed = await tokenRepository.consume(match.id);
+    if (!consumed) {
+      // Lost a race — another request consumed it, which means activation is done.
+      return;
+    }
     await userRepository.activate(match.userId);
   }
 

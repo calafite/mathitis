@@ -1,13 +1,12 @@
 import { Worker } from 'bullmq';
 import type { Redis } from 'ioredis';
 import type { EmailSender } from './mailer.js';
-import type { NotificationType } from '@prisma/client';
 import type { LoggerLike } from './logger.js';
 import { createEmailDlq, EMAIL_QUEUE_NAME } from './queue.js';
 
 export interface EmailJobData {
   to: string;
-  type: NotificationType;
+  type: string;
   title: string;
   body: string;
 }

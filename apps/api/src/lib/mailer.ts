@@ -26,9 +26,7 @@ export function createEmailSender(env: Env, logger: LoggerLike): EmailSender {
       port: env.SMTP_PORT,
       secure: env.SMTP_PORT === 465,
       auth:
-        env.SMTP_USER && env.SMTP_PASS
-          ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
-          : undefined,
+        env.SMTP_USER && env.SMTP_PASS ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
     });
   }
 
@@ -48,6 +46,7 @@ export function createEmailSender(env: Env, logger: LoggerLike): EmailSender {
         {
           to: message.to,
           subject: message.subject,
+          body: message.text,
           transport: 'dev-noop',
         },
         'email dispatched (no SMTP configured)',
