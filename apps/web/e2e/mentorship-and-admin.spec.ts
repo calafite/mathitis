@@ -5,7 +5,7 @@ test.describe('Senior mentorship flow', () => {
   test('accepts an incoming mentorship request', async ({ page }) => {
     await login(page, 'ada_math');
 
-    await page.getByRole('link', { name: 'Requests' }).click();
+    await page.getByRole('link', { name: 'Mentorship Requests' }).click();
     await expect(page.getByRole('heading', { name: 'Mentorship requests' })).toBeVisible();
 
     const incoming = page.getByText('Incoming');
@@ -31,6 +31,13 @@ test.describe('Administrative workflow', () => {
     const toggle = page.getByLabel('Allow new registrations');
     await expect(toggle).toBeVisible({ timeout: 15_000 });
     await toggle.uncheck();
+    await page.getByRole('button', { name: 'Save changes' }).click();
+    await expect(page.getByText('Saved.')).toBeVisible({ timeout: 15_000 });
+
+    // reload so the local draft syncs with the saved server state, then restore the setting
+    await page.reload();
+    await expect(page.getByLabel('Allow new registrations')).toBeVisible({ timeout: 15_000 });
+    await page.getByLabel('Allow new registrations').check();
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.getByText('Saved.')).toBeVisible({ timeout: 15_000 });
 

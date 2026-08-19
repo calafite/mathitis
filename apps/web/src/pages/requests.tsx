@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { MentorshipRequest } from '@mathitis/schemas';
 import { useAuth } from '@/contexts/auth-context';
 import { requestsApi, buildIdempotencyKey, type RequestInbox } from '@/lib/requests-api';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pending',
@@ -165,7 +167,18 @@ export function RequestsPage() {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-slate-900">Mentorship requests</h1>
+      <header className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">Mentorship requests</h1>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/settings"
+            className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
+          >
+            Settings
+          </Link>
+          <ThemeToggle />
+        </div>
+      </header>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {!isFreshman && (

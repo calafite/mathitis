@@ -7,6 +7,7 @@ import { discoveryApi } from '@/lib/discovery-api';
 import { requestsApi, buildIdempotencyKey } from '@/lib/requests-api';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 function avatar(src: string | null, alt: string) {
   if (!src) {
@@ -238,14 +239,25 @@ export function DiscoveryPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-900">Discovery</h1>
-        {isFreshman && (
-          <Button variant="outline" size="sm" onClick={() => setShowRecommendations((v) => !v)}>
-            {showRecommendations ? 'Show catalog' : 'Show recommendations'}
-          </Button>
-        )}
-      </div>
+      <header className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold text-foreground">Discovery</h1>
+        </div>
+        <div className="flex items-center gap-3">
+          {isFreshman && (
+            <Button variant="outline" size="sm" onClick={() => setShowRecommendations((v) => !v)}>
+              {showRecommendations ? 'Show catalog' : 'Show recommendations'}
+            </Button>
+          )}
+          <Link
+            to="/settings"
+            className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
+          >
+            Settings
+          </Link>
+          <ThemeToggle />
+        </div>
+      </header>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <select

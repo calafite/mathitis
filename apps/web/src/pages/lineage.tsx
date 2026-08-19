@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import type { LineageEdge, LineageNode } from '@mathitis/schemas';
 import { lineageApi } from '@/lib/lineage-api';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 interface Position {
   x: number;
@@ -80,10 +82,23 @@ export function LineagePage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-slate-900">Mentorship lineage</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        {handle ? `Subgraph rooted at @${handle}` : 'The full department lineage across academic years.'}
-      </p>
+      <header className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Mentorship lineage</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {handle ? `Subgraph rooted at @${handle}` : 'The full department lineage across academic years.'}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/settings"
+            className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
+          >
+            Settings
+          </Link>
+          <ThemeToggle />
+        </div>
+      </header>
 
       {lineageQuery.isLoading && <p className="mt-4 text-slate-500">Loading…</p>}
       {!lineageQuery.isLoading && nodes.length === 0 && (

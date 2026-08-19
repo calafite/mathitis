@@ -11,6 +11,7 @@ import { BioEditor } from '@/components/profile/bio-editor';
 import { MediaUpload } from '@/components/profile/media-upload';
 import { RichCardManager } from '@/components/profile/rich-card-manager';
 import { ProfilePreview, type ProfileDraft } from '@/components/profile/profile-preview';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const DEFAULT_THEME: ThemePalette = {
   primaryColor: '#6366f1',
@@ -126,16 +127,23 @@ export function ProfileStudioPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+      <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-4">
-            <Link to="/" className="text-lg font-semibold text-slate-900">
+            <Link to="/" className="text-lg font-semibold text-foreground">
               Mathitis
             </Link>
-            <span className="text-sm text-slate-500">Profile Studio</span>
+            <span className="text-sm text-muted-foreground">Profile Studio</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-600">{user?.handle}</span>
+            <span className="text-sm text-muted-foreground">{user?.handle}</span>
+            <Link
+              to="/settings"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
+              Settings
+            </Link>
+            <ThemeToggle />
             <Button size="sm" disabled={!dirty || saveMutation.isPending} onClick={() => saveMutation.mutate(toUpdateBody(draft))}>
               {saveMutation.isPending ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}
             </Button>

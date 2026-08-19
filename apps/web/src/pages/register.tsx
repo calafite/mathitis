@@ -7,6 +7,7 @@ import { useAuth, type RegisterInput } from '@/contexts/auth-context';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { FieldError, Input } from '@/components/ui/input';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export function RegisterPage() {
   const { register } = useAuth();
@@ -46,10 +47,13 @@ export function RegisterPage() {
 
   if (submitted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h1 className="text-2xl font-semibold text-slate-900">Check your inbox</h1>
-          <p className="mt-2 text-sm text-slate-600">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 text-center shadow-sm">
+          <header className="mb-6 flex justify-end">
+            <ThemeToggle />
+          </header>
+          <h1 className="text-2xl font-semibold text-foreground">Check your inbox</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             If an account with that information exists, you will receive a verification email
             shortly. Follow the link in the email to activate your account.
           </p>
@@ -62,16 +66,19 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-8">
-      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold text-slate-900">Create your account</h1>
-        <p className="mt-1 text-sm text-slate-600">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
+        <header className="mb-6 flex justify-end">
+          <ThemeToggle />
+        </header>
+        <h1 className="text-2xl font-semibold text-foreground">Create your account</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Join as a freshman and discover mentors in the mathematics department.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
-            <label htmlFor="handle" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="handle" className="mb-1 block text-sm font-medium text-foreground">
               Handle
             </label>
             <Input
@@ -84,7 +91,7 @@ export function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
               University email
             </label>
             <Input
@@ -98,7 +105,7 @@ export function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="semester" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="semester" className="mb-1 block text-sm font-medium text-foreground">
               Semester
             </label>
             <Input
@@ -112,7 +119,7 @@ export function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="socialName" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="socialName" className="mb-1 block text-sm font-medium text-foreground">
               Preferred name (optional)
             </label>
             <Input id="socialName" autoComplete="name" {...field('socialName')} />
@@ -120,7 +127,7 @@ export function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="password" className="mb-1 block text-sm font-medium text-foreground">
               Password
             </label>
             <Input
@@ -133,7 +140,7 @@ export function RegisterPage() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive" role="alert">
               {error}
             </div>
           )}
@@ -143,9 +150,9 @@ export function RegisterPage() {
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-slate-600">
+        <p className="mt-4 text-center text-sm text-muted-foreground">
           Already have an account?{' '}
-          <Link to="/login" className="text-indigo-600 hover:underline">
+          <Link to="/login" className="text-primary hover:underline">
             Sign in
           </Link>
         </p>

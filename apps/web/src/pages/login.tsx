@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { FieldError, Input } from '@/components/ui/input';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -40,16 +41,19 @@ export function LoginPage() {
   });
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold text-slate-900">Sign in to Mathitis</h1>
-        <p className="mt-1 text-sm text-slate-600">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
+        <header className="mb-6 flex justify-end">
+          <ThemeToggle />
+        </header>
+        <h1 className="text-2xl font-semibold text-foreground">Sign in to Mathitis</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Find your mentor and join the mathematics lineage.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
-            <label htmlFor="identifier" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="identifier" className="mb-1 block text-sm font-medium text-foreground">
               Handle or email
             </label>
             <Input id="identifier" autoComplete="username" {...register('identifier')} />
@@ -57,7 +61,7 @@ export function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="password" className="mb-1 block text-sm font-medium text-foreground">
               Password
             </label>
             <Input
@@ -70,7 +74,7 @@ export function LoginPage() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive" role="alert">
               {error}
             </div>
           )}
@@ -81,10 +85,10 @@ export function LoginPage() {
         </form>
 
         <div className="mt-4 flex items-center justify-between text-sm">
-          <Link to="/register" className="text-indigo-600 hover:underline">
+          <Link to="/register" className="text-primary hover:underline">
             Create an account
           </Link>
-          <Link to="/recover" className="text-slate-600 hover:underline">
+          <Link to="/recover" className="text-muted-foreground hover:underline">
             Forgot password?
           </Link>
         </div>

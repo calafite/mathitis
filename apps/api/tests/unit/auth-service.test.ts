@@ -21,6 +21,7 @@ function makeUser(overrides: Partial<User> = {}): User {
     deletedAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
+    preferences: null,
     ...overrides,
   };
 }

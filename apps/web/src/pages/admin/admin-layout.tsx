@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', end: true },
@@ -16,16 +17,19 @@ export function AdminLayout() {
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <aside className="flex w-60 flex-col border-r border-slate-200 bg-white">
-        <div className="border-b border-slate-200 px-4 py-4">
-          <button
-            type="button"
-            className="text-lg font-semibold text-slate-900"
-            onClick={() => navigate('/')}
-          >
-            Mathitis Admin
-          </button>
-          <p className="mt-1 text-xs text-slate-500">
+      <aside className="flex w-60 flex-col border-r border-border bg-card">
+        <div className="border-b border-border px-4 py-4">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              className="text-lg font-semibold text-foreground"
+              onClick={() => navigate('/')}
+            >
+              Mathitis Admin
+            </button>
+            <ThemeToggle />
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
             {user?.socialName ?? user?.handle} · {user?.role}
           </p>
         </div>

@@ -4,3 +4,4 @@ export * from './profile';
 export * from './discovery';
 export * from './admin';
 export * from './notifications';
+export * from './settings';

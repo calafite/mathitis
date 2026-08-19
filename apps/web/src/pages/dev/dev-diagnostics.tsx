@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { devApi } from '@/lib/dev-api';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 function formatBytes(bytes: number): string {
   if (bytes >= 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GiB`;
@@ -74,16 +75,17 @@ export function DevDiagnosticsPage() {
     <div className="min-h-screen bg-slate-950 p-6 text-slate-100">
       <header className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Developer diagnostics</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-2xl font-bold text-foreground">Developer diagnostics</h1>
+          <p className="text-sm text-muted-foreground">
             Runtime telemetry. No personal data is exposed here.
           </p>
         </div>
         <div className="flex gap-2">
+          <ThemeToggle />
           <Button
             variant="outline"
             size="sm"
-            className="border-slate-700 text-slate-200"
+            className="border-border text-foreground"
             onClick={() => navigate('/')}
           >
             Back to app
@@ -91,7 +93,7 @@ export function DevDiagnosticsPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="text-slate-200"
+            className="text-muted-foreground"
             onClick={() => void logout()}
           >
             Sign out

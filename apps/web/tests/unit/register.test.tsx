@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { RegisterPage } from '@/pages/register';
+import { ThemeProvider } from '@/contexts/theme-context';
 
 const register = vi.fn();
 
@@ -20,7 +21,9 @@ vi.mock('@/contexts/auth-context', () => ({
 function renderPage() {
   return render(
     <MemoryRouter>
-      <RegisterPage />
+      <ThemeProvider>
+        <RegisterPage />
+      </ThemeProvider>
     </MemoryRouter>,
   );
 }

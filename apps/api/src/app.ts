@@ -15,6 +15,7 @@ import type { Env } from './config/env.js';
 import { createPrismaClient } from './db/client.js';
 import { registerErrorHandler } from './plugins/error-handler.js';
 import { registerAuthPlugin } from './plugins/auth-plugin.js';
+import { registerAccountPlugin } from './plugins/account-plugin.js';
 import { registerProfilesPlugin } from './plugins/profiles-plugin.js';
 import { registerDiscoveryPlugin } from './plugins/discovery-plugin.js';
 import { registerAdminPlugin } from './plugins/admin-plugin.js';
@@ -237,6 +238,11 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     tokenRepository: createTokenRepository(prisma),
     systemConfigRepository: createSystemConfigRepository(prisma),
     mailer,
+  });
+
+  await app.register(registerAccountPlugin, {
+    prisma,
+    session,
   });
 
   await app.register(registerProfilesPlugin, {

@@ -63,8 +63,8 @@ test.describe('email enumeration prevention (UI)', () => {
   test('signs in a seeded active user', async ({ page }) => {
     await login(page, 'alan_loops');
     await expect(
-      page.getByRole('heading', { name: 'Welcome to the mathematics lineage' }),
+      page.getByRole('heading', { name: /Welcome,/ }),
     ).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/Alan.*freshman/)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/freshman/i)).toBeVisible({ timeout: 15_000 });
   });
 });

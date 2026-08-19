@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { authApi } from '@/lib/auth-api';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 type VerifyState = 'verifying' | 'success' | 'error';
 
@@ -37,19 +38,22 @@ export function VerifyEmailPage() {
   }, [token]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 text-center shadow-sm">
+        <header className="mb-6 flex justify-end">
+          <ThemeToggle />
+        </header>
         {state === 'verifying' && (
           <>
-            <h1 className="text-2xl font-semibold text-slate-900">Verifying your email…</h1>
-            <p className="mt-2 text-sm text-slate-600">Please wait a moment.</p>
+            <h1 className="text-2xl font-semibold text-foreground">Verifying your email…</h1>
+            <p className="mt-2 text-sm text-muted-foreground">Please wait a moment.</p>
           </>
         )}
 
         {state === 'success' && (
           <>
-            <h1 className="text-2xl font-semibold text-slate-900">Email verified</h1>
-            <p className="mt-2 text-sm text-slate-600">
+            <h1 className="text-2xl font-semibold text-foreground">Email verified</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
               Your account is now active. Sign in to start exploring mentors.
             </p>
             <Link to="/login">
@@ -60,9 +64,9 @@ export function VerifyEmailPage() {
 
         {state === 'error' && (
           <>
-            <h1 className="text-2xl font-semibold text-slate-900">Verification failed</h1>
-            <p className="mt-2 text-sm text-slate-600">{message}</p>
-            <p className="mt-2 text-sm text-slate-600">
+            <h1 className="text-2xl font-semibold text-foreground">Verification failed</h1>
+            <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
               You can request a new link by registering again or by visiting the recovery page.
             </p>
             <div className="mt-6 flex justify-center gap-2">
