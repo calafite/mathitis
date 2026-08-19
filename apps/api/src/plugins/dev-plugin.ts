@@ -2,10 +2,23 @@ import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import type { Redis } from 'ioredis';
 import type { Queue } from 'bullmq';
-import { devHealthSchema, devMetricsResponseSchema } from '@mathitis/schemas';
+import {
+  devHealthSchema,
+  devMetricsResponseSchema,
+  devMailboxQuerySchema,
+  devMailboxResponseSchema,
+  devLinkQuerySchema,
+  devLinkResponseSchema,
+  type DevMailboxQuery,
+  type DevLinkQuery,
+} from '@mathitis/schemas';
 import type { SessionManager } from './session.js';
 import { createRequireRole } from './auth-guard.js';
 import { createDevService } from '../services/dev-service.js';
+import { latestDevLink, listDevEmails } from '../lib/dev-mailbox.js';
+
+const VERIFY_LINK_PATTERN = /https?:\/\/\S*\/verify-email\?token=[a-f0-9]{16,}/;
+const RESET_LINK_PATTERN = /https?:\/\/\S*\/recover\?token=[a-f0-9]{16,}/;
 
 export interface DevPluginOptions {
   prisma: PrismaClient;
@@ -45,6 +58,53 @@ export async function registerDevPlugin(app: FastifyInstance, options: DevPlugin
         async (_request, reply) => {
           const metrics = await devService.getMetrics();
           return reply.send({ metrics });
+        },
+      );
+
+      devRoutes.get<{ Querystring: DevMailboxQuery }>(
+        '/mailbox',
+        {
+          preHandler: requireDeveloper,
+          schema: {
+            querystring: devMailboxQuerySchema,
+            response: { 200: devMailboxResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          const { to, limit } = request.query;
+          return reply.send({ emails: listDevEmails({ to, limit }) });
+        },
+      );
+
+      devRoutes.get<{ Querystring: DevLinkQuery }>(
+        '/verification-link',
+        {
+          preHandler: requireDeveloper,
+          schema: {
+            querystring: devLinkQuerySchema,
+            response: { 200: devLinkResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          return reply.send({
+            url: latestDevLink({ to: request.query.email, pattern: VERIFY_LINK_PATTERN }),
+          });
+        },
+      );
+
+      devRoutes.get<{ Querystring: DevLinkQuery }>(
+        '/reset-link',
+        {
+          preHandler: requireDeveloper,
+          schema: {
+            querystring: devLinkQuerySchema,
+            response: { 200: devLinkResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          return reply.send({
+            url: latestDevLink({ to: request.query.email, pattern: RESET_LINK_PATTERN }),
+          });
         },
       );
     },

@@ -22,6 +22,29 @@ function StatusBadge({ ok }: { ok: boolean }) {
   );
 }
 
+function LinkifiedText({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/\S+)/g);
+  return (
+    <>
+      {parts.map((part, index) =>
+        /^https?:\/\//.test(part) ? (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noreferrer"
+            className="break-all text-indigo-400 underline"
+          >
+            {part}
+          </a>
+        ) : (
+          <span key={index}>{part}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 export function DevDiagnosticsPage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -36,6 +59,12 @@ export function DevDiagnosticsPage() {
     queryKey: ['dev', 'metrics'],
     queryFn: () => devApi.metrics(),
     refetchInterval: 15_000,
+  });
+
+  const mailboxQuery = useQuery({
+    queryKey: ['dev', 'mailbox'],
+    queryFn: () => devApi.mailbox({ limit: 10 }),
+    refetchInterval: 5_000,
   });
 
   const health = healthQuery.data;
@@ -59,7 +88,12 @@ export function DevDiagnosticsPage() {
           >
             Back to app
           </Button>
-          <Button variant="ghost" size="sm" className="text-slate-200" onClick={() => void logout()}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-slate-200"
+            onClick={() => void logout()}
+          >
             Sign out
           </Button>
         </div>
@@ -75,15 +109,21 @@ export function DevDiagnosticsPage() {
             <dl className="mt-3 space-y-2 text-sm">
               <div className="flex justify-between">
                 <dt className="text-slate-400">Database</dt>
-                <dd><StatusBadge ok={health.checks.database === 'ok'} /></dd>
+                <dd>
+                  <StatusBadge ok={health.checks.database === 'ok'} />
+                </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-slate-400">Redis</dt>
-                <dd><StatusBadge ok={health.checks.redis === 'ok'} /></dd>
+                <dd>
+                  <StatusBadge ok={health.checks.redis === 'ok'} />
+                </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-slate-400">Queue</dt>
-                <dd><StatusBadge ok={health.checks.queue === 'ok'} /></dd>
+                <dd>
+                  <StatusBadge ok={health.checks.queue === 'ok'} />
+                </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-slate-400">Uptime</dt>
@@ -195,7 +235,8 @@ export function DevDiagnosticsPage() {
         {metrics ? (
           <div className="mt-3 space-y-2 text-sm">
             <p className="text-slate-400">
-              Listening ports: {metrics.network.listeningPorts.length > 0
+              Listening ports:{' '}
+              {metrics.network.listeningPorts.length > 0
                 ? metrics.network.listeningPorts.join(', ')
                 : 'none'}
             </p>
@@ -212,6 +253,40 @@ export function DevDiagnosticsPage() {
           </div>
         ) : (
           <p className="mt-3 text-sm text-slate-400">Loading…</p>
+        )}
+      </section>
+
+      <section className="mt-4 rounded-xl border border-slate-800 bg-slate-900 p-4">
+        <h2 className="font-semibold">Local mail (no SMTP)</h2>
+        <p className="mt-1 text-sm text-slate-400">
+          Emails the dev sender would dispatch are captured here, so you can open verification and
+          password-reset links without running a mail server.
+        </p>
+        {mailboxQuery.isLoading ? (
+          <p className="mt-3 text-sm text-slate-400">Loading…</p>
+        ) : mailboxQuery.data?.emails.length === 0 ? (
+          <p className="mt-3 text-sm text-slate-400">
+            No emails captured yet. Register a new account to see its verification link.
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-3">
+            {mailboxQuery.data?.emails.map((email) => (
+              <li
+                key={email.id}
+                className="rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-medium text-slate-100">{email.to}</span>
+                  <span className="text-xs text-slate-500">
+                    {email.subject} · {new Date(email.sentAt).toLocaleTimeString()}
+                  </span>
+                </div>
+                <pre className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-slate-300">
+                  <LinkifiedText text={email.text} />
+                </pre>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
     </div>

@@ -1,6 +1,7 @@
 import nodemailer, { type Transporter } from 'nodemailer';
 import type { Env } from '../config/env.js';
 import type { LoggerLike } from './logger.js';
+import { recordDevEmail } from './dev-mailbox.js';
 
 export interface EmailMessage {
   to: string;
@@ -42,6 +43,7 @@ export function createEmailSender(env: Env, logger: LoggerLike): EmailSender {
         });
         return;
       }
+      recordDevEmail(message);
       logger.info(
         {
           to: message.to,

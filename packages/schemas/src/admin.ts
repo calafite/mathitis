@@ -249,3 +249,33 @@ export const devMetricsResponseSchema = z.object({
   metrics: devMetricsSchema,
 });
 export type DevMetricsResponse = z.infer<typeof devMetricsResponseSchema>;
+
+export const devEmailSchema = z.object({
+  id: z.string(),
+  to: z.string(),
+  subject: z.string(),
+  text: z.string(),
+  sentAt: z.string(),
+});
+export type DevEmail = z.infer<typeof devEmailSchema>;
+
+export const devMailboxQuerySchema = z.object({
+  to: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(100).optional(),
+});
+export type DevMailboxQuery = z.infer<typeof devMailboxQuerySchema>;
+
+export const devMailboxResponseSchema = z.object({
+  emails: z.array(devEmailSchema),
+});
+export type DevMailboxResponse = z.infer<typeof devMailboxResponseSchema>;
+
+export const devLinkQuerySchema = z.object({
+  email: z.string(),
+});
+export type DevLinkQuery = z.infer<typeof devLinkQuerySchema>;
+
+export const devLinkResponseSchema = z.object({
+  url: z.string().nullable(),
+});
+export type DevLinkResponse = z.infer<typeof devLinkResponseSchema>;

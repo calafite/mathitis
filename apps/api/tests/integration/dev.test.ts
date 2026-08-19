@@ -1,9 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  startTestEnvironment,
-  stopTestEnvironment,
-  type TestContext,
-} from './test-environment.js';
+import { startTestEnvironment, stopTestEnvironment, type TestContext } from './test-environment.js';
+import { clearDevMailbox, recordDevEmail } from '../../src/lib/dev-mailbox.js';
 
 interface TestUser {
   handle: string;
@@ -16,8 +13,20 @@ interface TestUser {
 describe('Developer Diagnostics API', () => {
   let ctx: TestContext;
 
-  const developer: TestUser = { handle: 'dev_ops', email: 'dev_ops@cs.uni.edu', password: 'Pass12345!', role: 'developer', semester: 10 };
-  const freshman: TestUser = { handle: 'fresh_dev', email: 'fresh_dev@cs.uni.edu', password: 'Pass12345!', role: 'freshman', semester: 2 };
+  const developer: TestUser = {
+    handle: 'dev_ops',
+    email: 'dev_ops@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'developer',
+    semester: 10,
+  };
+  const freshman: TestUser = {
+    handle: 'fresh_dev',
+    email: 'fresh_dev@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'freshman',
+    semester: 2,
+  };
 
   let developerCookie = '';
   let freshmanCookie = '';
@@ -141,5 +150,86 @@ describe('Developer Diagnostics API', () => {
     });
     expect(res.body).not.toContain('fresh_dev@cs.uni.edu');
     expect(res.body).not.toContain('Pass12345');
+  });
+
+  describe('dev mailbox', () => {
+    beforeAll(() => {
+      clearDevMailbox();
+    });
+
+    it('rejects anonymous and non-developer access', async () => {
+      const anon = await ctx.app.inject({ method: 'GET', url: '/api/dev/mailbox' });
+      expect(anon.statusCode).toBe(403);
+      const user = await ctx.app.inject({
+        method: 'GET',
+        url: '/api/dev/mailbox',
+        headers: { cookie: freshmanCookie },
+      });
+      expect(user.statusCode).toBe(403);
+    });
+
+    it('lists captured emails for a developer', async () => {
+      recordDevEmail({
+        to: 'fresh_dev@cs.uni.edu',
+        subject: 'Verify your Mathitis email',
+        text: 'http://localhost:5173/verify-email?token=abcdef0123456789abcdef0123456789',
+      });
+
+      const res = await ctx.app.inject({
+        method: 'GET',
+        url: '/api/dev/mailbox',
+        headers: { cookie: developerCookie },
+      });
+      expect(res.statusCode).toBe(200);
+      const body = res.json();
+      expect(Array.isArray(body.emails)).toBe(true);
+      expect(body.emails[0]).toMatchObject({
+        to: 'fresh_dev@cs.uni.edu',
+        subject: 'Verify your Mathitis email',
+      });
+      expect(typeof body.emails[0].text).toBe('string');
+    });
+
+    it('filters the mailbox by recipient', async () => {
+      const res = await ctx.app.inject({
+        method: 'GET',
+        url: `/api/dev/mailbox?to=${encodeURIComponent('fresh_dev@cs.uni.edu')}`,
+        headers: { cookie: developerCookie },
+      });
+      expect(res.statusCode).toBe(200);
+      const emails = res.json().emails;
+      expect(emails.length).toBeGreaterThan(0);
+      for (const email of emails) {
+        expect(email.to).toBe('fresh_dev@cs.uni.edu');
+      }
+    });
+
+    it('returns the latest verification link for an email', async () => {
+      recordDevEmail({
+        to: 'fresh_dev@cs.uni.edu',
+        subject: 'Verify your Mathitis email',
+        text: 'http://localhost:5173/verify-email?token=fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321',
+      });
+
+      const res = await ctx.app.inject({
+        method: 'GET',
+        url: `/api/dev/verification-link?email=${encodeURIComponent('fresh_dev@cs.uni.edu')}`,
+        headers: { cookie: developerCookie },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.json().url).toBe(
+        'http://localhost:5173/verify-email?token=fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321',
+      );
+    });
+
+    it('returns null when no reset link exists for an email', async () => {
+      const res = await ctx.app.inject({
+        method: 'GET',
+        url: `/api/dev/reset-link?email=${encodeURIComponent('nobody@cs.uni.edu')}`,
+        headers: { cookie: developerCookie },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.json().url).toBeNull();
+    });
   });
 });
