@@ -18,14 +18,14 @@ Ensure full test coverage across unit, integration, and end-to-end user flows, i
   - Verify complete request/response lifecycles, role-based authorization guards, field privacy filtering, and error status code mappings.
   - Test database constraint enforcement and transaction rollback on failure.
   - Test `user_tokens` flow: token creation, hash verification, expiry, consumption marking, reuse prevention.
-- [ ] **6.3 Frontend Component & E2E Testing**
+- [x] **6.3 Frontend Component & E2E Testing**
   - Write React Testing Library tests for forms, theme pickers, rich card widgets, custom Markdown parser, and profile components.
   - Implement Playwright E2E test suites covering:
     - Complete Freshman Journey: Registration -> Email verification -> Profile customization -> Discovery catalog search/filter -> Bump (max 4, reallocate) -> Mentorship request submission -> Lineage graph exploration.
     - Senior Mentorship Flow: Login -> Notification receipt -> Request inbox review -> Candidate profile inspection -> Request acceptance -> Permanent mentorship roster -> Lineage graph.
     - Administrative Workflow: Dynamic configuration toggle -> Admin approval queue override -> Content moderation -> User anonymization (with lineage warning) -> Audit log verification.
     - Email enumeration: Attempt to register/recover with existing and non-existing emails; verify identical UI responses.
-- [ ] **6.4 CI/CD Pipeline & Pull Request Quality Gates (GitHub Actions)**
+- [x] **6.4 CI/CD Pipeline & Pull Request Quality Gates (GitHub Actions)**
   - Implement complete `.github/workflows/ci.yml` running on every Pull Request:
     - Code formatting check (`prettier --check`).
     - Static analysis & linting (`eslint`).

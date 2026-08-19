@@ -10,3 +10,5 @@ coverage
 *.tsbuildinfo
 pnpm-lock.yaml
 .DS_Store
+test-results
+playwright-report

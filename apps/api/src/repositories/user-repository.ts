@@ -13,8 +13,8 @@ export interface CreateUserInput {
 export interface UserRepository {
   findByEmail(email: string): Promise<User | null>;
   findByHandle(handle: string): Promise<User | null>;
-  findActiveById(id: string): Promise<User | null>;
-  findByLoginIdentifier(identifier: string): Promise<User | null>;
+  findActiveById(id: string): Promise<(User & { profile: { socialName: string | null } | null }) | null>;
+  findByLoginIdentifier(identifier: string): Promise<(User & { profile: { socialName: string | null } | null }) | null>;
   create(input: CreateUserInput): Promise<User>;
   updatePassword(id: string, passwordHash: string): Promise<void>;
   activate(id: string): Promise<void>;
@@ -30,7 +30,10 @@ export function createUserRepository(prisma: PrismaClient): UserRepository {
   }
 
   async function findActiveById(id: string) {
-    return prisma.user.findFirst({ where: { id, deletedAt: null } });
+    return prisma.user.findFirst({
+      where: { id, deletedAt: null },
+      include: { profile: { select: { socialName: true } } },
+    });
   }
 
   async function findByLoginIdentifier(identifier: string) {
@@ -39,6 +42,7 @@ export function createUserRepository(prisma: PrismaClient): UserRepository {
       where: isEmail
         ? { email: identifier.toLowerCase(), deletedAt: null }
         : { handle: identifier, deletedAt: null },
+      include: { profile: { select: { socialName: true } } },
     });
   }
 

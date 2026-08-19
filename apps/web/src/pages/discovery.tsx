@@ -16,9 +16,7 @@ function avatar(src: string | null, alt: string) {
       </div>
     );
   }
-  return (
-    <img src={src} alt={alt} className="h-16 w-16 rounded-full object-cover" />
-  );
+  return <img src={src} alt={alt} className="h-16 w-16 rounded-full object-cover" />;
 }
 
 function SeniorCard({
@@ -46,7 +44,10 @@ function SeniorCard({
         {avatar(senior.avatarThumbnailUrl, senior.socialName ?? senior.handle)}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <Link to={`/lineage/${senior.handle}`} className="truncate font-semibold text-slate-900 hover:underline">
+            <Link
+              to={`/lineage/${senior.handle}`}
+              className="truncate font-semibold text-slate-900 hover:underline"
+            >
               {senior.socialName ?? senior.handle}
             </Link>
             {score !== undefined && (
@@ -55,7 +56,9 @@ function SeniorCard({
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-500">@{senior.handle} · Semester {senior.semester}</p>
+          <p className="text-sm text-slate-500">
+            @{senior.handle} · Semester {senior.semester}
+          </p>
         </div>
       </div>
 
@@ -134,12 +137,14 @@ export function DiscoveryPage() {
     queryFn: () =>
       showRecommendations
         ? discoveryApi.recommendations(20).then((r) => r.recommendations)
-        : discoveryApi.listSeniors({
-            semester,
-            availability,
-            tagIds: selectedTags.length > 0 ? selectedTags : undefined,
-            limit: 30,
-          }).then((r) => r.seniors),
+        : discoveryApi
+            .listSeniors({
+              semester,
+              availability,
+              tagIds: selectedTags.length > 0 ? selectedTags : undefined,
+              limit: 30,
+            })
+            .then((r) => r.seniors),
   });
 
   const bumpMutation = useMutation({
@@ -252,7 +257,10 @@ export function DiscoveryPage() {
           <option value="full">At capacity</option>
         </select>
         {groupedTags.map(([category, tags]) => (
-          <div key={category} className="flex flex-wrap items-center gap-2 rounded-md border border-slate-200 px-2 py-1.5">
+          <div
+            key={category}
+            className="flex flex-wrap items-center gap-2 rounded-md border border-slate-200 px-2 py-1.5"
+          >
             <span className="text-xs font-medium text-slate-500">{category}</span>
             {tags.map((tag) => (
               <button
@@ -281,7 +289,9 @@ export function DiscoveryPage() {
             key={senior.userId}
             senior={senior}
             role={user?.role}
-            score={'score' in senior ? (senior as SeniorSummary & { score: number }).score : undefined}
+            score={
+              'score' in senior ? (senior as SeniorSummary & { score: number }).score : undefined
+            }
             onBump={() => handleBumpClick(senior.handle)}
             onRequest={(s) => setRequestTarget(s)}
             bumping={bumpMutation.isPending || removeBumpMutation.isPending}
@@ -291,9 +301,18 @@ export function DiscoveryPage() {
       </div>
 
       {requestTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={() => setRequestTarget(null)}>
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold text-slate-900">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4"
+          onClick={() => setRequestTarget(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="request-dialog-title"
+            className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="request-dialog-title" className="text-lg font-semibold text-slate-900">
               Request mentorship from {requestTarget.socialName ?? requestTarget.handle}
             </h2>
             <textarea
@@ -307,7 +326,10 @@ export function DiscoveryPage() {
               <Button variant="outline" onClick={() => setRequestTarget(null)}>
                 Cancel
               </Button>
-              <Button onClick={() => void submitRequest()} disabled={requestMutation.isPending || !message.trim()}>
+              <Button
+                onClick={() => void submitRequest()}
+                disabled={requestMutation.isPending || !message.trim()}
+              >
                 {requestMutation.isPending ? 'Sending…' : 'Send request'}
               </Button>
             </div>

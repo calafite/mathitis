@@ -29,11 +29,12 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   const isFormData = init?.body instanceof FormData;
   const method = (init?.method ?? 'GET').toUpperCase();
   const csrfToken = STATE_CHANGING_METHODS.has(method) ? getCookie(CSRF_COOKIE) : undefined;
+  const hasJsonBody = !isFormData && typeof init?.body === 'string' && init.body.trim().length > 0;
   const response = await fetch(`${API_BASE}${path}`, {
     ...init,
     credentials: 'include',
     headers: {
-      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...(hasJsonBody ? { 'Content-Type': 'application/json' } : {}),
       ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
       ...init?.headers,
     },

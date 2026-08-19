@@ -37,8 +37,8 @@ export interface RegisterInput {
 
 export interface AuthService {
   register(input: RegisterInput): Promise<void>;
-  login(identifier: string, password: string): Promise<User>;
-  getCurrentUser(userId: string): Promise<User>;
+  login(identifier: string, password: string): Promise<User & { profile: { socialName: string | null } | null }>;
+  getCurrentUser(userId: string): Promise<User & { profile: { socialName: string | null } | null }>;
   recover(email: string): Promise<void>;
   resetPassword(token: string, newPassword: string): Promise<void>;
   verifyEmail(token: string): Promise<void>;
