@@ -33,7 +33,7 @@ Ensure full test coverage across unit, integration, and end-to-end user flows, i
     - Dependency vulnerability audit (`pnpm audit --audit-level=high`).
     - Unit, integration, and E2E test execution with coverage reports.
     - Production build verification for both `apps/web` and `apps/api`.
-- [ ] **6.5 Production Docker & Deployment Configuration**
+- [x] **6.5 Production Docker & Deployment Configuration**
   - Write multi-stage Dockerfiles for `apps/api` and `apps/web` (Nginx static serving with gzip/brotli compression and security headers).
   - Run container processes as non-root users (`node` / `nginx`) for principle of least privilege.
   - Create `docker-compose.production.yml` specifying Fastify API, PostgreSQL 16, Redis, and MinIO with strict health check probes (`HEALTHCHECK`).

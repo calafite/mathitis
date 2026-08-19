@@ -2,8 +2,8 @@ services:
   nginx:
     image: nginx:1.27-alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/certs:ro
@@ -21,13 +21,16 @@ services:
       redis:
         condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
     networks: [internal]
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+        VITE_RELEASE: ${VITE_RELEASE:-}
     depends_on: [api]
     networks: [internal]
 
@@ -37,7 +40,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,9 +48,10 @@ services:
 
   redis:
     image: redis:7-alpine
+    env_file: .env.production
     command: redis-server --appendonly yes --requirepass $${REDIS_PASSWORD}
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "$${REDIS_PASSWORD}", "ping"]
+      test: ['CMD', 'redis-cli', '-a', '$${REDIS_PASSWORD}', 'ping']
       interval: 10s
       timeout: 3s
       retries: 5
@@ -59,6 +63,15 @@ services:
     env_file: .env.production
     volumes:
       - minio_data:/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'mc alias set local http://localhost:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} >/dev/null 2>&1 && mc ready local',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks: [internal]
 
 networks:

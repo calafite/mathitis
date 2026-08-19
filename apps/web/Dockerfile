@@ -4,9 +4,11 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 WORKDIR /app
+ARG VITE_SENTRY_DSN=""
+ARG VITE_RELEASE=""
 COPY . .
 RUN pnpm install --frozen-lockfile \
-    && pnpm --filter @mathitis/web build
+    && VITE_SENTRY_DSN=$VITE_SENTRY_DSN VITE_RELEASE=$VITE_RELEASE pnpm --filter @mathitis/web build
 
 FROM nginx:1.27-alpine AS runner
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf

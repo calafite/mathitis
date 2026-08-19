@@ -408,6 +408,8 @@ volumes:
   minio_data:
 ```
 
+> The configs above are illustrative summaries. The source of truth is the actual `docker-compose.production.yml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, and `nginx.conf`. For step-by-step operational procedures (deploy, migrations, secret rotation) see [`docs/operations/`](../operations/README.md).
+
 ---
 
 ## 🔐 Secrets Management & Startup Validation
