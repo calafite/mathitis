@@ -4,7 +4,7 @@
 Ensure full test coverage across unit, integration, and end-to-end user flows, implement automated CI/CD PR quality gates, and establish production-ready containerized deployment configuration with health checks.
 
 ## Tasks
-- [ ] **6.1 Unit & Domain Logic Testing**
+^- [x] **6.1 Unit & Domain Logic Testing**
   - Write Vitest unit tests for domain services (auth policies, limit calculations, semester validations, Markdown sanitization rules).
   - Test transactional edge cases: concurrency limit saturation, concurrent acceptance race conditions, and idempotency key duplicate replay protection.
   - Test **email enumeration prevention**: verify `POST /api/auth/recover` and `POST /api/auth/register` always return `200 OK` with identical response bodies regardless of email existence.
@@ -13,7 +13,7 @@ Ensure full test coverage across unit, integration, and end-to-end user flows, i
   - Test **bump limit enforcement**: verify max 4 active bumps per freshman; reallocation (DELETE + INSERT in transaction) works correctly.
   - Test **idempotency TTL**: verify Redis keys expire after 24 hours; no memory leak from abandoned keys.
   - Achieve >85% code coverage across core business logic modules.
-- [ ] **6.2 API Integration & Database Testing**
+^- [x] **6.2 API Integration & Database Testing**
   - Write Fastify integration tests using Supertest against a test PostgreSQL instance.
   - Verify complete request/response lifecycles, role-based authorization guards, field privacy filtering, and error status code mappings.
   - Test database constraint enforcement and transaction rollback on failure.
