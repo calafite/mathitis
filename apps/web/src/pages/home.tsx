@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Compass,
@@ -20,11 +21,13 @@ import { profileApi } from '@/lib/profile-api';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Settings, Shield } from 'lucide-react';
+import { MentorProfileModal } from '@/components/profile/mentor-profile-modal';
 
 export function HomePage() {
   const { user } = useAuth();
   const isFreshman = user?.role === 'freshman';
   const isSenior = user?.role === 'senior';
+  const [profileModalHandle, setProfileModalHandle] = useState<string | null>(null);
 
   // Fetch quick telemetry for the dashboard
   const profileQuery = useQuery({
@@ -294,9 +297,13 @@ export function HomePage() {
                         )}
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-white">
+                            <button
+                              type="button"
+                              onClick={() => setProfileModalHandle(senior.handle)}
+                              className="font-semibold text-white hover:underline focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded"
+                            >
                               {senior.socialName ?? senior.handle}
-                            </span>
+                            </button>
                             <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-[11px] font-semibold text-indigo-300">
                               {senior.score}% compatibility
                             </span>
@@ -312,11 +319,14 @@ export function HomePage() {
                         </div>
                       </div>
 
-                      <Link to="/discovery">
-                        <Button size="sm" variant="outline" className="w-full border-slate-700 sm:w-auto">
-                          View Profile
-                        </Button>
-                      </Link>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full border-slate-700 sm:w-auto"
+                        onClick={() => setProfileModalHandle(senior.handle)}
+                      >
+                        View Profile
+                      </Button>
                     </div>
                   ))}
                   {recommendationsQuery.data?.length === 0 && (
@@ -429,6 +439,11 @@ export function HomePage() {
           </div>
         </div>
       </div>
+      <MentorProfileModal
+        open={profileModalHandle !== null}
+        onOpenChange={(open) => !open && setProfileModalHandle(null)}
+        seniorHandle={profileModalHandle ?? ''}
+      />
     </div>
   );
 }
