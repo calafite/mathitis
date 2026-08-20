@@ -8,6 +8,7 @@ import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { FieldError, Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { PasswordStrength } from '@/components/ui/password-strength';
 
 export function RegisterPage() {
   const { register } = useAuth();
@@ -18,11 +19,14 @@ export function RegisterPage() {
   const {
     register: field,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterBody>({
     resolver: zodResolver(registerBodySchema),
     defaultValues: { handle: '', email: '', password: '', semester: 1 },
   });
+
+  const password = watch('password');
 
   const onSubmit = handleSubmit(async (values) => {
     setError(null);
@@ -40,7 +44,7 @@ export function RegisterPage() {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
-        setError('Unable to register. Please try again.');
+        setError('Não foi possível completar o registro. Tente novamente mais tarde.');
       }
     }
   });
@@ -54,8 +58,8 @@ export function RegisterPage() {
           </header>
           <h1 className="text-2xl font-semibold text-foreground">Check your inbox</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            If an account with that information exists, you will receive a verification email
-            shortly. Follow the link in the email to activate your account.
+            Se o e-mail suprido for válido, você receberá uma mensagem de confirmação
+            embreve. Clique no link na mensagem para verificar sua conta. Lembre-se de verificar o spam!
           </p>
           <Button className="mt-6" onClick={() => navigate('/login')}>
             Back to sign in
@@ -71,20 +75,20 @@ export function RegisterPage() {
         <header className="mb-6 flex justify-end">
           <ThemeToggle />
         </header>
-        <h1 className="text-2xl font-semibold text-foreground">Create your account</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Crie sua conta</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Join as a freshman and discover mentors in the mathematics department.
+          Junte-se ao programa de apadrinhamento e conheça nossos veteranos.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
             <label htmlFor="handle" className="mb-1 block text-sm font-medium text-foreground">
-              Handle
+              Username
             </label>
             <Input
               id="handle"
               autoComplete="username"
-              placeholder="ada_math"
+              placeholder="nycolas"
               {...field('handle')}
             />
             <FieldError message={errors.handle?.message} />
@@ -92,13 +96,13 @@ export function RegisterPage() {
 
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
-              University email
+              Email Acadêmico
             </label>
             <Input
               id="email"
               type="email"
               autoComplete="email"
-              placeholder="you@cs.uni.edu"
+              placeholder="nycodemon@academico.ufpb.br"
               {...field('email')}
             />
             <FieldError message={errors.email?.message} />
@@ -106,7 +110,7 @@ export function RegisterPage() {
 
           <div>
             <label htmlFor="semester" className="mb-1 block text-sm font-medium text-foreground">
-              Semester
+              Período
             </label>
             <Input
               id="semester"
@@ -120,7 +124,7 @@ export function RegisterPage() {
 
           <div>
             <label htmlFor="socialName" className="mb-1 block text-sm font-medium text-foreground">
-              Preferred name (optional)
+              Nome Social (opcional)
             </label>
             <Input id="socialName" autoComplete="name" {...field('socialName')} />
             <FieldError message={errors.socialName?.message} />
@@ -128,7 +132,7 @@ export function RegisterPage() {
 
           <div>
             <label htmlFor="password" className="mb-1 block text-sm font-medium text-foreground">
-              Password
+              Senha
             </label>
             <Input
               id="password"
@@ -137,6 +141,7 @@ export function RegisterPage() {
               {...field('password')}
             />
             <FieldError message={errors.password?.message} />
+            <PasswordStrength password={password} />
           </div>
 
           {error && (
@@ -146,12 +151,12 @@ export function RegisterPage() {
           )}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating account…' : 'Create account'}
+            {isSubmitting ? 'Criando conta…' : 'Criar conta'}
           </Button>
         </form>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
+          Já possui uma conta?{' '}
           <Link to="/login" className="text-primary hover:underline">
             Sign in
           </Link>
