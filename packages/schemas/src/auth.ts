@@ -50,7 +50,7 @@ export const registerBodySchema = z.object({
 export type RegisterBody = z.infer<typeof registerBodySchema>;
 
 export const loginBodySchema = z.object({
-  identifier: z.string().min(3, 'Handle or email is required').max(255),
+  identifier: z.string().min(3, 'Nome ou email is required').max(255),
   password: z.string().min(1, 'Password is required').max(128),
 });
 export type LoginBody = z.infer<typeof loginBodySchema>;
