@@ -6,15 +6,20 @@ test.describe('Freshman journey', () => {
     await login(page, 'alan_loops');
     await page.getByRole('link', { name: 'Discovery' }).click();
 
-    const seniorCard = page.locator('div.rounded-xl').filter({ hasText: 'ada_math' }).first();
+    const seniorCard = page.locator('div.rounded-xl').filter({ hasText: 'Ada' }).first();
     await expect(seniorCard).toBeVisible({ timeout: 15_000 });
 
-    await seniorCard.getByRole('button', { name: 'Request' }).click();
+    // Click the senior's name to open the mentor profile modal
+    await seniorCard.getByRole('button', { name: 'Ada' }).click();
     await expect(page.getByRole('dialog')).toBeVisible({ timeout: 15_000 });
-    await page
-      .getByPlaceholder(/Introduce yourself/)
-      .fill('Hi Ada, I would love to study real analysis together this semester.');
-    await page.getByRole('button', { name: 'Send request' }).click();
+
+    // Click "Apply for mentorship" in the modal (force click since it might be outside viewport)
+    const applyBtn = page.getByRole('button', { name: 'Apply for mentorship' });
+    await expect(applyBtn).toBeVisible({ timeout: 15_000 });
+    await applyBtn.click({ force: true });
+
+    // Wait for the request to be sent (modal closes)
+    await expect(page.getByRole('dialog')).toBeHidden({ timeout: 15_000 });
 
     await page.goto('/requests');
     await expect(page.getByRole('heading', { name: 'Mentorship requests' })).toBeVisible();

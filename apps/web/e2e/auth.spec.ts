@@ -52,7 +52,7 @@ test.describe('email enumeration prevention (UI)', () => {
 
   test('rejects invalid credentials with a visible error', async ({ page }) => {
     await page.goto('/login');
-    await page.getByLabel(/Handle or email/).fill('alan_loops');
+    await page.getByLabel(/Nome ou email/).fill('alan_loops');
     await page.getByLabel(/Password/).fill('WrongPassword123!');
     await page.getByRole('button', { name: 'Sign in' }).click();
 

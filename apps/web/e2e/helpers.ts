@@ -4,10 +4,10 @@ export const SEED_PASSWORD = 'TestPassword123!';
 
 export async function login(page: Page, handle: string, password = SEED_PASSWORD) {
   await page.goto('/login');
-  await page.getByLabel(/Handle or email/).fill(handle);
+  await page.getByLabel(/Nome ou email/).fill(handle);
   await page.getByLabel(/Password/).fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.getByRole('heading', { name: 'Sign in to Mathitis' })).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'Junte-se ao Apadrinhamento' })).toBeHidden();
 }
 
 export async function logout(page: Page) {
@@ -18,5 +18,5 @@ export async function logout(page: Page) {
     });
   });
   await page.goto('/login');
-  await expect(page.getByRole('heading', { name: 'Sign in to Mathitis' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Junte-se ao Apadrinhamento' })).toBeVisible();
 }

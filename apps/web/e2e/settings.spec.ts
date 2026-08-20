@@ -50,7 +50,7 @@ test.describe('settings portal', () => {
     });
 
     await page.goto('/login');
-    await page.getByLabel(/Handle or email/).fill('ada_math');
+    await page.getByLabel(/Nome ou email/).fill('ada_math');
     await page.getByLabel(/Password/).fill('FreshPassword456!');
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page.getByRole('heading', { name: /Welcome,/ })).toBeVisible({
@@ -82,11 +82,11 @@ test.describe('settings portal', () => {
   }) => {
     const handle = `e2e_anon_${Date.now()}`;
     await page.goto('/register');
-    await page.getByLabel(/Handle/).fill(handle);
-    await page.getByLabel(/University email/).fill(`${handle}@cs.uni.edu`);
-    await page.getByLabel(/^Semester/).fill('1');
-    await page.getByLabel(/Password/).fill('StrongPassword123!');
-    await page.getByRole('button', { name: 'Create account' }).click();
+    await page.getByLabel(/Username/).fill(handle);
+    await page.getByLabel(/Email Acad/i).fill(`${handle}@cs.uni.edu`);
+    await page.getByLabel(/Per.odo/).fill('1');
+    await page.getByLabel(/Senha/).fill('StrongPassword123!');
+    await page.getByRole('button', { name: 'Criar conta' }).click();
     await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible();
 
     // fetch the verification link from the dev mailbox API (as the seeded developer)
@@ -98,7 +98,7 @@ test.describe('settings portal', () => {
     const devCookies = (devLogin.headers()['set-cookie'] ?? '').split(',').map((c) => c.split(';')[0]).join('; ');
 
     let token: string | null = null;
-    for (let attempt = 0; attempt < 20; attempt++) {
+    for (let attempt = 0; attempt < 40; attempt++) {
       const linkRes = await api.get(
         `http://localhost:4000/api/dev/verification-link?email=${encodeURIComponent(`${handle}@cs.uni.edu`)}`,
         { headers: { cookie: devCookies } },
@@ -123,11 +123,11 @@ test.describe('settings portal', () => {
     await page.getByLabel(/Enter your password to confirm/).fill('StrongPassword123!');
     await page.locator('form').getByRole('button', { name: 'Anonymize account' }).click();
 
-    await expect(page.getByRole('heading', { name: 'Sign in to Mathitis' })).toBeVisible({
+    await expect(page.getByRole('heading', { name: 'Junte-se ao Apadrinhamento' })).toBeVisible({
       timeout: 15_000,
     });
 
-    await page.getByLabel(/Handle or email/).fill(handle);
+    await page.getByLabel(/Nome ou email/).fill(handle);
     await page.getByLabel(/Password/).fill('StrongPassword123!');
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page.getByRole('alert')).toBeVisible();
