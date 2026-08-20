@@ -70,7 +70,7 @@ export function createUserRepository(prisma: PrismaClient): UserRepository {
       throw new DomainError(
         'HANDLE_OR_EMAIL_TAKEN',
         409,
-        'An account with this handle or email already exists',
+        'An account with this Nome ou email already exists',
       );
     }
   }
