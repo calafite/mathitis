@@ -46,7 +46,7 @@ export function LoginPage() {
         <header className="mb-6 flex justify-end">
           <ThemeToggle />
         </header>
-        <h1 className="text-2xl font-semibold text-foreground">Sign in to Mathitis</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Junte-se ao Apadrinhamento</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Find your mentor and join the mathematics lineage.
         </p>
@@ -54,7 +54,7 @@ export function LoginPage() {
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
             <label htmlFor="identifier" className="mb-1 block text-sm font-medium text-foreground">
-              Handle or email
+              Nome ou email
             </label>
             <Input id="identifier" autoComplete="username" {...register('identifier')} />
             <FieldError message={errors.identifier?.message} />
