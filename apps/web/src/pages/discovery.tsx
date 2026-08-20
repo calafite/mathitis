@@ -4,10 +4,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SeniorSummary, Tag } from '@mathitis/schemas';
 import { useAuth } from '@/contexts/auth-context';
 import { discoveryApi } from '@/lib/discovery-api';
-import { requestsApi, buildIdempotencyKey } from '@/lib/requests-api';
-import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { MentorProfileModal } from '@/components/profile/mentor-profile-modal';
 
 function avatar(src: string | null, alt: string) {
   if (!src) {
@@ -26,18 +25,16 @@ function SeniorCard({
   score,
   matchReasons,
   onBump,
-  onRequest,
+  onViewProfile,
   bumping,
-  requested,
 }: {
   senior: SeniorSummary;
   role?: string;
   score?: number;
   matchReasons?: string[];
   onBump: () => void;
-  onRequest: (senior: SeniorSummary) => void;
+  onViewProfile: () => void;
   bumping: boolean;
-  requested: boolean;
 }) {
   const isFreshman = role === 'freshman';
 
@@ -47,12 +44,13 @@ function SeniorCard({
         {avatar(senior.avatarThumbnailUrl, senior.socialName ?? senior.handle)}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <Link
-              to={`/lineage/${senior.handle}`}
-              className="truncate font-semibold text-slate-900 hover:underline"
+            <button
+              type="button"
+              onClick={onViewProfile}
+              className="truncate font-semibold text-slate-900 hover:underline focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded"
             >
               {senior.socialName ?? senior.handle}
-            </Link>
+            </button>
             {score !== undefined && (
               <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">
                 {Math.round(score)}% match
@@ -104,23 +102,15 @@ function SeniorCard({
       )}
 
       {isFreshman && (
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3">
           <Button
             variant="outline"
             size="sm"
             disabled={bumping}
             onClick={onBump}
-            className="flex-1"
+            className="w-full"
           >
             {bumping ? '…' : 'Bump'}
-          </Button>
-          <Button
-            size="sm"
-            disabled={!senior.isAcceptingRequests || requested}
-            onClick={() => onRequest(senior)}
-            className="flex-1"
-          >
-            {requested ? 'Requested' : 'Request'}
           </Button>
         </div>
       )}
@@ -135,11 +125,8 @@ export function DiscoveryPage() {
   const [availability, setAvailability] = useState<'accepting' | 'full' | undefined>(undefined);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showRecommendations, setShowRecommendations] = useState(false);
-  const [requestTarget, setRequestTarget] = useState<SeniorSummary | null>(null);
-  const [message, setMessage] = useState('');
-  const [requestError, setRequestError] = useState<string | null>(null);
   const [bumpedSet, setBumpedSet] = useState<Set<string>>(new Set());
-  const [requestedSet, setRequestedSet] = useState<Set<string>>(new Set());
+  const [profileModalHandle, setProfileModalHandle] = useState<string | null>(null);
 
   const isFreshman = user?.role === 'freshman';
 
@@ -183,21 +170,6 @@ export function DiscoveryPage() {
     },
   });
 
-  const requestMutation = useMutation({
-    mutationFn: async ({ handle, text }: { handle: string; text: string }) => {
-      const response = await requestsApi.create(
-        { seniorHandle: handle, message: text },
-        buildIdempotencyKey(),
-      );
-      return response;
-    },
-    onSuccess: (_data, variables) => {
-      setRequestedSet((prev) => new Set(prev).add(variables.handle));
-      setRequestTarget(null);
-      setMessage('');
-    },
-  });
-
   const groupedTags = useMemo(() => {
     const map = new Map<string, Tag[]>();
     for (const tag of tagsQuery.data?.tags ?? []) {
@@ -216,19 +188,6 @@ export function DiscoveryPage() {
     } else {
       void bumpMutation.mutateAsync(handle);
     }
-  };
-
-  const submitRequest = () => {
-    if (!requestTarget) return;
-    setRequestError(null);
-    requestMutation.mutate(
-      { handle: requestTarget.handle, text: message },
-      {
-        onError: (error) => {
-          setRequestError(error instanceof ApiError ? error.message : 'Request failed');
-        },
-      },
-    );
   };
 
   const toggleTag = (tagId: string) => {
@@ -307,7 +266,6 @@ export function DiscoveryPage() {
         ))}
       </div>
 
-      {requestError && <p className="mt-4 text-sm text-red-600">{requestError}</p>}
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {seniorsQuery.isLoading && <p className="text-slate-500">Loading…</p>}
@@ -325,49 +283,17 @@ export function DiscoveryPage() {
                 : undefined
             }
             onBump={() => handleBumpClick(senior.handle)}
-            onRequest={(s) => setRequestTarget(s)}
+            onViewProfile={() => setProfileModalHandle(senior.handle)}
             bumping={bumpMutation.isPending || removeBumpMutation.isPending}
-            requested={requestedSet.has(senior.handle)}
           />
         ))}
       </div>
 
-      {requestTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4"
-          onClick={() => setRequestTarget(null)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="request-dialog-title"
-            className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 id="request-dialog-title" className="text-lg font-semibold text-slate-900">
-              Request mentorship from {requestTarget.socialName ?? requestTarget.handle}
-            </h2>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={5}
-              placeholder="Introduce yourself and explain what you would like to work on together…"
-              className="mt-3 w-full rounded-md border border-slate-300 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <div className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setRequestTarget(null)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={() => void submitRequest()}
-                disabled={requestMutation.isPending || !message.trim()}
-              >
-                {requestMutation.isPending ? 'Sending…' : 'Send request'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <MentorProfileModal
+        open={profileModalHandle !== null}
+        onOpenChange={(open) => !open && setProfileModalHandle(null)}
+        seniorHandle={profileModalHandle ?? ''}
+      />
     </div>
   );
 }
