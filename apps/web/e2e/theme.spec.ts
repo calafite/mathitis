@@ -11,19 +11,19 @@ test.describe('site-wide theme', () => {
     await page.goto('/login');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
-    const toggle = page.getByRole('button', { name: 'Switch to light theme' });
+    const toggle = page.getByRole('button', { name: 'Alternar para tema claro' });
     await expect(toggle).toBeVisible();
     await toggle.click();
 
     await expect(page.locator('html')).toHaveClass(/light/);
-    await expect(page.getByRole('button', { name: 'Switch to dark theme' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Alternar para tema escuro' })).toBeVisible();
   });
 
   test('theme persists across route navigation and reloads', async ({ page }) => {
     await page.goto('/login');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Switch to light theme' }).click();
+    await page.getByRole('button', { name: 'Alternar para tema claro' }).click();
     await expect(page.locator('html')).toHaveClass(/light/);
 
     await page.goto('/register');

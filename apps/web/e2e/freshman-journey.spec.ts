@@ -4,7 +4,7 @@ import { login } from './helpers';
 test.describe('Freshman journey', () => {
   test('bumps a senior and submits a mentorship request', async ({ page }) => {
     await login(page, 'alan_loops');
-    await page.getByRole('link', { name: 'Discovery' }).click();
+    await page.getByRole('link', { name: 'Descoberta de mentores' }).click();
 
     const seniorCard = page.locator('div.rounded-xl').filter({ hasText: 'Ada' }).first();
     await expect(seniorCard).toBeVisible({ timeout: 15_000 });
@@ -13,8 +13,8 @@ test.describe('Freshman journey', () => {
     await seniorCard.getByRole('button', { name: 'Ada' }).click();
     await expect(page.getByRole('dialog')).toBeVisible({ timeout: 15_000 });
 
-    // Click "Apply for mentorship" in the modal (scroll inside the dialog first)
-    const applyBtn = page.getByRole('button', { name: 'Apply for mentorship' });
+    // Click "Pedir apadrinhamento" in the modal (scroll inside the dialog first)
+    const applyBtn = page.getByRole('button', { name: 'Pedir apadrinhamento' });
     await expect(applyBtn).toBeVisible({ timeout: 15_000 });
     await applyBtn.scrollIntoViewIfNeeded();
     await applyBtn.click();
@@ -23,22 +23,22 @@ test.describe('Freshman journey', () => {
     await expect(page.getByRole('dialog')).toBeHidden({ timeout: 15_000 });
 
     await page.goto('/requests');
-    await expect(page.getByRole('heading', { name: 'Mentorship requests' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Pedidos de apadrinhamento' })).toBeVisible();
     const row = page.locator('div.rounded-xl').filter({ hasText: 'Ada' }).first();
     await expect(row).toBeVisible({ timeout: 15_000 });
-    await expect(row.getByText('Pending')).toBeVisible();
+    await expect(row.getByText('Pendente')).toBeVisible();
   });
 
   test('customizes the profile via the studio', async ({ page }) => {
     await login(page, 'alan_loops');
-    await page.getByRole('link', { name: 'Profile studio' }).click();
+    await page.getByRole('link', { name: 'Estúdio de perfil' }).click();
 
-    const textarea = page.getByPlaceholder(/Tell your story/);
+    const textarea = page.getByPlaceholder(/Conte sua história/);
     await expect(textarea).toBeVisible({ timeout: 15_000 });
     await textarea.fill('I solve hard problems.\n\n[Highlight me]{color=#ec4899}');
-    await page.getByTitle('Badge').click();
+    await page.getByTitle('Emblema').click();
 
-    await page.getByRole('button', { name: 'Save changes' }).click();
-    await expect(page.getByRole('button', { name: 'Saved' })).toBeVisible({ timeout: 15_000 });
+    await page.getByRole('button', { name: 'Salvar alterações' }).click();
+    await expect(page.getByRole('button', { name: 'Salvo' })).toBeVisible({ timeout: 15_000 });
   });
 });

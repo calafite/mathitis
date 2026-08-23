@@ -5,8 +5,8 @@ export const SEED_PASSWORD = 'TestPassword123!';
 export async function login(page: Page, handle: string, password = SEED_PASSWORD) {
   await page.goto('/login');
   await page.getByLabel(/Nome ou email/).fill(handle);
-  await page.getByLabel(/Password/).fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.getByLabel(/Senha/).fill(password);
+  await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page.getByRole('heading', { name: 'Junte-se ao Apadrinhamento' })).toBeHidden();
 }
 
