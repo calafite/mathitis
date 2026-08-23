@@ -15,7 +15,7 @@ describe('Auth API', () => {
 
   const genericBody = {
     ok: true,
-    message: 'If an account with that information exists, you will receive an email shortly.',
+    message: 'Se existir uma conta com essas informações, você receberá um e-mail em breve.',
   };
 
   it('register returns 200 with generic message', async () => {

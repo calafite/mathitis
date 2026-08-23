@@ -120,7 +120,7 @@ describe('buildMatchReasons', () => {
       profileViews: 0,
       bumpCount: 0,
     });
-    expect(reasons).toEqual(['2 shared tags: Algebra, Databases']);
+    expect(reasons).toEqual(['2 interesses em comum: Algebra, Databases']);
   });
 
   it('uses singular wording for a single shared tag', () => {
@@ -131,7 +131,7 @@ describe('buildMatchReasons', () => {
       profileViews: 0,
       bumpCount: 0,
     });
-    expect(reasons).toContain('1 shared tag: Algebra');
+    expect(reasons).toContain('1 interesse em comum: Algebra');
   });
 
   it('caps the listed tag names and summarises the remainder', () => {
@@ -143,7 +143,9 @@ describe('buildMatchReasons', () => {
       profileViews: 0,
       bumpCount: 0,
     });
-    expect(reasons[0]).toBe('7 shared tags: Algebra, Databases, Machine Learning +4 more');
+    expect(reasons[0]).toBe(
+      '7 interesses em comum: Algebra, Databases, Machine Learning +4',
+    );
   });
 
   it('describes an above-average profile as rich', () => {
@@ -154,7 +156,7 @@ describe('buildMatchReasons', () => {
       profileViews: 0,
       bumpCount: 0,
     });
-    expect(reasons).toContain('Rich, highly detailed profile');
+    expect(reasons).toContain('Perfil rico e muito detalhado');
   });
 
   it('describes a moderate profile as detailed, not rich', () => {
@@ -165,7 +167,7 @@ describe('buildMatchReasons', () => {
       profileViews: 0,
       bumpCount: 0,
     });
-    expect(reasons).toEqual(['Detailed profile']);
+    expect(reasons).toEqual(['Perfil detalhado']);
   });
 
   it('flags a profile in high demand by views', () => {
@@ -176,7 +178,7 @@ describe('buildMatchReasons', () => {
       profileViews: REASON_THRESHOLDS.viewsHighDemand,
       bumpCount: 0,
     });
-    expect(reasons).toContain('In high demand among students');
+    expect(reasons).toContain('Em alta entre os estudantes');
   });
 
   it('flags a frequently bumped senior', () => {
@@ -187,7 +189,7 @@ describe('buildMatchReasons', () => {
       profileViews: 0,
       bumpCount: REASON_THRESHOLDS.bumpsFrequent,
     });
-    expect(reasons).toContain('Frequently bumped by fellow freshmen');
+    expect(reasons).toContain('Frequentemente impulsionado por calouros');
   });
 
   it('flags a single bump with softer wording', () => {
@@ -198,7 +200,7 @@ describe('buildMatchReasons', () => {
       profileViews: 0,
       bumpCount: REASON_THRESHOLDS.bumpsNoticed,
     });
-    expect(reasons).toContain('Recently bumped by a fellow freshman');
+    expect(reasons).toContain('Recentemente impulsionado por um calouro');
   });
 
   it('mentions that an accepting senior is open to new mentees', () => {
@@ -210,7 +212,7 @@ describe('buildMatchReasons', () => {
       bumpCount: 0,
       isAcceptingRequests: true,
     });
-    expect(reasons).toContain('Currently accepting new mentees');
+    expect(reasons).toContain('Aceitando novos pupilos');
   });
 
   it('combines reasons across signals in stable order', () => {
@@ -223,11 +225,11 @@ describe('buildMatchReasons', () => {
       isAcceptingRequests: true,
     });
     expect(reasons).toEqual([
-      '2 shared tags: Algebra, Databases',
-      'Rich, highly detailed profile',
-      'Popular profile with students',
-      'Frequently bumped by fellow freshmen',
-      'Currently accepting new mentees',
+      '2 interesses em comum: Algebra, Databases',
+      'Perfil rico e muito detalhado',
+      'Perfil popular entre estudantes',
+      'Frequentemente impulsionado por calouros',
+      'Aceitando novos pupilos',
     ]);
   });
 });

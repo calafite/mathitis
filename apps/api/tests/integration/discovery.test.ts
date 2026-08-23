@@ -315,7 +315,7 @@ describe('Discovery, Requests & Lineage API', () => {
     }
     // The leading senior shares the freshman's algebra tag, so its reasons
     // explain that overlap.
-    expect(recommendations[0]!.matchReasons).toContain('1 shared tag: algebra');
+    expect(recommendations[0]!.matchReasons).toContain('1 interesse em comum: algebra');
   });
 
   // -- Bumps ---------------------------------------------------------------

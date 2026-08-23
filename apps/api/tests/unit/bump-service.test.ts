@@ -113,6 +113,8 @@ describe('bump service', () => {
       handle: 'me',
     });
     const service = createBumpService(createBumpRepo(), userRepo);
-    await expect(service.bump(FRESHMAN, 'me')).rejects.toThrow('bump yourself');
+    await expect(service.bump(FRESHMAN, 'me')).rejects.toThrow(
+      'Você não pode se impulsionar',
+    );
   });
 });

@@ -51,10 +51,10 @@ describe('createRecommendationEngine', () => {
     );
 
     expect(top!.matchReasons).toEqual([
-      '1 shared tag: Algebra',
-      'Rich, highly detailed profile',
-      'Frequently bumped by fellow freshmen',
-      'Currently accepting new mentees',
+      '1 interesse em comum: Algebra',
+      'Perfil rico e muito detalhado',
+      'Frequentemente impulsionado por calouros',
+      'Aceitando novos pupilos',
     ]);
   });
 

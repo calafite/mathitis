@@ -32,7 +32,7 @@ describe('createAuthMailer', () => {
     expect(name).toBe('email-send');
     expect(data.type).toBe('email_verification');
     expect(data.to).toBe('new@cs.uni.edu');
-    expect(data.title).toBe('Verify your Mathitis email');
+    expect(data.title).toBe('Verifique seu e-mail no Mathitis');
     expect(data.body).toContain('http://localhost:5173/verify-email?token=plain-token-123');
     expect(opts.attempts).toBe(5);
   });
