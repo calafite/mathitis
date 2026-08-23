@@ -5,7 +5,7 @@ test.describe('Senior mentorship flow', () => {
   test('accepts an incoming mentorship request', async ({ page }) => {
     await login(page, 'ada_math');
 
-    await page.getByRole('link', { name: 'Pedidos de apadrinhamento' }).click();
+    await page.getByRole('link', { name: 'Pedidos', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Pedidos de apadrinhamento' })).toBeVisible();
 
     const incoming = page.getByRole('button', { name: 'Recebidos' });
@@ -46,7 +46,7 @@ test.describe('Administrative workflow', () => {
       page.getByRole('heading', { name: 'Registro de auditoria' }),
     ).toBeVisible({ timeout: 15_000 });
     await expect(
-      page.locator('div.w-64.shrink-0.truncate.font-mono.text-xs.text-indigo-700').first(),
+      page.locator('div.w-64.shrink-0.truncate.font-mono.text-xs.text-primary').first(),
     ).toBeVisible({ timeout: 15_000 });
   });
 });

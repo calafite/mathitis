@@ -69,6 +69,6 @@ test.describe('email enumeration prevention (UI)', () => {
     await expect(
       page.getByRole('heading', { name: /Bem-vindo/ }),
     ).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/freshman/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/Calouro/).first()).toBeVisible({ timeout: 15_000 });
   });
 });

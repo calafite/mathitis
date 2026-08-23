@@ -4,13 +4,13 @@ import { login } from './helpers';
 test.describe('Freshman journey', () => {
   test('bumps a senior and submits a mentorship request', async ({ page }) => {
     await login(page, 'alan_loops');
-    await page.getByRole('link', { name: 'Descoberta de mentores' }).click();
+    await page.getByRole('link', { name: 'Descoberta de Padrinhos' }).first().click();
 
     const seniorCard = page.locator('div.rounded-xl').filter({ hasText: 'Ada' }).first();
     await expect(seniorCard).toBeVisible({ timeout: 15_000 });
 
-    // Click the senior's name to open the mentor profile modal
-    await seniorCard.getByRole('button', { name: 'Ada' }).click();
+    // Click the card to open the mentor profile modal (the whole card is clickable)
+    await seniorCard.click();
     await expect(page.getByRole('dialog')).toBeVisible({ timeout: 15_000 });
 
     // Click "Pedir apadrinhamento" in the modal (scroll inside the dialog first)

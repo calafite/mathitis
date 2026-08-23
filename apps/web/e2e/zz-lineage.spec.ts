@@ -4,7 +4,7 @@ import { login } from './helpers';
 test.describe('Lineage graph', () => {
   test('renders the mentorship graph after a request is accepted', async ({ page }) => {
     await login(page, 'alan_loops');
-    await page.getByRole('link', { name: 'Árvore de linhagem' }).click();
+    await page.getByRole('navigation').getByRole('link', { name: 'Linhagem' }).click();
 
     await expect(page.getByRole('heading', { name: 'Linhagem de apadrinhamento' })).toBeVisible();
     await expect(page.getByText('@ada_math')).toBeVisible({ timeout: 15_000 });
