@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button';
 function relativeTime(date: Date): string {
   const seconds = Math.round((date.getTime() - Date.now()) / 1000);
   const minutes = Math.round(seconds / 60);
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1) return 'agora mesmo';
+  if (minutes < 60) return `${minutes} min atrás`;
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return `${hours} h atrás`;
   const days = Math.round(hours / 24);
-  return `${days}d ago`;
+  return `${days} d atrás`;
 }
 
 export function NotificationBell() {
@@ -42,7 +42,7 @@ export function NotificationBell() {
       <Button
         variant="outline"
         size="sm"
-        aria-label="Notifications"
+        aria-label="Notificações"
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
       >
@@ -57,7 +57,7 @@ export function NotificationBell() {
       {open && (
         <div className="absolute right-0 z-50 mt-2 w-96 max-w-[90vw] rounded-md border border-slate-200 bg-white shadow-lg">
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-            <span className="text-sm font-semibold text-slate-900">Notifications</span>
+            <span className="text-sm font-semibold text-slate-900">Notificações</span>
             <div className="flex items-center gap-2">
               {unread > 0 && (
                 <Button
@@ -66,22 +66,22 @@ export function NotificationBell() {
                   className="text-xs"
                   onClick={() => void markAllRead()}
                 >
-                  Mark all read
+                  Marcar tudo como lido
                 </Button>
               )}
               <Button variant="ghost" size="sm" className="text-xs" onClick={toggleMuted}>
-                {muted ? 'Unmute' : 'Mute'}
+                {muted ? 'Reativar som' : 'Silenciar'}
               </Button>
             </div>
           </div>
 
           <ul className="max-h-96 overflow-y-auto">
             {isLoading && notifications.length === 0 && (
-              <li className="px-4 py-6 text-center text-sm text-slate-500">Loading…</li>
+              <li className="px-4 py-6 text-center text-sm text-slate-500">Carregando…</li>
             )}
             {!isLoading && notifications.length === 0 && (
               <li className="px-4 py-6 text-center text-sm text-slate-500">
-                No notifications yet
+                Nenhuma notificação ainda
               </li>
             )}
             {notifications.map((notification) => (

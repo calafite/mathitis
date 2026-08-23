@@ -15,19 +15,19 @@ interface ToolButton {
 const TOOLS: ToolButton[] = [
   {
     label: 'B',
-    title: 'Bold',
+    title: 'Negrito',
     insert: (c, s, e) => `${c.slice(0, s)}**${c.slice(s, e)}**${c.slice(e)}`,
     selectAfter: (ins) => [ins.indexOf('**') + 2, ins.indexOf('**', 2)],
   },
   {
     label: 'I',
-    title: 'Italic',
+    title: 'Itálico',
     insert: (c, s, e) => `${c.slice(0, s)}*${c.slice(s, e)}*${c.slice(e)}`,
     selectAfter: (ins) => [ins.indexOf('*') + 1, ins.indexOf('*', 1)],
   },
   {
     label: 'H',
-    title: 'Header',
+    title: 'Cabeçalho',
     insert: (c, s, _e) => {
       const lineStart = c.lastIndexOf('\n', s - 1) + 1;
       return `${c.slice(0, lineStart)}## ${c.slice(lineStart)}`;
@@ -36,36 +36,36 @@ const TOOLS: ToolButton[] = [
   },
   {
     label: '</>',
-    title: 'Code block',
+    title: 'Bloco de código',
     insert: (c, s, e) => `${c.slice(0, s)}\n\`\`\`\n${c.slice(s, e)}\n\`\`\`\n${c.slice(e)}`,
     selectAfter: (ins) => [ins.lastIndexOf('```\n') + 4, ins.lastIndexOf('\n```')],
   },
   {
     label: 'Clr',
-    title: 'Coloured text',
-    insert: (c, s, e) => `${c.slice(0, s)}[${c.slice(s, e) || 'coloured text'}]{color=#ec4899}${c.slice(e)}`,
+    title: 'Texto colorido',
+    insert: (c, s, e) => `${c.slice(0, s)}[${c.slice(s, e) || 'texto colorido'}]{color=#ec4899}${c.slice(e)}`,
     selectAfter: (ins) => [ins.lastIndexOf('{color=') - 0, ins.lastIndexOf('}')],
   },
   {
-    label: 'Badge',
-    title: 'Badge',
-    insert: (c, s, e) => `${c.slice(0, s)}[${c.slice(s, e) || 'tag'}]{badge=Tag}${c.slice(e)}`,
+    label: 'Emblema',
+    title: 'Emblema',
+    insert: (c, s, e) => `${c.slice(0, s)}[${c.slice(s, e) || 'etiqueta'}]{badge=Etiqueta}${c.slice(e)}`,
     selectAfter: (ins) => [ins.lastIndexOf('{badge=') , ins.lastIndexOf('}')],
   },
   {
-    label: 'Note',
-    title: 'Callout',
+    label: 'Nota',
+    title: 'Destaque',
     insert: (c, s, e) => {
       const before = c.slice(0, s);
       const after = c.slice(e);
-      const block = `> [!NOTE]\n> ${c.slice(s, e) || 'A note worth sharing.'}`;
+      const block = `> [!NOTE]\n> ${c.slice(s, e) || 'Uma nota que vale a pena compartilhar.'}`;
       return `${before}${block}${after}`;
     },
     selectAfter: (ins) => [ins.lastIndexOf('> '), ins.length],
   },
   {
     label: '•',
-    title: 'List',
+    title: 'Lista',
     insert: (c, s, e) => `${c.slice(0, s)}- ${c.slice(s, e)}${c.slice(e)}`,
     selectAfter: (ins) => [ins.lastIndexOf('- ') + 2, ins.length],
   },
@@ -109,7 +109,7 @@ export function BioEditor({ value, onChange }: BioEditorProps) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={10}
-        placeholder={'Tell your story in markdown…\n\n[Highlight me]{color=#ec4899}  [math lover]{badge=Algebra}\n\n> [!TIP]\n> A tip worth sharing.'}
+        placeholder={'Conte sua história em markdown…\n\n[Destaque-me]{color=#ec4899}  [fã de matemática]{badge=Álgebra}\n\n> [!TIP]\n> Uma dica que vale a pena compartilhar.'}
         className="w-full resize-y bg-white px-3 py-2 font-mono text-sm text-slate-800 outline-none"
       />
     </div>

@@ -30,12 +30,12 @@ export interface ProfilePreviewProps {
 }
 
 const CARD_META: Record<string, { label: string; icon: string }> = {
-  song: { label: 'Song', icon: '♪' },
-  game: { label: 'Game', icon: '▣' },
-  film: { label: 'Film', icon: '▶' },
-  book: { label: 'Book', icon: '📖' },
-  project: { label: 'Project', icon: '⚙' },
-  custom: { label: 'Card', icon: '✦' },
+  song: { label: 'Música', icon: '♪' },
+  game: { label: 'Jogo', icon: '▣' },
+  film: { label: 'Filme', icon: '▶' },
+  book: { label: 'Livro', icon: '📖' },
+  project: { label: 'Projeto', icon: '⚙' },
+  custom: { label: 'Cartão', icon: '✦' },
 };
 
 function CardEmbed({ card }: { card: RichCard }) {
@@ -60,7 +60,7 @@ function CardLink({ card }: { card: RichCard }) {
       rel="noopener noreferrer"
       className="mt-2 inline-block text-xs font-medium underline"
     >
-      Open source
+      Código aberto
     </a>
   );
 }
@@ -73,12 +73,12 @@ function CardContent({ card }: { card: RichCard }) {
   }
   const steamAppId = meta?.steamAppId;
   if (card.cardType === 'game' && typeof steamAppId === 'string') {
-    return <p className="text-xs text-slate-500">Steam App {steamAppId}</p>;
+    return <p className="text-xs text-slate-500">App Steam {steamAppId}</p>;
   }
   if (card.cardType === 'film') {
     const rating = meta?.rating;
     if (typeof rating === 'number') {
-      return <p className="text-xs text-slate-500">Rating {rating.toFixed(1)}/10</p>;
+      return <p className="text-xs text-slate-500">Avaliação {rating.toFixed(1)}/10</p>;
     }
   }
   if (card.cardType === 'project' && Array.isArray(meta?.techStack)) {
@@ -97,7 +97,7 @@ function CardContent({ card }: { card: RichCard }) {
 }
 
 function RichCardView({ card }: { card: RichCard }) {
-  const meta = CARD_META[card.cardType] ?? { label: 'Card', icon: '✦' };
+  const meta = CARD_META[card.cardType] ?? { label: 'Cartão', icon: '✦' };
   const styleVar = { '--profile-card-accent': card.accentColor } as CSSProperties;
   return (
     <article
@@ -168,14 +168,14 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
         <div className="flex items-end justify-between">
           <div className="flex items-center gap-3">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Avatar" className="h-16 w-16 -mt-8 rounded-full border-4 border-white object-cover shadow" />
+              <img src={avatarUrl} alt="Pré-visualização do avatar" className="h-16 w-16 -mt-8 rounded-full border-4 border-white object-cover shadow" />
             ) : (
               <div className="flex h-16 w-16 -mt-8 items-center justify-center rounded-full border-4 border-white text-2xl font-bold text-white shadow" style={{ background: theme.primaryColor }}>
                 {(draft.socialName || '?').charAt(0).toUpperCase()}
               </div>
             )}
             <div>
-              <h2 className="text-xl font-bold text-slate-900">{draft.socialName || 'Your name'}</h2>
+              <h2 className="text-xl font-bold text-slate-900">{draft.socialName || 'Seu nome'}</h2>
               {draft.pronouns ? <p className="text-xs text-slate-500">{draft.pronouns}</p> : null}
             </div>
           </div>
@@ -183,7 +183,7 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
             className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-white"
             style={{ background: draft.isAcceptingRequests ? '#16a34a' : '#64748b' }}
           >
-            {draft.isAcceptingRequests ? 'Accepting mentees' : 'Capacity full'}
+            {draft.isAcceptingRequests ? 'Aceitando pupilos' : 'Capacidade cheia'}
           </span>
         </div>
 
@@ -216,12 +216,12 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
             ))}
           </div>
         ) : (
-          <p className="mt-5 text-xs text-slate-400">Add rich cards to showcase songs, games, films, or projects.</p>
+          <p className="mt-5 text-xs text-slate-400">Adicione cartões ricos para exibir músicas, jogos, filmes ou projetos.</p>
         )}
 
         <div className="mt-5 flex items-center justify-between text-[10px] text-slate-400">
-          <span>Up to {draft.maxMentees} mentees</span>
-          <span>Effort score {effortScore}</span>
+          <span>Até {draft.maxMentees} pupilos</span>
+          <span>Pontuação de esforço {effortScore}</span>
         </div>
       </div>
     </div>

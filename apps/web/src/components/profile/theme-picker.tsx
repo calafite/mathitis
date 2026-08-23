@@ -6,9 +6,9 @@ export interface ThemePickerProps {
 }
 
 const CARD_STYLES: Array<{ value: CardStyle; label: string }> = [
-  { value: 'glassmorphic', label: 'Glassmorphic' },
-  { value: 'solid', label: 'Solid' },
-  { value: 'bordered', label: 'Bordered' },
+  { value: 'glassmorphic', label: 'Vidro fosco' },
+  { value: 'solid', label: 'Sólido' },
+  { value: 'bordered', label: 'com borda' },
 ];
 
 const PRESETS: ThemePalette[] = [
@@ -25,7 +25,7 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
           <button
             key={index}
             type="button"
-            aria-label={`Apply theme preset ${index + 1}`}
+            aria-label={`Aplicar predefinição de tema ${index + 1}`}
             onClick={() => onChange(preset)}
             className="h-8 w-8 rounded-full border border-slate-300 transition hover:scale-110"
             style={{ background: `linear-gradient(135deg, ${preset.primaryColor}, ${preset.accentColor})` }}
@@ -35,7 +35,7 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
 
       <div className="grid grid-cols-3 gap-3">
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Primary</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Primária</span>
           <input
             type="color"
             value={value.primaryColor}
@@ -44,7 +44,7 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Accent</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Destaque</span>
           <input
             type="color"
             value={value.accentColor}
@@ -53,7 +53,7 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Badge</span>
+          <span className="mb-1 block text-xs font-medium text-slate-600">Emblema</span>
           <input
             type="color"
             value={value.badgeColor}
@@ -64,7 +64,7 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
       </div>
 
       <div>
-        <span className="mb-1 block text-xs font-medium text-slate-600">Card style</span>
+        <span className="mb-1 block text-xs font-medium text-slate-600">Estilo do cartão</span>
         <div className="flex gap-2">
           {CARD_STYLES.map((style) => (
             <button

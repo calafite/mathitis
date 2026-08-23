@@ -19,7 +19,7 @@ export function NotificationToastStack() {
           </div>
           <button
             type="button"
-            aria-label="Dismiss"
+            aria-label="Descartar"
             className="text-slate-400 hover:text-slate-600"
             onClick={() => dismissToast(toast.id)}
           >

@@ -10,12 +10,12 @@ import { MarkdownPreview } from '@/components/markdown/markdown-preview';
 import { Button } from '@/components/ui/button';
 
 const CARD_META: Record<string, { label: string; icon: string }> = {
-  song: { label: 'Song', icon: '♪' },
-  game: { label: 'Game', icon: '▣' },
-  film: { label: 'Film', icon: '▶' },
-  book: { label: 'Book', icon: '📖' },
-  project: { label: 'Project', icon: '⚙' },
-  custom: { label: 'Card', icon: '✦' },
+  song: { label: 'Música', icon: '♪' },
+  game: { label: 'Jogo', icon: '▣' },
+  film: { label: 'Filme', icon: '▶' },
+  book: { label: 'Livro', icon: '📖' },
+  project: { label: 'Projeto', icon: '⚙' },
+  custom: { label: 'Cartão', icon: '✦' },
 };
 
 function CardEmbed({ card }: { card: RichCard }) {
@@ -40,7 +40,7 @@ function CardLink({ card }: { card: RichCard }) {
       rel="noopener noreferrer"
       className="mt-2 inline-block text-xs font-medium underline"
     >
-      Open source
+      Código aberto
     </a>
   );
 }
@@ -53,12 +53,12 @@ function CardContent({ card }: { card: RichCard }) {
   }
   const steamAppId = meta?.steamAppId;
   if (card.cardType === 'game' && typeof steamAppId === 'string') {
-    return <p className="text-xs text-slate-500">Steam App {steamAppId}</p>;
+    return <p className="text-xs text-slate-500">App Steam {steamAppId}</p>;
   }
   if (card.cardType === 'film') {
     const rating = meta?.rating;
     if (typeof rating === 'number') {
-      return <p className="text-xs text-slate-500">Rating {rating.toFixed(1)}/10</p>;
+      return <p className="text-xs text-slate-500">Avaliação {rating.toFixed(1)}/10</p>;
     }
   }
   if (card.cardType === 'project' && Array.isArray(meta?.techStack)) {
@@ -81,7 +81,7 @@ function CardContent({ card }: { card: RichCard }) {
 }
 
 function RichCardView({ card }: { card: RichCard }) {
-  const meta = CARD_META[card.cardType] ?? { label: 'Card', icon: '✦' };
+  const meta = CARD_META[card.cardType] ?? { label: 'Cartão', icon: '✦' };
   const styleVar = { '--profile-card-accent': card.accentColor } as CSSProperties;
   return (
     <article
@@ -159,7 +159,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
       setBumped(true);
       setBumpCount(res.bumpCount);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to bump');
+      setError(err instanceof Error ? err.message : 'Falha ao impulsionar');
     }
   };
 
@@ -169,7 +169,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
       setBumped(false);
       setBumpCount((c) => Math.max(0, c - 1));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to remove bump');
+      setError(err instanceof Error ? err.message : 'Falha ao remover impulso');
     }
   };
 
@@ -178,13 +178,13 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
     setError(null);
     try {
       await requestsApi.create(
-        { seniorHandle, message: 'I would love to connect and learn from your experience.' },
+        { seniorHandle, message: 'Adoraria me conectar e aprender com a sua experiência.' },
         buildIdempotencyKey(),
       );
       setRequestSent(true);
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Request failed');
+      setError(err instanceof Error ? err.message : 'Falha no pedido');
     }
   };
 
@@ -246,7 +246,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
             className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800 dark:ring-offset-slate-950"
           >
             <X className="h-5 w-5" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">Fechar</span>
           </Dialog.Close>
 
           <div className="p-6" style={cssVars}>
@@ -282,7 +282,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                   {profile?.pronouns && <span>{profile.pronouns}</span>}
                   <span>@{profile?.handle}</span>
                   <span className="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
-                    Semester {profile?.semester}
+                    Período {profile?.semester}
                   </span>
                 </div>
                 {profile?.tagline && (
@@ -297,13 +297,13 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                     background: profile?.isAcceptingRequests ? '#16a34a' : '#64748b',
                   }}
                 >
-                  {profile?.isAcceptingRequests ? 'Accepting mentees' : 'Capacity full'}
+                  {profile?.isAcceptingRequests ? 'Aceitando pupilos' : 'Capacidade cheia'}
                 </span>
                 <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800">
-                  0 / {profile?.maxMentees ?? 3} pupils
+                  0 / {profile?.maxMentees ?? 3} pupilos
                 </span>
                 <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/30">
-                  Effort score {profile?.effortScore ?? 0}
+                  Pontuação de esforço {profile?.effortScore ?? 0}
                 </span>
               </div>
             </div>
@@ -311,13 +311,13 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
             <div className="mt-10 grid gap-6 lg:grid-cols-3">
               <div className="lg:col-span-2 space-y-6">
                 <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Biography</h3>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Biografia</h3>
                   <MarkdownPreview markdown={profile?.biographyMarkdown} />
                 </div>
 
                 {profile?.tags && profile.tags.length > 0 && (
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Interests</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Interesses</h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.tags.map((tag) => (
                         <span
@@ -334,12 +334,12 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
 
                 {hasSocialLinks && (
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Contact</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Contato</h3>
                     <div className="flex flex-wrap gap-3">
                       {socialLinks?.github && <SocialLink href={socialLinks.github} label="GitHub" icon={Github} />}
                       {socialLinks?.linkedin && <SocialLink href={socialLinks.linkedin} label="LinkedIn" icon={Linkedin} />}
                       {socialLinks?.discord && <SocialLink href={socialLinks.discord} label="Discord" icon={MessageSquare} />}
-                      {socialLinks?.website && <SocialLink href={socialLinks.website} label="Website" icon={Globe} />}
+                      {socialLinks?.website && <SocialLink href={socialLinks.website} label="Site" icon={Globe} />}
                       {profile?.contactEmail && (
                         <SocialLink href={`mailto:${profile.contactEmail}`} label={profile.contactEmail} icon={Mail} />
                       )}
@@ -349,7 +349,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
 
                 {profile?.richCards && profile.richCards.length > 0 && (
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Showcase</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Vitrine</h3>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {profile.richCards.map((card) => (
                         <RichCardView key={card.id} card={card} />
@@ -369,10 +369,10 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                       disabled={isLoading}
                       className="w-full"
                     >
-                      {bumped ? 'Remove bump' : 'Bump profile'}
+                      {bumped ? 'Remover impulso' : 'Impulsionar perfil'}
                     </Button>
                     <p className="text-center text-xs text-slate-500 dark:text-slate-400">
-                      {bumpCount} bumps · 4 max per semester
+                      {bumpCount} impulsos · máx. 4 por período
                     </p>
                   </div>
 
@@ -384,11 +384,11 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                       disabled={requestSent || isLoading}
                       className="w-full"
                     >
-                      {requestSent ? 'Request sent' : 'Apply for mentorship'}
+                      {requestSent ? 'Pedido enviado' : 'Pedir apadrinhamento'}
                     </Button>
                   ) : (
                     <Button size="lg" variant="outline" disabled className="w-full">
-                      Not accepting requests
+                      Não aceitando pedidos
                     </Button>
                   )}
 

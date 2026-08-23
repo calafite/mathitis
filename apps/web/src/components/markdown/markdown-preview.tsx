@@ -67,10 +67,10 @@ function stripMarker(children: ReactNode, marker: string): ReactNode {
 }
 
 const CALLOUT_STYLES: Record<string, { className: string; label: string }> = {
-  NOTE: { className: 'callout callout-note', label: 'Note' },
-  TIP: { className: 'callout callout-tip', label: 'Tip' },
-  WARNING: { className: 'callout callout-warning', label: 'Warning' },
-  QUOTE: { className: 'callout callout-quote', label: 'Quote' },
+  NOTE: { className: 'callout callout-note', label: 'Nota' },
+  TIP: { className: 'callout callout-tip', label: 'Dica' },
+  WARNING: { className: 'callout callout-warning', label: 'Aviso' },
+  QUOTE: { className: 'callout callout-quote', label: 'Citação' },
 };
 
 function CalloutBlock({ type, children }: { type: string; children: ReactNode }) {

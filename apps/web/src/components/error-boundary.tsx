@@ -33,16 +33,16 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       return (
         this.props.fallback ?? (
           <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 p-8 text-center">
-            <h1 className="text-2xl font-bold text-slate-900">Something went wrong</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Algo deu errado</h1>
             <p className="text-sm text-slate-600">
-              An unexpected error occurred. The incident has been reported.
+              Ocorreu um erro inesperado. O incidente foi registrado.
             </p>
             <button
               type="button"
               className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
               onClick={() => window.location.reload()}
             >
-              Reload page
+              Recarregar página
             </button>
           </div>
         )

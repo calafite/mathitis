@@ -10,8 +10,8 @@ export function ThemeToggle() {
       variant="ghost"
       size="sm"
       onClick={toggleTheme}
-      aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-      title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+      aria-label={theme === 'dark' ? 'Alternar para tema claro' : 'Alternar para tema escuro'}
+      title={theme === 'dark' ? 'Alternar para tema claro' : 'Alternar para tema escuro'}
     >
       {theme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
     </Button>
