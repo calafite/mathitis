@@ -49,16 +49,16 @@ function CardContent({ card }: { card: RichCard }) {
   const meta = card.metadata as Record<string, unknown> | null;
   const artistName = meta?.artistName;
   if (card.cardType === 'song' && typeof artistName === 'string' && artistName) {
-    return <p className="text-xs text-slate-500">{artistName}</p>;
+    return <p className="text-xs text-muted-foreground">{artistName}</p>;
   }
   const steamAppId = meta?.steamAppId;
   if (card.cardType === 'game' && typeof steamAppId === 'string') {
-    return <p className="text-xs text-slate-500">App Steam {steamAppId}</p>;
+    return <p className="text-xs text-muted-foreground">App Steam {steamAppId}</p>;
   }
   if (card.cardType === 'film') {
     const rating = meta?.rating;
     if (typeof rating === 'number') {
-      return <p className="text-xs text-slate-500">Avaliação {rating.toFixed(1)}/10</p>;
+      return <p className="text-xs text-muted-foreground">Avaliação {rating.toFixed(1)}/10</p>;
     }
   }
   if (card.cardType === 'project' && Array.isArray(meta?.techStack)) {
@@ -68,8 +68,11 @@ function CardContent({ card }: { card: RichCard }) {
         {stack.map((item) => (
           <span
             key={String(item)}
-            className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
-            style={{ background: 'var(--profile-badge, #3b82f6)' }}
+            className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+            style={{
+              background: 'var(--profile-badge, var(--color-primary))',
+              color: 'var(--profile-badge-foreground, var(--color-primary-foreground))',
+            }}
           >
             {String(item)}
           </span>
@@ -82,20 +85,20 @@ function CardContent({ card }: { card: RichCard }) {
 
 function RichCardView({ card }: { card: RichCard }) {
   const meta = CARD_META[card.cardType] ?? { label: 'Cartão', icon: '✦' };
-  const styleVar = { '--profile-card-accent': card.accentColor } as CSSProperties;
+  const styleVar = { '--profile-card-accent': card.accentColor } as React.CSSProperties & Record<string, string>;
   return (
     <article
-      className="profile-card flex flex-col rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm"
+      className="profile-card flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm"
       style={styleVar}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{card.title}</h3>
-        <span className="text-base text-slate-400" aria-hidden>
+        <h3 className="text-sm font-semibold text-foreground">{card.title}</h3>
+        <span className="text-base text-muted-foreground" aria-hidden>
           {meta.icon}
         </span>
       </div>
-      {card.subtitle ? <p className="text-xs text-slate-500 dark:text-slate-400">{card.subtitle}</p> : null}
-      {card.description ? <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{card.description}</p> : null}
+      {card.subtitle ? <p className="text-xs text-muted-foreground">{card.subtitle}</p> : null}
+      {card.description ? <p className="mt-1 text-xs text-foreground/80">{card.description}</p> : null}
       <CardContent card={card} />
       <CardEmbed card={card} />
       <CardLink card={card} />
@@ -109,7 +112,7 @@ function SocialLink({ href, label, icon: Icon }: { href: string; label: string; 
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+      className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
     >
       <Icon className="h-4 w-4" />
       {label}
@@ -120,8 +123,12 @@ function SocialLink({ href, label, icon: Icon }: { href: string; label: string; 
 function AvatarBadge({ children, size = 10, className = '' }: { children: React.ReactNode; size?: number; className?: string }) {
   return (
     <div
-      className={`flex h-${size} w-${size} items-center justify-center rounded-full border-4 border-white text-2xl font-bold text-white shadow ${className}`}
-      style={{ background: 'var(--profile-primary, #6366f1)' }}
+      className={`flex h-${size} w-${size} items-center justify-center rounded-full border-4 text-2xl font-bold shadow ${className}`}
+      style={{
+        background: 'var(--profile-primary, var(--color-primary))',
+        color: 'var(--profile-primary-foreground, var(--color-primary-foreground))',
+        borderColor: 'var(--profile-primary, var(--color-primary))',
+      }}
     >
       {children}
     </div>
@@ -210,18 +217,18 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
 
   const cardClass = theme
     ? theme.cardStyle === 'glassmorphic'
-      ? 'backdrop-blur-md bg-white/60 dark:bg-slate-800/60 border-white/40 dark:border-slate-700/40'
+      ? 'backdrop-blur-md bg-card/60 border-border/40'
       : theme.cardStyle === 'solid'
-        ? 'bg-white dark:bg-slate-800'
+        ? 'bg-card'
         : 'bg-transparent border-2'
-    : 'bg-white dark:bg-slate-800';
+    : 'bg-card';
 
   const bannerStyle: CSSProperties = {
     backgroundImage: profile?.bannerUrl
       ? `url(${profile.bannerUrl})`
       : profile?.bannerPreset === 'gradient_cosmic'
-        ? 'linear-gradient(135deg, #6366f1, #ec4899)'
-        : `linear-gradient(135deg, ${theme?.primaryColor ?? '#6366f1'}, ${theme?.accentColor ?? '#ec4899'})`,
+        ? 'linear-gradient(135deg, var(--profile-primary), var(--profile-accent))'
+        : 'linear-gradient(135deg, var(--profile-primary), var(--profile-accent))',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
   };
@@ -238,12 +245,12 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl bg-white dark:bg-slate-950 shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:max-w-5xl"
+          className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl bg-popover text-popover-foreground shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:max-w-5xl"
         >
           <Dialog.Close
-            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800 dark:ring-offset-slate-950"
+            className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-popover disabled:pointer-events-none data-[state=open]:bg-accent"
           >
             <X className="h-5 w-5" />
             <span className="sr-only">Fechar</span>
@@ -266,7 +273,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                 <img
                   src={profile.avatarUrl}
                   alt=""
-                  className="h-20 w-20 -mt-10 rounded-full border-4 border-white dark:border-slate-950 object-cover shadow-lg"
+                  className="h-20 w-20 -mt-10 rounded-full border-4 border-card object-cover shadow-lg"
                 />
               ) : (
                 <AvatarBadge size={20} className="-mt-10">
@@ -275,34 +282,39 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
               )}
 
               <div className="mt-4 text-center">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                <h2 className="text-2xl font-bold text-foreground">
                   {profile?.socialName ?? profile?.handle}
                 </h2>
-                <div className="mt-1 flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                <div className="mt-1 flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   {profile?.pronouns && <span>{profile.pronouns}</span>}
                   <span>@{profile?.handle}</span>
-                  <span className="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
+                  <span className="px-2 py-0.5 rounded-full bg-primary/15 text-primary">
                     Período {profile?.semester}
                   </span>
                 </div>
                 {profile?.tagline && (
-                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{profile.tagline}</p>
+                  <p className="mt-2 text-sm text-foreground/80">{profile.tagline}</p>
                 )}
               </div>
 
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
                 <span
-                  className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-white"
+                  className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
                   style={{
-                    background: profile?.isAcceptingRequests ? '#16a34a' : '#64748b',
+                    background: profile?.isAcceptingRequests
+                      ? 'color-mix(in srgb, var(--color-primary) 20%, transparent)'
+                      : 'var(--color-muted)',
+                    color: profile?.isAcceptingRequests
+                      ? 'var(--color-primary)'
+                      : 'var(--color-muted-foreground)',
                   }}
                 >
                   {profile?.isAcceptingRequests ? 'Aceitando pupilos' : 'Capacidade cheia'}
                 </span>
-                <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800">
+                <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-muted-foreground bg-muted">
                   0 / {profile?.maxMentees ?? 3} pupilos
                 </span>
-                <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/30">
+                <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-primary bg-primary/15">
                   Pontuação de esforço {profile?.effortScore ?? 0}
                 </span>
               </div>
@@ -311,13 +323,13 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
             <div className="mt-10 grid gap-6 lg:grid-cols-3">
               <div className="lg:col-span-2 space-y-6">
                 <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Biografia</h3>
+                  <h3 className="text-lg font-semibold text-foreground">Biografia</h3>
                   <MarkdownPreview markdown={profile?.biographyMarkdown} />
                 </div>
 
                 {profile?.tags && profile.tags.length > 0 && (
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Interesses</h3>
+                    <h3 className="text-lg font-semibold text-foreground">Interesses</h3>
                     <div className="flex flex-wrap gap-2">
                       {profile.tags.map((tag) => (
                         <span
@@ -334,7 +346,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
 
                 {hasSocialLinks && (
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Contato</h3>
+                    <h3 className="text-lg font-semibold text-foreground">Contato</h3>
                     <div className="flex flex-wrap gap-3">
                       {socialLinks?.github && <SocialLink href={socialLinks.github} label="GitHub" icon={Github} />}
                       {socialLinks?.linkedin && <SocialLink href={socialLinks.linkedin} label="LinkedIn" icon={Linkedin} />}
@@ -349,7 +361,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
 
                 {profile?.richCards && profile.richCards.length > 0 && (
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Vitrine</h3>
+                    <h3 className="text-lg font-semibold text-foreground">Vitrine</h3>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {profile.richCards.map((card) => (
                         <RichCardView key={card.id} card={card} />
@@ -371,7 +383,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                     >
                       {bumped ? 'Remover impulso' : 'Impulsionar perfil'}
                     </Button>
-                    <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-center text-xs text-muted-foreground">
                       {bumpCount} impulsos · máx. 4 por período
                     </p>
                   </div>
@@ -392,7 +404,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                     </Button>
                   )}
 
-                  {error && <p className="text-center text-sm text-red-600 dark:text-red-400">{error}</p>}
+                  {error && <p className="text-center text-sm text-destructive">{error}</p>}
                 </div>
               </div>
             </div>

@@ -30,17 +30,29 @@ export function MediaUpload({ kind, url, uploading, onUpload }: MediaUploadProps
   return (
     <div className="flex items-center gap-4">
       {isAvatar ? (
-        <img
-          src={url ?? undefined}
-          alt="Pré-visualização do avatar"
-          className="h-16 w-16 rounded-full object-cover ring-2 ring-slate-200"
-        />
+        url ? (
+          <img
+            src={url}
+            alt="Pré-visualização do avatar"
+            className="h-16 w-16 rounded-full object-cover ring-2 ring-border"
+          />
+        ) : (
+          <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center ring-2 ring-border">
+            <span className="text-muted-foreground text-lg font-display">?</span>
+          </div>
+        )
       ) : (
-        <img
-          src={url ?? undefined}
-          alt="Pré-visualização do banner"
-          className="h-16 w-32 rounded-md object-cover ring-2 ring-slate-200"
-        />
+        url ? (
+          <img
+            src={url}
+            alt="Pré-visualização do banner"
+            className="h-16 w-32 rounded-md object-cover ring-2 ring-border"
+          />
+        ) : (
+          <div className="h-16 w-32 rounded-md bg-muted flex items-center justify-center ring-2 ring-border">
+            <span className="text-muted-foreground text-sm font-medium">Sem banner</span>
+          </div>
+        )
       )}
       <div className="flex flex-col gap-1">
         <input
@@ -59,7 +71,7 @@ export function MediaUpload({ kind, url, uploading, onUpload }: MediaUploadProps
         >
           {uploading ? 'Enviando…' : `Enviar ${isAvatar ? 'avatar' : 'banner'}`}
         </Button>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           JPEG, PNG ou WebP · máx. {maxMb}MB
         </p>
       </div>

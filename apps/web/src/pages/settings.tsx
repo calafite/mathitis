@@ -26,7 +26,6 @@ import { requestsApi } from '@/lib/requests-api';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { FieldError, Input } from '@/components/ui/input';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 interface AnonymizeForm {
   password: string;
@@ -226,20 +225,9 @@ export function SettingsPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
       <div className="mx-auto w-full max-w-4xl px-4 py-8">
-        <header className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Settings className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground"
-            >
-              Voltar para a página inicial
-            </Link>
-            <ThemeToggle />
-          </div>
+        <header className="mb-6 flex items-center gap-3">
+          <Settings className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
         </header>
 
         {notice && (
@@ -677,13 +665,13 @@ function ToggleRow({
         aria-checked={checked}
         aria-label={title}
         onClick={onChange}
-        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-          checked ? 'bg-primary' : 'bg-input'
+        className={`relative h-6 w-11 shrink-0 rounded-full border-2 transition-colors ${
+          checked ? 'bg-primary border-primary' : 'bg-muted border-border'
         }`}
       >
         <span
-          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-            checked ? 'translate-x-5' : 'translate-x-0.5'
+          className={`absolute top-[2px] left-[2px] h-5 w-5 rounded-full border border-border/50 transition-transform ${
+            checked ? 'translate-x-5 bg-primary-foreground' : 'translate-x-0 bg-background'
           }`}
         />
       </button>

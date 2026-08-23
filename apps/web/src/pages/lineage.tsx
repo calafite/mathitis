@@ -1,10 +1,8 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import type { LineageEdge, LineageNode } from '@mathitis/schemas';
 import { lineageApi } from '@/lib/lineage-api';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 interface Position {
   x: number;
@@ -82,31 +80,20 @@ export function LineagePage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <header className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Linhagem de apadrinhamento</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {handle ? `Subgrafo com raiz em @${handle}` : 'A linhagem completa do departamento ao longo dos anos acadêmicos.'}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            to="/settings"
-            className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
-          >
-            Configurações
-          </Link>
-          <ThemeToggle />
-        </div>
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Linhagem de apadrinhamento</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {handle ? `Subgrafo com raiz em @${handle}` : 'A linhagem completa do departamento ao longo dos anos acadêmicos.'}
+        </p>
       </header>
 
-      {lineageQuery.isLoading && <p className="mt-4 text-slate-500">Carregando…</p>}
+      {lineageQuery.isLoading && <p className="mt-4 text-muted-foreground">Carregando…</p>}
       {!lineageQuery.isLoading && nodes.length === 0 && (
-        <p className="mt-4 text-slate-500">Nenhum apadrinhamento registrado ainda.</p>
+        <p className="mt-4 text-muted-foreground">Nenhum apadrinhamento registrado ainda.</p>
       )}
 
       {nodes.length > 0 && (
-        <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white p-4">
+        <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-card p-4">
           <svg width={width} height={height} className="block">
             {edges.map((edge, index) => {
               const from = positions.get(edge.mentorId);
@@ -136,7 +123,7 @@ export function LineagePage() {
                   x={10}
                   y={y + 4}
                   fontSize={11}
-                  fill="#64748b"
+                  className="fill-muted-foreground"
                   fontWeight="600"
                 >
                   {year}
@@ -167,7 +154,7 @@ export function LineagePage() {
                     y={pos.y + 38}
                     textAnchor="middle"
                     fontSize={11}
-                    fill="#334155"
+                    className="fill-foreground"
                   >
                     {node.socialName ?? node.handle}
                   </text>
@@ -176,7 +163,7 @@ export function LineagePage() {
                     y={pos.y + 52}
                     textAnchor="middle"
                     fontSize={10}
-                    fill="#94a3b8"
+                    className="fill-muted-foreground"
                   >
                     @{node.handle} · S{node.semester}
                   </text>

@@ -72,29 +72,29 @@ export function AdminConfigPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Configuração do sistema</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="text-2xl font-bold text-foreground">Configuração do sistema</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Configurações dinâmicas aplicadas em tempo de execução. Cada alteração é registrada no
           registro de auditoria com um diff de antes/depois.
         </p>
       </div>
 
       {configQuery.isLoading ? (
-        <p className="text-sm text-slate-500">Carregando…</p>
+        <p className="text-sm text-muted-foreground">Carregando…</p>
       ) : (
         <div className="max-w-2xl space-y-3">
           {booleanKeys.map((key) => (
             <label
               key={key}
-              className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+              className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-sm"
             >
               <span>
-                <span className="block font-medium text-slate-900">{configLabels[key].label}</span>
-                <span className="block text-xs text-slate-500">{configLabels[key].hint}</span>
+                <span className="block font-medium text-foreground">{configLabels[key].label}</span>
+                <span className="block text-xs text-muted-foreground">{configLabels[key].hint}</span>
               </span>
               <input
                 type="checkbox"
-                className="h-5 w-5 accent-indigo-600"
+                className="h-5 w-5 accent-primary"
                 checked={Boolean(draft[key])}
                 onChange={(e) => setDraft({ ...draft, [key]: e.target.checked })}
               />
@@ -104,11 +104,11 @@ export function AdminConfigPage() {
           {numberKeys.map((key) => (
             <label
               key={key}
-              className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+              className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-sm"
             >
               <span>
-                <span className="block font-medium text-slate-900">{configLabels[key].label}</span>
-                <span className="block text-xs text-slate-500">{configLabels[key].hint}</span>
+                <span className="block font-medium text-foreground">{configLabels[key].label}</span>
+                <span className="block text-xs text-muted-foreground">{configLabels[key].hint}</span>
               </span>
               <input
                 type="number"
@@ -130,8 +130,8 @@ export function AdminConfigPage() {
             >
               {saveMutation.isPending ? 'Salvando…' : 'Salvar alterações'}
             </Button>
-            {saved && <span className="text-sm text-emerald-600">Salvo.</span>}
-            {error && <span className="text-sm text-red-600">{error}</span>}
+            {saved && <span className="text-sm text-emerald-600 dark:text-emerald-400">Salvo.</span>}
+            {error && <span className="text-sm text-red-600 dark:text-red-400">{error}</span>}
           </div>
         </div>
       )}

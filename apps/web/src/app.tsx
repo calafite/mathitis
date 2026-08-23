@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/contexts/theme-context';
 import { NotificationToastStack } from '@/components/notifications/toast-stack';
 import { ProtectedRoute, RoleGuard } from '@/components/auth/route-guards';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { AppLayout } from '@/components/layout/app-layout';
 import { HomePage } from '@/pages/home';
 import { LoginPage } from '@/pages/login';
 import { RegisterPage } from '@/pages/register';
@@ -48,62 +49,64 @@ export function App() {
                   <Route path="/verify-email" element={<VerifyEmailPage />} />
 
                   <Route element={<ProtectedRoute />}>
-                    <Route
-                      path="/"
-                      element={
-                        <ErrorBoundary name="protected">
-                          <HomePage />
-                        </ErrorBoundary>
-                      }
-                    />
-                    <Route
-                      path="/profile/studio"
-                      element={
-                        <ErrorBoundary name="profile-studio">
-                          <ProfileStudioPage />
-                        </ErrorBoundary>
-                      }
-                    />
-                    <Route
-                      path="/discovery"
-                      element={
-                        <ErrorBoundary name="discovery">
-                          <DiscoveryPage />
-                        </ErrorBoundary>
-                      }
-                    />
-                    <Route
-                      path="/requests"
-                      element={
-                        <ErrorBoundary name="requests">
-                          <RequestsPage />
-                        </ErrorBoundary>
-                      }
-                    />
-                    <Route
-                      path="/lineage"
-                      element={
-                        <ErrorBoundary name="lineage">
-                          <LineagePage />
-                        </ErrorBoundary>
-                      }
-                    />
-                    <Route
-                      path="/lineage/:handle"
-                      element={
-                        <ErrorBoundary name="lineage">
-                          <LineagePage />
-                        </ErrorBoundary>
-                      }
-                    />
-                    <Route
-                      path="/settings"
-                      element={
-                        <ErrorBoundary name="settings">
-                          <SettingsPage />
-                        </ErrorBoundary>
-                      }
-                    />
+                    <Route element={<AppLayout />}>
+                      <Route
+                        path="/"
+                        element={
+                          <ErrorBoundary name="protected">
+                            <HomePage />
+                          </ErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="/profile/studio"
+                        element={
+                          <ErrorBoundary name="profile-studio">
+                            <ProfileStudioPage />
+                          </ErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="/discovery"
+                        element={
+                          <ErrorBoundary name="discovery">
+                            <DiscoveryPage />
+                          </ErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="/requests"
+                        element={
+                          <ErrorBoundary name="requests">
+                            <RequestsPage />
+                          </ErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="/lineage"
+                        element={
+                          <ErrorBoundary name="lineage">
+                            <LineagePage />
+                          </ErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="/lineage/:handle"
+                        element={
+                          <ErrorBoundary name="lineage">
+                            <LineagePage />
+                          </ErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="/settings"
+                        element={
+                          <ErrorBoundary name="settings">
+                            <SettingsPage />
+                          </ErrorBoundary>
+                        }
+                      />
+                    </Route>
                   </Route>
 
                   <Route

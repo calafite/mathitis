@@ -48,7 +48,7 @@ export function LoginPage() {
         </header>
         <h1 className="text-2xl font-semibold text-foreground">Junte-se ao Apadrinhamento</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Encontre seu mentor e faça parte da linhagem matemática.
+          Encontre seu padrinho e faça novos amigos.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>

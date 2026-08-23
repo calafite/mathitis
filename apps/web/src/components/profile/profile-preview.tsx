@@ -69,16 +69,16 @@ function CardContent({ card }: { card: RichCard }) {
   const meta = card.metadata as Record<string, unknown> | null;
   const artistName = meta?.artistName;
   if (card.cardType === 'song' && typeof artistName === 'string' && artistName) {
-    return <p className="text-xs text-slate-500">{artistName}</p>;
+    return <p className="text-xs text-muted-foreground">{artistName}</p>;
   }
   const steamAppId = meta?.steamAppId;
   if (card.cardType === 'game' && typeof steamAppId === 'string') {
-    return <p className="text-xs text-slate-500">App Steam {steamAppId}</p>;
+    return <p className="text-xs text-muted-foreground">App Steam {steamAppId}</p>;
   }
   if (card.cardType === 'film') {
     const rating = meta?.rating;
     if (typeof rating === 'number') {
-      return <p className="text-xs text-slate-500">Avaliação {rating.toFixed(1)}/10</p>;
+      return <p className="text-xs text-muted-foreground">Avaliação {rating.toFixed(1)}/10</p>;
     }
   }
   if (card.cardType === 'project' && Array.isArray(meta?.techStack)) {
@@ -101,17 +101,17 @@ function RichCardView({ card }: { card: RichCard }) {
   const styleVar = { '--profile-card-accent': card.accentColor } as CSSProperties;
   return (
     <article
-      className="profile-card flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+      className="profile-card flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm"
       style={styleVar}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-sm font-semibold text-slate-900">{card.title}</h3>
-        <span className="text-base text-slate-400" aria-hidden>
+        <h3 className="text-sm font-semibold text-foreground">{card.title}</h3>
+        <span className="text-base text-muted-foreground" aria-hidden>
           {meta.icon}
         </span>
       </div>
-      {card.subtitle ? <p className="text-xs text-slate-500">{card.subtitle}</p> : null}
-      {card.description ? <p className="mt-1 text-xs text-slate-600">{card.description}</p> : null}
+      {card.subtitle ? <p className="text-xs text-muted-foreground">{card.subtitle}</p> : null}
+      {card.description ? <p className="mt-1 text-xs text-foreground/80">{card.description}</p> : null}
       <CardContent card={card} />
       <CardEmbed card={card} />
       <CardLink card={card} />
@@ -135,14 +135,14 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
 
   const cardClass =
     theme.cardStyle === 'glassmorphic'
-      ? 'backdrop-blur-md bg-white/60 border-white/40'
+      ? 'backdrop-blur-md bg-card/60 border-border/40'
       : theme.cardStyle === 'solid'
-        ? 'bg-white'
+        ? 'bg-card'
         : 'bg-transparent border-2';
 
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm"
+      className="overflow-hidden rounded-2xl border border-border shadow-sm"
       style={cssVars}
     >
       <div
@@ -168,15 +168,15 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
         <div className="flex items-end justify-between">
           <div className="flex items-center gap-3">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Pré-visualização do avatar" className="h-16 w-16 -mt-8 rounded-full border-4 border-white object-cover shadow" />
+              <img src={avatarUrl} alt="Pré-visualização do avatar" className="h-16 w-16 -mt-8 rounded-full border-4 border-card object-cover shadow" />
             ) : (
-              <div className="flex h-16 w-16 -mt-8 items-center justify-center rounded-full border-4 border-white text-2xl font-bold text-white shadow" style={{ background: theme.primaryColor }}>
+              <div className="flex h-16 w-16 -mt-8 items-center justify-center rounded-full border-4 border-card text-2xl font-bold text-white shadow" style={{ background: theme.primaryColor }}>
                 {(draft.socialName || '?').charAt(0).toUpperCase()}
               </div>
             )}
             <div>
-              <h2 className="text-xl font-bold text-slate-900">{draft.socialName || 'Seu nome'}</h2>
-              {draft.pronouns ? <p className="text-xs text-slate-500">{draft.pronouns}</p> : null}
+              <h2 className="text-xl font-bold text-foreground">{draft.socialName || 'Seu nome'}</h2>
+              {draft.pronouns ? <p className="text-xs text-muted-foreground">{draft.pronouns}</p> : null}
             </div>
           </div>
           <span
@@ -187,7 +187,7 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
           </span>
         </div>
 
-        {draft.tagline ? <p className="mt-3 text-sm text-slate-600">{draft.tagline}</p> : null}
+        {draft.tagline ? <p className="mt-3 text-sm text-foreground/80">{draft.tagline}</p> : null}
 
         <div className="mt-4">
           <MarkdownPreview markdown={draft.biographyMarkdown} />
@@ -196,16 +196,16 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
         {draft.socialLinks.github || draft.socialLinks.linkedin || draft.contactEmail ? (
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
             {draft.socialLinks.github ? (
-              <a href={draft.socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline">
+              <a href={draft.socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-primary underline">
                 GitHub
               </a>
             ) : null}
             {draft.socialLinks.linkedin ? (
-              <a href={draft.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline">
+              <a href={draft.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-primary underline">
                 LinkedIn
               </a>
             ) : null}
-            {draft.contactEmail ? <span className="text-slate-600">{draft.contactEmail}</span> : null}
+            {draft.contactEmail ? <span className="text-foreground/80">{draft.contactEmail}</span> : null}
           </div>
         ) : null}
 
@@ -216,10 +216,10 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
             ))}
           </div>
         ) : (
-          <p className="mt-5 text-xs text-slate-400">Adicione cartões ricos para exibir músicas, jogos, filmes ou projetos.</p>
+          <p className="mt-5 text-xs text-muted-foreground">Adicione cartões ricos para exibir músicas, jogos, filmes ou projetos.</p>
         )}
 
-        <div className="mt-5 flex items-center justify-between text-[10px] text-slate-400">
+        <div className="mt-5 flex items-center justify-between text-[10px] text-muted-foreground">
           <span>Até {draft.maxMentees} pupilos</span>
           <span>Pontuação de esforço {effortScore}</span>
         </div>

@@ -48,16 +48,16 @@ export function NotificationBell() {
       >
         <BellIcon className="h-4 w-4" />
         {unread > 0 && (
-          <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1.5 text-xs font-semibold text-white">
+          <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
             {unread > 99 ? '99+' : unread}
           </span>
         )}
       </Button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-96 max-w-[90vw] rounded-md border border-slate-200 bg-white shadow-lg">
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-            <span className="text-sm font-semibold text-slate-900">Notificações</span>
+        <div className="absolute right-0 z-50 mt-2 w-96 max-w-[90vw] rounded-md border border-border bg-popover text-popover-foreground shadow-lg">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <span className="text-sm font-semibold text-foreground">Notificações</span>
             <div className="flex items-center gap-2">
               {unread > 0 && (
                 <Button
@@ -77,10 +77,10 @@ export function NotificationBell() {
 
           <ul className="max-h-96 overflow-y-auto">
             {isLoading && notifications.length === 0 && (
-              <li className="px-4 py-6 text-center text-sm text-slate-500">Carregando…</li>
+              <li className="px-4 py-6 text-center text-sm text-muted-foreground">Carregando…</li>
             )}
             {!isLoading && notifications.length === 0 && (
-              <li className="px-4 py-6 text-center text-sm text-slate-500">
+              <li className="px-4 py-6 text-center text-sm text-muted-foreground">
                 Nenhuma notificação ainda
               </li>
             )}
@@ -88,22 +88,22 @@ export function NotificationBell() {
               <li key={notification.id}>
                 <button
                   type="button"
-                  className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-slate-50"
+                  className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-accent hover:text-accent-foreground"
                   onClick={() => {
                     if (!notification.readAt) void markRead(notification.id);
                   }}
                 >
                   <span
                     className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
-                      notification.readAt ? 'bg-transparent' : 'bg-indigo-500'
+                      notification.readAt ? 'bg-transparent' : 'bg-primary'
                     }`}
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-medium text-slate-900">
+                    <span className="block text-sm font-medium text-foreground">
                       {notification.title}
                     </span>
-                    <span className="block text-sm text-slate-600">{notification.body}</span>
-                    <span className="mt-0.5 block text-xs text-slate-400">
+                    <span className="block text-sm text-foreground/80">{notification.body}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
                       {relativeTime(notification.createdAt)}
                     </span>
                   </span>

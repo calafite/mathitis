@@ -1,57 +1,74 @@
 @import 'tailwindcss';
 
-/* Design-system tokens for the shadcn-style semantic utilities used across
-   the app (bg-background, text-muted-foreground, border-input, ring-ring,
-   bg-accent, text-accent-foreground). Dark mode is the default baseline;
-   .light class overrides provide clean switching without hardcoded duplication. */
+/* Class-based dark variant: the ThemeProvider toggles .light/.dark on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design-system tokens — "tinta e papel" avant-garde palette.
+   Deep plum-black ink (dark baseline) / warm bone paper (.light).
+   Acid lime primary, vermillion reserved as the lineage accent.
+   Dark mode is the default baseline; .light class overrides provide
+   clean switching without hardcoded duplication. */
 @theme {
-  --color-background: #0f172a;
-  --color-foreground: #f8fafc;
-  --color-card: #1e293b;
-  --color-card-foreground: #f8fafc;
-  --color-popover: #1e293b;
-  --color-popover-foreground: #f8fafc;
-  --color-primary: #6366f1;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #1e293b;
-  --color-secondary-foreground: #f8fafc;
-  --color-muted: #1e293b;
-  --color-muted-foreground: #94a3b8;
-  --color-accent: #312e81;
-  --color-accent-foreground: #e0e7ff;
-  --color-destructive: #ef4444;
+  --color-background: #0f0c13;
+  --color-foreground: #f2ede4;
+  --color-card: #191420;
+  --color-card-foreground: #f2ede4;
+  --color-popover: #1d1626;
+  --color-popover-foreground: #f2ede4;
+  --color-primary: #c9f24c;
+  --color-primary-foreground: #16130a;
+  --color-secondary: #221a2c;
+  --color-secondary-foreground: #f2ede4;
+  --color-muted: #201829;
+  --color-muted-foreground: #a093b3;
+  --color-accent: #2b2038;
+  --color-accent-foreground: #e7ddf5;
+  --color-destructive: #ff5470;
   --color-destructive-foreground: #ffffff;
-  --color-border: #334155;
-  --color-input: #334155;
-  --color-ring: #6366f1;
+  --color-border: #2e2537;
+  --color-input: #382d44;
+  --color-ring: #c9f24c;
+  --color-lineage: #ff4d14;
+  --color-lineage-foreground: #fff4ee;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Space Grotesk', system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
 .light {
-  --color-background: #f8fafc;
-  --color-foreground: #0f172a;
-  --color-card: #ffffff;
-  --color-card-foreground: #0f172a;
-  --color-popover: #ffffff;
-  --color-popover-foreground: #0f172a;
-  --color-primary: #4f46e5;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #f1f5f9;
-  --color-secondary-foreground: #0f172a;
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
-  --color-accent: #eef2ff;
-  --color-accent-foreground: #4338ca;
-  --color-destructive: #dc2626;
+  --color-background: #f5efe6;
+  --color-foreground: #17121c;
+  --color-card: #fffdf6;
+  --color-card-foreground: #17121c;
+  --color-popover: #fffdf6;
+  --color-popover-foreground: #17121c;
+  --color-primary: #17121c;
+  --color-primary-foreground: #dcf56b;
+  --color-secondary: #ece4d8;
+  --color-secondary-foreground: #17121c;
+  --color-muted: #ede6da;
+  --color-muted-foreground: #6e6378;
+  --color-accent: #efe7db;
+  --color-accent-foreground: #17121c;
+  --color-destructive: #d92654;
   --color-destructive-foreground: #ffffff;
-  --color-border: #e2e8f0;
-  --color-input: #cbd5e1;
-  --color-ring: #6366f1;
+  --color-border: #ddd2c2;
+  --color-input: #cfc2af;
+  --color-ring: #17121c;
+  --color-lineage: #e8430d;
+  --color-lineage-foreground: #fff8f4;
 }
 
 :root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
   color-scheme: light dark;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Display face for headings — academic lineage / diploma vibe. */
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
 }
 
 body {

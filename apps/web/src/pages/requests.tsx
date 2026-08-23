@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { MentorshipRequest } from '@mathitis/schemas';
 import { useAuth } from '@/contexts/auth-context';
 import { requestsApi, buildIdempotencyKey, type RequestInbox } from '@/lib/requests-api';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pendente',
@@ -18,12 +16,12 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-amber-100 text-amber-800',
-  pending_admin_approval: 'bg-purple-100 text-purple-800',
-  accepted: 'bg-emerald-100 text-emerald-800',
-  rejected: 'bg-red-100 text-red-800',
-  cancelled: 'bg-slate-100 text-slate-600',
-  cancelled_capacity_filled: 'bg-slate-100 text-slate-600',
+  pending: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300',
+  pending_admin_approval: 'bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300',
+  accepted: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
+  rejected: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300',
+  cancelled: 'bg-muted text-muted-foreground',
+  cancelled_capacity_filled: 'bg-muted text-muted-foreground',
 };
 
 function partyName(party: MentorshipRequest['freshman'] | MentorshipRequest['senior']) {
@@ -55,15 +53,15 @@ function RequestRow({
   const active = request.status === 'pending' || request.status === 'pending_admin_approval';
 
   return (
-    <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[request.status] ?? 'bg-slate-100 text-slate-600'}`}>
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[request.status] ?? 'bg-muted text-muted-foreground'}`}>
             {STATUS_LABELS[request.status] ?? request.status}
           </span>
           <button
             type="button"
-            className="text-sm font-semibold text-slate-900 hover:underline"
+            className="text-sm font-semibold text-foreground hover:underline"
             onClick={() => onInspect(request)}
           >
             {isSenior || isStaff
@@ -71,12 +69,12 @@ function RequestRow({
               : partyName(request.senior)}
           </button>
         </div>
-        <p className="mt-1 line-clamp-2 text-sm text-slate-600">{request.message}</p>
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 line-clamp-2 text-sm text-foreground/80">{request.message}</p>
+        <p className="mt-1 text-xs text-muted-foreground">
           {new Date(request.createdAt).toLocaleString('pt-BR')}
         </p>
         {request.rejectionReason && (
-          <p className="mt-1 text-xs text-red-600">Motivo: {request.rejectionReason}</p>
+          <p className="mt-1 text-xs text-red-600 dark:text-red-400">Motivo: {request.rejectionReason}</p>
         )}
       </div>
       <div className="flex shrink-0 flex-col gap-2">
@@ -169,38 +167,29 @@ export function RequestsPage() {
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <header className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Pedidos de apadrinhamento</h1>
-        <div className="flex items-center gap-3">
-          <Link
-            to="/settings"
-            className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
-          >
-            Configurações
-          </Link>
-          <ThemeToggle />
-        </div>
       </header>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {!isFreshman && (
-          <div className="inline-flex rounded-md border border-slate-300 p-0.5">
+          <div className="inline-flex rounded-md border border-input p-0.5">
             <button
               type="button"
               onClick={() => setInbox('incoming')}
-              className={`rounded px-3 py-1.5 text-sm ${inbox === 'incoming' ? 'bg-indigo-600 text-white' : 'text-slate-600'}`}
+              className={`rounded px-3 py-1.5 text-sm ${inbox === 'incoming' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
             >
               Recebidos
             </button>
             <button
               type="button"
               onClick={() => setInbox('sent')}
-              className={`rounded px-3 py-1.5 text-sm ${inbox === 'sent' ? 'bg-indigo-600 text-white' : 'text-slate-600'}`}
+              className={`rounded px-3 py-1.5 text-sm ${inbox === 'sent' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
             >
               Enviados
             </button>
           </div>
         )}
         <select
-          className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
+          className="h-10 rounded-md border border-input bg-card px-3 text-sm"
           value={status ?? ''}
           onChange={(e) => setStatus(e.target.value || undefined)}
         >
@@ -213,12 +202,12 @@ export function RequestsPage() {
         </select>
       </div>
 
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       <div className="mt-6 flex flex-col gap-3">
-        {requestsQuery.isLoading && <p className="text-slate-500">Carregando…</p>}
+        {requestsQuery.isLoading && <p className="text-muted-foreground">Carregando…</p>}
         {requestsQuery.data?.length === 0 && (
-          <p className="text-slate-500">Nenhum pedido ainda.</p>
+          <p className="text-muted-foreground">Nenhum pedido ainda.</p>
         )}
         {requestsQuery.data?.map((request) => (
           <RequestRow
@@ -239,26 +228,26 @@ export function RequestsPage() {
 
       {inspecting && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
           onClick={() => setInspecting(null)}
         >
           <div
-            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-lg"
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-popover text-popover-foreground p-6 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">Perfil do candidato</h2>
+              <h2 className="text-lg font-semibold text-foreground">Perfil do candidato</h2>
               <Button variant="outline" size="sm" onClick={() => setInspecting(null)}>
                 Fechar
               </Button>
             </div>
-            <p className="mt-1 text-sm text-slate-500">@{inspecting.freshman?.handle}</p>
-            <p className="mt-2 text-sm text-slate-700">
+            <p className="mt-1 text-sm text-muted-foreground">@{inspecting.freshman?.handle}</p>
+            <p className="mt-2 text-sm text-foreground/80">
               <strong>Mensagem:</strong> {inspecting.message}
             </p>
 
             {inspecting.freshmanProfile ? (
-              <div className="mt-4 rounded-lg border border-slate-200 p-4">
+              <div className="mt-4 rounded-lg border border-border p-4">
                 <div className="flex items-center gap-3">
                   {inspecting.freshmanProfile.avatarUrl ? (
                     <img
@@ -267,24 +256,24 @@ export function RequestsPage() {
                       className="h-14 w-14 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-700">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-lg font-bold text-primary">
                       {(inspecting.freshmanProfile.socialName ?? inspecting.freshman?.handle ?? '?').charAt(0)}
                     </div>
                   )}
                   <div>
-                    <p className="font-semibold text-slate-900">
+                    <p className="font-semibold text-foreground">
                       {inspecting.freshmanProfile.socialName ?? inspecting.freshman?.handle}
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                       Período {inspecting.freshman?.semester ?? inspecting.freshmanProfile.semester}
                     </p>
                   </div>
                 </div>
                 {inspecting.freshmanProfile.tagline && (
-                  <p className="mt-3 text-sm text-slate-600">{inspecting.freshmanProfile.tagline}</p>
+                  <p className="mt-3 text-sm text-foreground/80">{inspecting.freshmanProfile.tagline}</p>
                 )}
                 {inspecting.freshmanProfile.biographyMarkdown && (
-                  <p className="mt-3 line-clamp-4 text-sm text-slate-600">
+                  <p className="mt-3 line-clamp-4 text-sm text-foreground/80">
                     {inspecting.freshmanProfile.biographyMarkdown}
                   </p>
                 )}
@@ -303,7 +292,7 @@ export function RequestsPage() {
                 )}
               </div>
             ) : (
-              <p className="mt-4 text-sm text-slate-400">Nenhum perfil detalhado disponível.</p>
+              <p className="mt-4 text-sm text-muted-foreground">Nenhum perfil detalhado disponível.</p>
             )}
           </div>
         </div>

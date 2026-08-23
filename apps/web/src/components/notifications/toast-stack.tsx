@@ -10,17 +10,17 @@ export function NotificationToastStack() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="pointer-events-auto flex items-start gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-lg"
+          className="pointer-events-auto flex items-start gap-3 rounded-md border border-border bg-popover text-popover-foreground p-3 shadow-lg"
           role="status"
         >
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-slate-900">{toast.title}</p>
-            {toast.body && <p className="mt-0.5 line-clamp-2 text-sm text-slate-600">{toast.body}</p>}
+            <p className="text-sm font-medium text-foreground">{toast.title}</p>
+            {toast.body && <p className="mt-0.5 line-clamp-2 text-sm text-foreground/80">{toast.body}</p>}
           </div>
           <button
             type="button"
             aria-label="Descartar"
-            className="text-slate-400 hover:text-slate-600"
+            className="text-muted-foreground hover:text-foreground"
             onClick={() => dismissToast(toast.id)}
           >
             <svg

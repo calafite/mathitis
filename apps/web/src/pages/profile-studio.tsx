@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
 import type { Profile, ThemePalette, UpdateProfileBody } from '@mathitis/schemas';
 import { useAuth } from '@/contexts/auth-context';
 import { profileApi } from '@/lib/profile-api';
@@ -11,7 +10,6 @@ import { BioEditor } from '@/components/profile/bio-editor';
 import { MediaUpload } from '@/components/profile/media-upload';
 import { RichCardManager } from '@/components/profile/rich-card-manager';
 import { ProfilePreview, type ProfileDraft } from '@/components/profile/profile-preview';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const DEFAULT_THEME: ThemePalette = {
   primaryColor: '#6366f1',
@@ -69,14 +67,14 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs font-medium text-slate-600">{label}</label>
+      <label className="mb-1 block text-xs font-medium text-muted-foreground">{label}</label>
       {children}
     </div>
   );
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="border-b border-slate-200 pb-2 text-sm font-semibold text-slate-800">{children}</h3>;
+  return <h3 className="border-b border-border pb-2 text-sm font-semibold text-foreground">{children}</h3>;
 }
 
 export function ProfileStudioPage() {
@@ -122,38 +120,23 @@ export function ProfileStudioPage() {
   };
 
   if (!profile || !draft) {
-    return <p className="px-4 py-10 text-center text-slate-500">Carregando seu perfil…</p>;
+    return <p className="px-4 py-10 text-center text-muted-foreground">Carregando seu perfil…</p>;
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="text-lg font-semibold text-foreground">
-              Mathitis
-            </Link>
-            <span className="text-sm text-muted-foreground">Estúdio de Perfil</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">{user?.handle}</span>
-            <Link
-              to="/settings"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground"
-            >
-              Configurações
-            </Link>
-            <ThemeToggle />
-            <Button size="sm" disabled={!dirty || saveMutation.isPending} onClick={() => saveMutation.mutate(toUpdateBody(draft))}>
-              {saveMutation.isPending ? 'Salvando…' : dirty ? 'Salvar alterações' : 'Salvo'}
-            </Button>
-          </div>
+    <div className="min-h-screen bg-background">
+      <header className="mb-8">
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold text-foreground">Estúdio de Perfil</h1>
+          <Button size="sm" disabled={!dirty || saveMutation.isPending} onClick={() => saveMutation.mutate(toUpdateBody(draft))}>
+            {saveMutation.isPending ? 'Salvando…' : dirty ? 'Salvar alterações' : 'Salvo'}
+          </Button>
         </div>
       </header>
 
       <main className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-2">
         <div className="space-y-6">
-          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+          <section className="space-y-4 rounded-xl border border-border bg-card p-5">
             <SectionTitle>Cabeçalho &amp; mídia</SectionTitle>
             <div className="space-y-3">
               <Field label="Avatar">
@@ -175,7 +158,7 @@ export function ProfileStudioPage() {
             </div>
           </section>
 
-          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+          <section className="space-y-4 rounded-xl border border-border bg-card p-5">
             <SectionTitle>Identidade</SectionTitle>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="Nome social">
@@ -203,14 +186,14 @@ export function ProfileStudioPage() {
                   type="button"
                   onClick={() => set({ isAcceptingRequests: !draft.isAcceptingRequests })}
                   className={`flex h-10 w-full items-center justify-between rounded-md border px-3 text-sm ${
-                    draft.isAcceptingRequests ? 'border-green-300 bg-green-50 text-green-700' : 'border-slate-300 bg-slate-50 text-slate-500'
+                    draft.isAcceptingRequests ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'border-input bg-muted text-muted-foreground'
                   }`}
                 >
                   {draft.isAcceptingRequests ? 'Aceitando pupilos' : 'Capacidade cheia'}
                 </button>
               </Field>
             </div>
-            <label className="flex items-center gap-2 text-sm text-slate-600">
+            <label className="flex items-center gap-2 text-sm text-foreground/80">
               <input
                 type="checkbox"
                 checked={draft.isDiscoverable}
@@ -221,12 +204,12 @@ export function ProfileStudioPage() {
             </label>
           </section>
 
-          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+          <section className="space-y-4 rounded-xl border border-border bg-card p-5">
             <SectionTitle>Tema &amp; paleta</SectionTitle>
             <ThemePicker value={draft.themePalette} onChange={(themePalette) => set({ themePalette })} />
           </section>
 
-          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+          <section className="space-y-4 rounded-xl border border-border bg-card p-5">
             <SectionTitle>Contato (opcional — exibido publicamente se adicionado)</SectionTitle>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="E-mail de contato">
@@ -247,12 +230,12 @@ export function ProfileStudioPage() {
             </div>
           </section>
 
-          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+          <section className="space-y-4 rounded-xl border border-border bg-card p-5">
             <SectionTitle>Biografia (markdown)</SectionTitle>
             <BioEditor value={draft.biographyMarkdown} onChange={(biographyMarkdown) => set({ biographyMarkdown })} />
           </section>
 
-          <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
+          <section className="space-y-4 rounded-xl border border-border bg-card p-5">
             <SectionTitle>Cards avançados</SectionTitle>
             <RichCardManager />
           </section>
@@ -260,8 +243,8 @@ export function ProfileStudioPage() {
 
         <div className="lg:sticky lg:top-6 lg:self-start">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-700">Pré-visualização ao vivo</h2>
-            {dirty ? <span className="text-xs text-amber-600">Alterações não salvas</span> : null}
+            <h2 className="text-sm font-semibold text-foreground">Pré-visualização ao vivo</h2>
+            {dirty ? <span className="text-xs text-amber-600 dark:text-amber-400">Alterações não salvas</span> : null}
           </div>
           <ProfilePreview
             draft={draft}

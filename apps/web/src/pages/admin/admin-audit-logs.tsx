@@ -84,16 +84,16 @@ export function AdminAuditLogsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Registro de auditoria</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="text-2xl font-bold text-foreground">Registro de auditoria</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Registro cronológico de alterações administrativas e de estado sensível, com autor, alvo
           e conteúdos de antes/depois.
         </p>
       </div>
 
-      <div className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="flex flex-wrap items-end gap-2 rounded-xl border border-border bg-card p-3 shadow-sm">
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-slate-500" htmlFor="audit-action">
+          <label className="text-xs font-medium text-muted-foreground" htmlFor="audit-action">
             Ação
           </label>
           <select
@@ -110,7 +110,7 @@ export function AdminAuditLogsPage() {
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-slate-500" htmlFor="audit-entity">
+          <label className="text-xs font-medium text-muted-foreground" htmlFor="audit-entity">
             Entidade
           </label>
           <select
@@ -127,7 +127,7 @@ export function AdminAuditLogsPage() {
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-slate-500" htmlFor="audit-from">
+          <label className="text-xs font-medium text-muted-foreground" htmlFor="audit-from">
             De
           </label>
           <input
@@ -139,7 +139,7 @@ export function AdminAuditLogsPage() {
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-slate-500" htmlFor="audit-to">
+          <label className="text-xs font-medium text-muted-foreground" htmlFor="audit-to">
             Até
           </label>
           <input
@@ -160,32 +160,32 @@ export function AdminAuditLogsPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <div className="max-h-[65vh] overflow-y-auto">
           {logs.length === 0 ? (
-            <p className="px-4 py-10 text-center text-sm text-slate-500">
+            <p className="px-4 py-10 text-center text-sm text-muted-foreground">
               {logsQuery.isLoading ? 'Carregando…' : 'Nenhuma entrada de auditoria corresponde aos filtros.'}
             </p>
           ) : (
-            <ol className="divide-y divide-slate-100">
+            <ol className="divide-y divide-border">
               {logs.map((log) => (
                 <li key={log.id} className="flex items-center gap-4 px-4 py-3">
-                  <div className="w-40 shrink-0 text-xs text-slate-500">
+                  <div className="w-40 shrink-0 text-xs text-muted-foreground">
                     {formatDate(log.createdAt)}
                   </div>
                   <div className="w-44 shrink-0">
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm font-medium text-foreground">
                       {log.actor ? `@${log.actor.handle}` : 'Sistema'}
                     </p>
-                    <p className="text-xs capitalize text-slate-500">
+                    <p className="text-xs capitalize text-muted-foreground">
                       {log.actor ? (roleLabels[log.actor.role] ?? log.actor.role) : 'automático'}
                     </p>
                   </div>
-                  <div className="w-64 shrink-0 truncate font-mono text-xs text-indigo-700">
+                  <div className="w-64 shrink-0 truncate font-mono text-xs text-primary">
                     {log.action}
                   </div>
-                  <div className="min-w-0 flex-1 truncate text-xs text-slate-500">
-                    <span className="text-slate-400">{log.targetEntity}</span>
+                  <div className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+                    <span className="text-muted-foreground">{log.targetEntity}</span>
                     {log.targetId ? (
                       <>
                         {' '}
@@ -193,7 +193,7 @@ export function AdminAuditLogsPage() {
                       </>
                     ) : null}
                   </div>
-                  <div className="hidden w-32 shrink-0 truncate text-xs text-slate-400 md:block">
+                  <div className="hidden w-32 shrink-0 truncate text-xs text-muted-foreground md:block">
                     {log.ipAddress ?? '—'}
                   </div>
                   <Button
@@ -212,7 +212,7 @@ export function AdminAuditLogsPage() {
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           {total} entradas · página {page} de {totalPages}
         </p>
         <div className="flex gap-2">
@@ -236,16 +236,16 @@ export function AdminAuditLogsPage() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-          <div className="w-full max-w-lg rounded-xl bg-white p-5 shadow-lg">
-            <h2 className="text-lg font-bold text-slate-900">Conteúdo da auditoria</h2>
-            <p className="mt-1 font-mono text-xs text-indigo-700">{selected.action}</p>
-            <p className="mt-1 text-xs text-slate-500">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-xl bg-popover text-popover-foreground p-5 shadow-lg">
+            <h2 className="text-lg font-bold text-foreground">Conteúdo da auditoria</h2>
+            <p className="mt-1 font-mono text-xs text-primary">{selected.action}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
               {formatDate(selected.createdAt)} · @{selected.actor?.handle ?? 'sistema'} ·{' '}
               {selected.targetEntity}
               {selected.targetId ? ` · ${selected.targetId}` : ''}
             </p>
-            <pre className="mt-4 max-h-96 overflow-auto rounded-lg bg-slate-900 p-4 text-xs leading-relaxed text-slate-100">
+            <pre className="mt-4 max-h-96 overflow-auto rounded-lg bg-muted p-4 text-xs leading-relaxed text-foreground">
               {JSON.stringify(selected.details, null, 2)}
             </pre>
             <div className="mt-5 flex justify-end">

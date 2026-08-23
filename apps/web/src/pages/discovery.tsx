@@ -1,17 +1,15 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SeniorSummary, Tag } from '@mathitis/schemas';
 import { useAuth } from '@/contexts/auth-context';
 import { discoveryApi } from '@/lib/discovery-api';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { MentorProfileModal } from '@/components/profile/mentor-profile-modal';
 
 function avatar(src: string | null, alt: string) {
   if (!src) {
     return (
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-xl font-bold text-indigo-700">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground">
         {alt.charAt(0).toUpperCase()}
       </div>
     );
@@ -39,31 +37,39 @@ function SeniorCard({
   const isFreshman = role === 'freshman';
 
   return (
-    <div className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Ver perfil completo de ${senior.socialName ?? senior.handle}`}
+      onClick={onViewProfile}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onViewProfile();
+        }
+      }}
+      className="flex cursor-pointer flex-col rounded-xl border border-border bg-card p-4 shadow-sm transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
       <div className="flex items-start gap-3">
         {avatar(senior.avatarThumbnailUrl, senior.socialName ?? senior.handle)}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onViewProfile}
-              className="truncate font-semibold text-slate-900 hover:underline focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded"
-            >
+            <span className="truncate font-semibold text-foreground">
               {senior.socialName ?? senior.handle}
-            </button>
+            </span>
             {score !== undefined && (
-              <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">
+              <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
                 {Math.round(score)}% de compatibilidade
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             @{senior.handle} · Período {senior.semester}
           </p>
         </div>
       </div>
 
-      {senior.tagline && <p className="mt-2 text-sm text-slate-700">{senior.tagline}</p>}
+      {senior.tagline && <p className="mt-2 text-sm text-foreground/80">{senior.tagline}</p>}
 
       {senior.tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
@@ -79,20 +85,20 @@ function SeniorCard({
         </div>
       )}
 
-      <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
+      <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
         <span>💬 {senior.effortScore} de esforço</span>
         <span>👁 {senior.profileViews} visualizações</span>
         <span>⬆ {senior.bumpCount} impulsos</span>
-        <span className={senior.isAcceptingRequests ? 'text-emerald-600' : 'text-slate-400'}>
+        <span className={senior.isAcceptingRequests ? 'text-emerald-500' : 'text-muted-foreground/60'}>
           {senior.isAcceptingRequests ? 'Aceitando pedidos' : 'Fechado a pedidos'}
         </span>
       </div>
 
       {matchReasons && matchReasons.length > 0 && (
-        <ul className="mt-3 space-y-1 border-t border-slate-100 pt-2">
+        <ul className="mt-3 space-y-1 border-t border-border pt-2">
           {matchReasons.map((reason) => (
-            <li key={reason} className="flex items-start gap-1.5 text-xs text-slate-600">
-              <span aria-hidden className="mt-0.5 text-indigo-500">
+            <li key={reason} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+              <span aria-hidden className="mt-0.5 text-primary">
                 ✦
               </span>
               <span>{reason}</span>
@@ -107,7 +113,10 @@ function SeniorCard({
             variant="outline"
             size="sm"
             disabled={bumping}
-            onClick={onBump}
+            onClick={(e) => {
+              e.stopPropagation();
+              onBump();
+            }}
             className="w-full"
           >
             {bumping ? '…' : 'Impulsionar'}
@@ -208,19 +217,12 @@ export function DiscoveryPage() {
               {showRecommendations ? 'Mostrar catálogo' : 'Mostrar recomendações'}
             </Button>
           )}
-          <Link
-            to="/settings"
-            className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
-          >
-            Configurações
-          </Link>
-          <ThemeToggle />
         </div>
       </header>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <select
-          className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
+          className="h-10 rounded-md border border-input bg-background px-3 text-foreground text-sm"
           value={semester ?? ''}
           onChange={(e) => setSemester(e.target.value ? Number(e.target.value) : undefined)}
         >
@@ -232,7 +234,7 @@ export function DiscoveryPage() {
           ))}
         </select>
         <select
-          className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
+          className="h-10 rounded-md border border-input bg-background px-3 text-foreground text-sm"
           value={availability ?? ''}
           onChange={(e) =>
             setAvailability(e.target.value ? (e.target.value as 'accepting' | 'full') : undefined)
@@ -245,9 +247,9 @@ export function DiscoveryPage() {
         {groupedTags.map(([category, tags]) => (
           <div
             key={category}
-            className="flex flex-wrap items-center gap-2 rounded-md border border-slate-200 px-2 py-1.5"
+            className="flex flex-wrap items-center gap-2 rounded-md border border-border px-2 py-1.5"
           >
-            <span className="text-xs font-medium text-slate-500">{category}</span>
+            <span className="text-xs font-medium text-muted-foreground">{category}</span>
             {tags.map((tag) => (
               <button
                 key={tag.id}
@@ -255,8 +257,8 @@ export function DiscoveryPage() {
                 onClick={() => toggleTag(tag.id)}
                 className={`rounded-full px-2 py-0.5 text-xs ${
                   selectedTags.includes(tag.id)
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-slate-100 text-slate-700'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
                 }`}
               >
                 {tag.name}
@@ -268,7 +270,7 @@ export function DiscoveryPage() {
 
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {seniorsQuery.isLoading && <p className="text-slate-500">Carregando…</p>}
+        {seniorsQuery.isLoading && <p className="text-muted-foreground">Carregando…</p>}
         {seniorsQuery.data?.map((senior) => (
           <SeniorCard
             key={senior.userId}

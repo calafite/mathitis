@@ -23,7 +23,7 @@ export function AdminLayout() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-background">
       <aside className="flex w-60 flex-col border-r border-border bg-card">
         <div className="border-b border-border px-4 py-4">
           <div className="flex items-center justify-between">
@@ -49,8 +49,8 @@ export function AdminLayout() {
               className={({ isActive }) =>
                 `block rounded-md px-3 py-2 text-sm font-medium ${
                   isActive
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 }`
               }
             >
@@ -58,7 +58,7 @@ export function AdminLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="space-y-2 border-t border-slate-200 p-3">
+        <div className="space-y-2 border-t border-border p-3">
           <Button variant="outline" size="sm" className="w-full" onClick={() => navigate('/')}>
             Voltar ao app
           </Button>

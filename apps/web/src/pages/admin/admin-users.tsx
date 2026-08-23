@@ -81,8 +81,8 @@ export function AdminUsersPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Gerenciamento de usuários</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="text-2xl font-bold text-foreground">Gerenciamento de usuários</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Pesquise, modere, suspenda ou anonimize contas. A anonimização preserva o grafo de
           linhagem de mentorias.
         </p>
@@ -117,12 +117,12 @@ export function AdminUsersPage() {
             </option>
           ))}
         </select>
-        {error && <span className="text-sm text-red-600">{error}</span>}
+        {error && <span className="text-sm text-red-600 dark:text-red-400">{error}</span>}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
+          <thead className="border-b border-border bg-muted text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-4 py-3">Membro</th>
               <th className="px-4 py-3">Papel</th>
@@ -131,12 +131,12 @@ export function AdminUsersPage() {
               <th className="px-4 py-3 text-right">Ações</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border">
             {users.map((user) => (
               <tr key={user.id}>
                 <td className="px-4 py-3">
-                  <p className="font-medium text-slate-900">{user.socialName ?? user.handle}</p>
-                  <p className="text-xs text-slate-500">@{user.handle} · {user.email}</p>
+                  <p className="font-medium text-foreground">{user.socialName ?? user.handle}</p>
+                  <p className="text-xs text-muted-foreground">@{user.handle} · {user.email}</p>
                 </td>
                 <td className="px-4 py-3 capitalize">{roleLabels[user.role] ?? user.role}</td>
                 <td className="px-4 py-3">{user.semester}</td>
@@ -144,10 +144,10 @@ export function AdminUsersPage() {
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       user.status === 'active'
-                        ? 'bg-emerald-100 text-emerald-700'
+                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
                         : user.status === 'suspended'
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-slate-100 text-slate-600'
+                          ? 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300'
+                          : 'bg-muted text-muted-foreground'
                     }`}
                   >
                     {statusLabels[user.status] ?? user.status}
@@ -162,7 +162,7 @@ export function AdminUsersPage() {
             ))}
             {users.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                   {usersQuery.isLoading ? 'Carregando…' : 'Nenhum usuário corresponde aos filtros.'}
                 </td>
               </tr>
@@ -172,19 +172,19 @@ export function AdminUsersPage() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-lg">
-            <h2 className="text-lg font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-popover text-popover-foreground p-5 shadow-lg">
+            <h2 className="text-lg font-bold text-foreground">
               Gerenciar {selected.socialName ?? selected.handle}
             </h2>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               @{selected.handle} · {roleLabels[selected.role] ?? selected.role} ·{' '}
               {statusLabels[selected.status] ?? selected.status}
             </p>
 
             <div className="mt-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">Status da conta</span>
+                <span className="text-sm text-foreground/80">Status da conta</span>
                 <div className="flex gap-2">
                   {(['active', 'suspended'] as const).map((status) => (
                     <Button
@@ -201,7 +201,7 @@ export function AdminUsersPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">Moderar conteúdo</span>
+                <span className="text-sm text-foreground/80">Moderar conteúdo</span>
                 <div className="flex gap-2">
                   <Button
                     size="sm"
@@ -226,8 +226,8 @@ export function AdminUsersPage() {
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 pt-3">
-                <p className="text-xs text-slate-500">
+              <div className="border-t border-border pt-3">
+                <p className="text-xs text-muted-foreground">
                   A anonimização remove irreversivelmente os dados pessoais, mantendo o grafo de
                   linhagem.
                 </p>
@@ -243,7 +243,7 @@ export function AdminUsersPage() {
               </div>
             </div>
 
-            {error && <p className="mt-3 text-sm text-red-600">{flagError(error)}</p>}
+            {error && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{flagError(error)}</p>}
 
             <div className="mt-5 flex justify-end">
               <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>

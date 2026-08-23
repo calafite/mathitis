@@ -90,15 +90,15 @@ export function BioEditor({ value, onChange }: BioEditorProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-md border border-input bg-white">
-      <div className="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 px-2 py-1.5">
+    <div className="overflow-hidden rounded-md border border-input bg-card">
+      <div className="flex flex-wrap items-center gap-1 border-b border-border bg-muted px-2 py-1.5">
         {TOOLS.map((tool) => (
           <button
             key={tool.title}
             type="button"
             title={tool.title}
             onClick={() => applyTool(tool)}
-            className="rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200"
+            className="rounded px-2 py-1 text-xs font-medium text-foreground/80 hover:bg-accent hover:text-accent-foreground"
           >
             {tool.label}
           </button>
@@ -110,7 +110,7 @@ export function BioEditor({ value, onChange }: BioEditorProps) {
         onChange={(e) => onChange(e.target.value)}
         rows={10}
         placeholder={'Conte sua história em markdown…\n\n[Destaque-me]{color=#ec4899}  [fã de matemática]{badge=Álgebra}\n\n> [!TIP]\n> Uma dica que vale a pena compartilhar.'}
-        className="w-full resize-y bg-white px-3 py-2 font-mono text-sm text-slate-800 outline-none"
+        className="w-full resize-y bg-card px-3 py-2 font-mono text-sm text-foreground outline-none placeholder:text-muted-foreground"
       />
     </div>
   );

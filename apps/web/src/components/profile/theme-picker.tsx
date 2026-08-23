@@ -27,7 +27,7 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
             type="button"
             aria-label={`Aplicar predefinição de tema ${index + 1}`}
             onClick={() => onChange(preset)}
-            className="h-8 w-8 rounded-full border border-slate-300 transition hover:scale-110"
+            className="h-8 w-8 rounded-full border border-border transition hover:scale-110"
             style={{ background: `linear-gradient(135deg, ${preset.primaryColor}, ${preset.accentColor})` }}
           />
         ))}
@@ -35,36 +35,36 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
 
       <div className="grid grid-cols-3 gap-3">
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Primária</span>
+          <span className="mb-1 block text-xs font-medium text-muted-foreground">Primária</span>
           <input
             type="color"
             value={value.primaryColor}
             onChange={(e) => onChange({ ...value, primaryColor: e.target.value })}
-            className="h-9 w-full cursor-pointer rounded-md border border-input bg-white"
+            className="h-9 w-full cursor-pointer rounded-md border border-input bg-background"
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Destaque</span>
+          <span className="mb-1 block text-xs font-medium text-muted-foreground">Destaque</span>
           <input
             type="color"
             value={value.accentColor}
             onChange={(e) => onChange({ ...value, accentColor: e.target.value })}
-            className="h-9 w-full cursor-pointer rounded-md border border-input bg-white"
+            className="h-9 w-full cursor-pointer rounded-md border border-input bg-background"
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Emblema</span>
+          <span className="mb-1 block text-xs font-medium text-muted-foreground">Emblema</span>
           <input
             type="color"
             value={value.badgeColor}
             onChange={(e) => onChange({ ...value, badgeColor: e.target.value })}
-            className="h-9 w-full cursor-pointer rounded-md border border-input bg-white"
+            className="h-9 w-full cursor-pointer rounded-md border border-input bg-background"
           />
         </label>
       </div>
 
       <div>
-        <span className="mb-1 block text-xs font-medium text-slate-600">Estilo do cartão</span>
+        <span className="mb-1 block text-xs font-medium text-muted-foreground">Estilo do cartão</span>
         <div className="flex gap-2">
           {CARD_STYLES.map((style) => (
             <button
@@ -73,8 +73,8 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
               onClick={() => onChange({ ...value, cardStyle: style.value })}
               className={`rounded-md border px-3 py-1.5 text-sm transition ${
                 value.cardStyle === style.value
-                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                  : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  ? 'border-primary bg-primary/15 text-primary'
+                  : 'border-border text-muted-foreground hover:bg-muted'
               }`}
             >
               {style.label}

@@ -18,9 +18,9 @@ describe('ThemePicker', () => {
     expect(primary.value).toBe('#6366f1');
 
     const solid = screen.getByRole('button', { name: 'Sólido' });
-    expect(solid.className).not.toContain('border-indigo-500');
+    expect(solid.className).not.toContain('border-primary');
     const glass = screen.getByRole('button', { name: 'Vidro fosco' });
-    expect(glass.className).toContain('border-indigo-500');
+    expect(glass.className).toContain('border-primary');
   });
 
   it('applies a preset palette when a preset swatch is clicked', async () => {
