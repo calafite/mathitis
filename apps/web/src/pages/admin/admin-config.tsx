@@ -6,28 +6,28 @@ import { Button } from '@/components/ui/button';
 
 const configLabels: Record<keyof SystemConfig, { label: string; hint: string }> = {
   REQUIRE_ADMIN_REQUEST_APPROVAL: {
-    label: 'Require admin approval for requests',
-    hint: 'When enabled, senior accepts are held until an administrator signs off.',
+    label: 'Exigir aprovação administrativa para pedidos',
+    hint: 'Quando ativado, os aceites de veteranos ficam retidos até a validação de um administrador.',
   },
   REGISTRATION_ENABLED: {
-    label: 'Allow new registrations',
-    hint: 'When disabled, the sign-up flow silently stops accepting new accounts.',
+    label: 'Permitir novos registros',
+    hint: 'Quando desativado, o fluxo de cadastro deixa de aceitar novas contas silenciosamente.',
   },
   DISCOVERY_ACTIVE: {
-    label: 'Discovery season active',
-    hint: 'Opens or closes the senior discovery catalog for the matching season.',
+    label: 'Temporada de descoberta ativa',
+    hint: 'Abre ou fecha o catálogo de descoberta de veteranos para a temporada correspondente.',
   },
   EMAIL_NOTIFICATIONS_ENABLED: {
-    label: 'Email notifications enabled',
-    hint: 'Master switch for transactional email delivery.',
+    label: 'Notificações por e-mail ativadas',
+    hint: 'Interruptor mestre para o envio de e-mails transacionais.',
   },
   MAX_FRESHMAN_REQUESTS: {
-    label: 'Max requests per freshman',
-    hint: 'Simultaneous active requests a freshman may have (1–100).',
+    label: 'Máx. de pedidos por calouro',
+    hint: 'Pedidos ativos simultâneos que um calouro pode ter (1–100).',
   },
   MAX_SENIOR_MENTEES: {
-    label: 'Default mentee capacity per senior',
-    hint: 'Global default for how many freshmen a senior can mentor (1–100).',
+    label: 'Capacidade padrão de mentorados por veterano',
+    hint: 'Padrão global de quantos calouros um veterano pode orientar (1–100).',
   },
 };
 
@@ -63,7 +63,7 @@ export function AdminConfigPage() {
       window.setTimeout(() => setSaved(false), 2000);
     },
     onError: (err: unknown) => {
-      setError(err instanceof Error ? err.message : 'Failed to save configuration');
+      setError(err instanceof Error ? err.message : 'Falha ao salvar a configuração');
     },
   });
 
@@ -72,15 +72,15 @@ export function AdminConfigPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">System configuration</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Configuração do sistema</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Dynamic settings applied at runtime. Every change is recorded in the audit log with a
-          before/after diff.
+          Configurações dinâmicas aplicadas em tempo de execução. Cada alteração é registrada no
+          registro de auditoria com um diff de antes/depois.
         </p>
       </div>
 
       {configQuery.isLoading ? (
-        <p className="text-sm text-slate-500">Loading…</p>
+        <p className="text-sm text-slate-500">Carregando…</p>
       ) : (
         <div className="max-w-2xl space-y-3">
           {booleanKeys.map((key) => (
@@ -128,9 +128,9 @@ export function AdminConfigPage() {
               disabled={!dirty || saveMutation.isPending}
               onClick={() => saveMutation.mutate(draft)}
             >
-              {saveMutation.isPending ? 'Saving…' : 'Save changes'}
+              {saveMutation.isPending ? 'Salvando…' : 'Salvar alterações'}
             </Button>
-            {saved && <span className="text-sm text-emerald-600">Saved.</span>}
+            {saved && <span className="text-sm text-emerald-600">Salvo.</span>}
             {error && <span className="text-sm text-red-600">{error}</span>}
           </div>
         </div>

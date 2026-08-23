@@ -4,12 +4,19 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const navItems = [
-  { to: '/admin', label: 'Dashboard', end: true },
-  { to: '/admin/users', label: 'Users' },
-  { to: '/admin/approvals', label: 'Approvals' },
-  { to: '/admin/config', label: 'Configuration' },
-  { to: '/admin/audit-logs', label: 'Audit log' },
+  { to: '/admin', label: 'Painel', end: true },
+  { to: '/admin/users', label: 'Usuários' },
+  { to: '/admin/approvals', label: 'Aprovações' },
+  { to: '/admin/config', label: 'Configuração' },
+  { to: '/admin/audit-logs', label: 'Registro de auditoria' },
 ];
+
+const roleLabels: Record<string, string> = {
+  administrator: 'Administrador',
+  developer: 'Desenvolvedor',
+  freshman: 'Calouro',
+  senior: 'Veterano',
+};
 
 export function AdminLayout() {
   const { user, logout } = useAuth();
@@ -30,7 +37,7 @@ export function AdminLayout() {
             <ThemeToggle />
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            {user?.socialName ?? user?.handle} · {user?.role}
+            {user?.socialName ?? user?.handle} · {user ? (roleLabels[user.role] ?? user.role) : ''}
           </p>
         </div>
         <nav className="flex-1 space-y-1 px-2 py-4">
@@ -53,10 +60,10 @@ export function AdminLayout() {
         </nav>
         <div className="space-y-2 border-t border-slate-200 p-3">
           <Button variant="outline" size="sm" className="w-full" onClick={() => navigate('/')}>
-            Back to app
+            Voltar ao app
           </Button>
           <Button variant="ghost" size="sm" className="w-full" onClick={() => void logout()}>
-            Sign out
+            Sair
           </Button>
         </div>
       </aside>

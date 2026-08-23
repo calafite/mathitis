@@ -41,19 +41,19 @@ export function AdminApprovalsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Approval queue</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Fila de aprovação</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Senior accepts that require an administrator sign-off. Approving creates the mentorship;
-          denying rejects the request.
+          Aceites de veteranos que exigem validação de um administrador. Aprovar cria a mentoria;
+          recusar rejeita o pedido.
         </p>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="space-y-3">
-        {approvalsQuery.isLoading && <p className="text-sm text-slate-500">Loading…</p>}
+        {approvalsQuery.isLoading && <p className="text-sm text-slate-500">Carregando…</p>}
         {!approvalsQuery.isLoading && approvals.length === 0 && (
-          <p className="text-sm text-slate-500">No requests awaiting approval.</p>
+          <p className="text-sm text-slate-500">Nenhum pedido aguardando aprovação.</p>
         )}
         {approvals.map((approval) => (
           <div
@@ -63,12 +63,12 @@ export function AdminApprovalsPage() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="font-medium text-slate-900">
-                  {approval.freshman?.socialName ?? approval.freshman?.handle ?? 'Unknown freshman'}
+                  {approval.freshman?.socialName ?? approval.freshman?.handle ?? 'Calouro desconhecido'}
                   <span className="mx-2 text-slate-400">→</span>
-                  {approval.senior?.socialName ?? approval.senior?.handle ?? 'Unknown senior'}
+                  {approval.senior?.socialName ?? approval.senior?.handle ?? 'Veterano desconhecido'}
                 </p>
                 <p className="text-xs text-slate-500">
-                  @{approval.freshman?.handle} (semester {approval.freshman?.semester}) asked{' '}
+                  @{approval.freshman?.handle} (semestre {approval.freshman?.semester}) pediu{' '}
                   @{approval.senior?.handle} · {new Date(approval.createdAt).toLocaleString()}
                 </p>
               </div>
@@ -78,7 +78,7 @@ export function AdminApprovalsPage() {
                   disabled={decideMutation.isPending}
                   onClick={() => decideMutation.mutate({ id: approval.id, decision: 'approve' })}
                 >
-                  Approve
+                  Aprovar
                 </Button>
                 <Button
                   variant="outline"
@@ -86,7 +86,7 @@ export function AdminApprovalsPage() {
                   disabled={decideMutation.isPending}
                   onClick={() => decideMutation.mutate({ id: approval.id, decision: 'deny' })}
                 >
-                  Deny
+                  Recusar
                 </Button>
               </div>
             </div>

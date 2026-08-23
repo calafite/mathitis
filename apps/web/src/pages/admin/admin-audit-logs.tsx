@@ -21,6 +21,13 @@ const actionFilters = [
 
 const entityFilters = ['', 'user', 'profile', 'system_config', 'mentorship_request'] as const;
 
+const roleLabels: Record<string, string> = {
+  freshman: 'Calouro',
+  senior: 'Veterano',
+  administrator: 'Administrador',
+  developer: 'Desenvolvedor',
+};
+
 function formatDate(value: string | Date) {
   return new Date(value).toLocaleString(undefined, {
     dateStyle: 'medium',
@@ -77,17 +84,17 @@ export function AdminAuditLogsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Audit log</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Registro de auditoria</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Chronological record of administrative and sensitive state changes, with actor, target,
-          and before/after payloads.
+          Registro cronológico de alterações administrativas e de estado sensível, com autor, alvo
+          e conteúdos de antes/depois.
         </p>
       </div>
 
       <div className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-slate-500" htmlFor="audit-action">
-            Action
+            Ação
           </label>
           <select
             id="audit-action"
@@ -97,14 +104,14 @@ export function AdminAuditLogsPage() {
           >
             {actionFilters.map((action) => (
               <option key={action} value={action}>
-                {action === '' ? 'All actions' : action}
+                {action === '' ? 'Todas as ações' : action}
               </option>
             ))}
           </select>
         </div>
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-slate-500" htmlFor="audit-entity">
-            Entity
+            Entidade
           </label>
           <select
             id="audit-entity"
@@ -114,14 +121,14 @@ export function AdminAuditLogsPage() {
           >
             {entityFilters.map((entity) => (
               <option key={entity} value={entity}>
-                {entity === '' ? 'All entities' : entity}
+                {entity === '' ? 'Todas as entidades' : entity}
               </option>
             ))}
           </select>
         </div>
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-slate-500" htmlFor="audit-from">
-            From
+            De
           </label>
           <input
             id="audit-from"
@@ -133,7 +140,7 @@ export function AdminAuditLogsPage() {
         </div>
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-slate-500" htmlFor="audit-to">
-            To
+            Até
           </label>
           <input
             id="audit-to"
@@ -145,10 +152,10 @@ export function AdminAuditLogsPage() {
         </div>
         <div className="flex gap-2">
           <Button size="sm" onClick={applyFilters}>
-            Apply
+            Aplicar
           </Button>
           <Button size="sm" variant="outline" onClick={resetFilters}>
-            Reset
+            Limpar
           </Button>
         </div>
       </div>
@@ -157,7 +164,7 @@ export function AdminAuditLogsPage() {
         <div className="max-h-[65vh] overflow-y-auto">
           {logs.length === 0 ? (
             <p className="px-4 py-10 text-center text-sm text-slate-500">
-              {logsQuery.isLoading ? 'Loading…' : 'No audit entries match the filters.'}
+              {logsQuery.isLoading ? 'Carregando…' : 'Nenhuma entrada de auditoria corresponde aos filtros.'}
             </p>
           ) : (
             <ol className="divide-y divide-slate-100">
@@ -168,10 +175,10 @@ export function AdminAuditLogsPage() {
                   </div>
                   <div className="w-44 shrink-0">
                     <p className="text-sm font-medium text-slate-900">
-                      {log.actor ? `@${log.actor.handle}` : 'System'}
+                      {log.actor ? `@${log.actor.handle}` : 'Sistema'}
                     </p>
                     <p className="text-xs capitalize text-slate-500">
-                      {log.actor ? log.actor.role : 'automated'}
+                      {log.actor ? (roleLabels[log.actor.role] ?? log.actor.role) : 'automático'}
                     </p>
                   </div>
                   <div className="w-64 shrink-0 truncate font-mono text-xs text-indigo-700">
@@ -195,7 +202,7 @@ export function AdminAuditLogsPage() {
                     onClick={() => setSelected(log)}
                     disabled={!log.details}
                   >
-                    Payload
+                    Conteúdo
                   </Button>
                 </li>
               ))}
@@ -206,7 +213,7 @@ export function AdminAuditLogsPage() {
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-slate-500">
-          {total} entries · page {page} of {totalPages}
+          {total} entradas · página {page} de {totalPages}
         </p>
         <div className="flex gap-2">
           <Button
@@ -215,7 +222,7 @@ export function AdminAuditLogsPage() {
             disabled={offset === 0}
             onClick={() => setOffset((value) => Math.max(0, value - PAGE_SIZE))}
           >
-            Previous
+            Anterior
           </Button>
           <Button
             size="sm"
@@ -223,7 +230,7 @@ export function AdminAuditLogsPage() {
             disabled={offset + PAGE_SIZE >= total}
             onClick={() => setOffset((value) => value + PAGE_SIZE)}
           >
-            Next
+            Próxima
           </Button>
         </div>
       </div>
@@ -231,10 +238,10 @@ export function AdminAuditLogsPage() {
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
           <div className="w-full max-w-lg rounded-xl bg-white p-5 shadow-lg">
-            <h2 className="text-lg font-bold text-slate-900">Audit payload</h2>
+            <h2 className="text-lg font-bold text-slate-900">Conteúdo da auditoria</h2>
             <p className="mt-1 font-mono text-xs text-indigo-700">{selected.action}</p>
             <p className="mt-1 text-xs text-slate-500">
-              {formatDate(selected.createdAt)} · @{selected.actor?.handle ?? 'system'} ·{' '}
+              {formatDate(selected.createdAt)} · @{selected.actor?.handle ?? 'sistema'} ·{' '}
               {selected.targetEntity}
               {selected.targetId ? ` · ${selected.targetId}` : ''}
             </p>
@@ -243,7 +250,7 @@ export function AdminAuditLogsPage() {
             </pre>
             <div className="mt-5 flex justify-end">
               <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>
-                Close
+                Fechar
               </Button>
             </div>
           </div>

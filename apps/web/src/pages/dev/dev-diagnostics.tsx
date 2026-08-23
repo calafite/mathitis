@@ -18,7 +18,7 @@ function StatusBadge({ ok }: { ok: boolean }) {
         ok ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
       }`}
     >
-      {ok ? 'ok' : 'error'}
+      {ok ? 'ok' : 'erro'}
     </span>
   );
 }
@@ -75,9 +75,9 @@ export function DevDiagnosticsPage() {
     <div className="min-h-screen bg-slate-950 p-6 text-slate-100">
       <header className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Developer diagnostics</h1>
+          <h1 className="text-2xl font-bold text-foreground">Diagnósticos de desenvolvedor</h1>
           <p className="text-sm text-muted-foreground">
-            Runtime telemetry. No personal data is exposed here.
+            Telemetria em tempo de execução. Nenhum dado pessoal é exposto aqui.
           </p>
         </div>
         <div className="flex gap-2">
@@ -88,7 +88,7 @@ export function DevDiagnosticsPage() {
             className="border-border text-foreground"
             onClick={() => navigate('/')}
           >
-            Back to app
+            Voltar ao app
           </Button>
           <Button
             variant="ghost"
@@ -96,7 +96,7 @@ export function DevDiagnosticsPage() {
             className="text-muted-foreground"
             onClick={() => void logout()}
           >
-            Sign out
+            Sair
           </Button>
         </div>
       </header>
@@ -104,13 +104,13 @@ export function DevDiagnosticsPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <section className="rounded-xl border border-slate-800 bg-slate-900 p-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold">Service health</h2>
+            <h2 className="font-semibold">Saúde do serviço</h2>
             <StatusBadge ok={health?.status === 'ok'} />
           </div>
           {health ? (
             <dl className="mt-3 space-y-2 text-sm">
               <div className="flex justify-between">
-                <dt className="text-slate-400">Database</dt>
+                <dt className="text-slate-400">Banco de dados</dt>
                 <dd>
                   <StatusBadge ok={health.checks.database === 'ok'} />
                 </dd>
@@ -122,29 +122,29 @@ export function DevDiagnosticsPage() {
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-slate-400">Queue</dt>
+                <dt className="text-slate-400">Fila</dt>
                 <dd>
                   <StatusBadge ok={health.checks.queue === 'ok'} />
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-slate-400">Uptime</dt>
+                <dt className="text-slate-400">Tempo ativo</dt>
                 <dd>{health.uptimeSeconds}s</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-slate-400">Checked at</dt>
+                <dt className="text-slate-400">Verificado às</dt>
                 <dd>{new Date(health.timestamp).toLocaleTimeString()}</dd>
               </div>
             </dl>
           ) : (
             <p className="mt-3 text-sm text-slate-400">
-              {healthQuery.isLoading ? 'Loading…' : 'Unavailable'}
+              {healthQuery.isLoading ? 'Carregando…' : 'Indisponível'}
             </p>
           )}
         </section>
 
         <section className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <h2 className="font-semibold">Process</h2>
+          <h2 className="font-semibold">Processo</h2>
           {metrics ? (
             <dl className="mt-3 space-y-2 text-sm">
               <div className="flex justify-between">
@@ -160,7 +160,7 @@ export function DevDiagnosticsPage() {
                 <dd>{formatBytes(metrics.process.memory.rss)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-slate-400">Heap used</dt>
+                <dt className="text-slate-400">Heap usado</dt>
                 <dd>{formatBytes(metrics.process.memory.heapUsed)}</dd>
               </div>
               <div className="flex justify-between">
@@ -169,82 +169,82 @@ export function DevDiagnosticsPage() {
               </div>
             </dl>
           ) : (
-            <p className="mt-3 text-sm text-slate-400">Loading…</p>
+            <p className="mt-3 text-sm text-slate-400">Carregando…</p>
           )}
         </section>
 
         <section className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <h2 className="font-semibold">Database pool</h2>
+          <h2 className="font-semibold">Pool do banco de dados</h2>
           {metrics ? (
             <dl className="mt-3 space-y-2 text-sm">
               <div className="flex justify-between">
-                <dt className="text-slate-400">Active connections</dt>
+                <dt className="text-slate-400">Conexões ativas</dt>
                 <dd>{metrics.database.activeConnections}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-slate-400">Idle connections</dt>
+                <dt className="text-slate-400">Conexões ociosas</dt>
                 <dd>{metrics.database.idleConnections}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-slate-400">Total connections</dt>
+                <dt className="text-slate-400">Total de conexões</dt>
                 <dd>{metrics.database.totalConnections}</dd>
               </div>
             </dl>
           ) : (
-            <p className="mt-3 text-sm text-slate-400">Loading…</p>
+            <p className="mt-3 text-sm text-slate-400">Carregando…</p>
           )}
         </section>
 
         <section className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <h2 className="font-semibold">Email queue</h2>
+          <h2 className="font-semibold">Fila de e-mails</h2>
           {metrics ? (
             <dl className="mt-3 space-y-2 text-sm">
               <div className="flex justify-between">
-                <dt className="text-slate-400">Waiting</dt>
+                <dt className="text-slate-400">Aguardando</dt>
                 <dd>{metrics.queue.waiting}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-slate-400">Active</dt>
+                <dt className="text-slate-400">Ativos</dt>
                 <dd>{metrics.queue.active}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-slate-400">Completed</dt>
+                <dt className="text-slate-400">Concluídos</dt>
                 <dd>{metrics.queue.completed}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-slate-400">Failed</dt>
+                <dt className="text-slate-400">Falhados</dt>
                 <dd>{metrics.queue.failed}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-slate-400">Delayed</dt>
+                <dt className="text-slate-400">Atrasados</dt>
                 <dd>{metrics.queue.delayed}</dd>
               </div>
               <div className="flex justify-between border-t border-slate-800 pt-2">
-                <dt className="text-slate-400">Throughput (completed / failed)</dt>
+                <dt className="text-slate-400">Vazão (concluídos / falhados)</dt>
                 <dd>
                   {metrics.queue.throughput.completed} / {metrics.queue.throughput.failed}
                 </dd>
               </div>
             </dl>
           ) : (
-            <p className="mt-3 text-sm text-slate-400">Loading…</p>
+            <p className="mt-3 text-sm text-slate-400">Carregando…</p>
           )}
         </section>
       </div>
 
       <section className="mt-4 rounded-xl border border-slate-800 bg-slate-900 p-4">
-        <h2 className="font-semibold">Network exposure</h2>
+        <h2 className="font-semibold">Exposição de rede</h2>
         {metrics ? (
           <div className="mt-3 space-y-2 text-sm">
             <p className="text-slate-400">
-              Listening ports:{' '}
+              Portas em escuta:{' '}
               {metrics.network.listeningPorts.length > 0
                 ? metrics.network.listeningPorts.join(', ')
-                : 'none'}
+                : 'nenhuma'}
             </p>
             {metrics.network.exposedPorts.length > 0 && (
               <p className="text-amber-300">
-                Exposed beyond 80/443: {metrics.network.exposedPorts.join(', ')}
+                Exposto além de 80/443: {metrics.network.exposedPorts.join(', ')}
               </p>
             )}
             {metrics.network.warnings.map((warning) => (
@@ -254,21 +254,23 @@ export function DevDiagnosticsPage() {
             ))}
           </div>
         ) : (
-          <p className="mt-3 text-sm text-slate-400">Loading…</p>
+          <p className="mt-3 text-sm text-slate-400">Carregando…</p>
         )}
       </section>
 
       <section className="mt-4 rounded-xl border border-slate-800 bg-slate-900 p-4">
-        <h2 className="font-semibold">Local mail (no SMTP)</h2>
+        <h2 className="font-semibold">Caixa de correio local (sem SMTP)</h2>
         <p className="mt-1 text-sm text-slate-400">
-          Emails the dev sender would dispatch are captured here, so you can open verification and
-          password-reset links without running a mail server.
+          Os e-mails que o remetente de desenvolvimento despacharia são capturados aqui, para que
+          você possa abrir os links de verificação e de redefinição de senha sem executar um
+          servidor de e-mail.
         </p>
         {mailboxQuery.isLoading ? (
-          <p className="mt-3 text-sm text-slate-400">Loading…</p>
+          <p className="mt-3 text-sm text-slate-400">Carregando…</p>
         ) : mailboxQuery.data?.emails.length === 0 ? (
           <p className="mt-3 text-sm text-slate-400">
-            No emails captured yet. Register a new account to see its verification link.
+            Nenhum e-mail capturado ainda. Registre uma nova conta para ver o link de verificação
+            dela.
           </p>
         ) : (
           <ul className="mt-3 space-y-3">

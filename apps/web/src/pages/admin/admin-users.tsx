@@ -9,6 +9,20 @@ import { Input } from '@/components/ui/input';
 const roleFilters = ['', 'freshman', 'senior', 'administrator', 'developer'] as const;
 const statusFilters = ['', 'pending_verification', 'active', 'suspended', 'deactivated'] as const;
 
+const roleLabels: Record<string, string> = {
+  freshman: 'Calouro',
+  senior: 'Veterano',
+  administrator: 'Administrador',
+  developer: 'Desenvolvedor',
+};
+
+const statusLabels: Record<string, string> = {
+  pending_verification: 'Verificação pendente',
+  active: 'Ativo',
+  suspended: 'Suspenso',
+  deactivated: 'Desativado',
+};
+
 export function AdminUsersPage() {
   const queryClient = useQueryClient();
   const [query, setQuery] = useState({ q: '', role: '' as (typeof roleFilters)[number], status: '' as (typeof statusFilters)[number] });
@@ -33,7 +47,7 @@ export function AdminUsersPage() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
     },
-    onError: (err: unknown) => setError(err instanceof Error ? err.message : 'Request failed'),
+    onError: (err: unknown) => setError(err instanceof Error ? err.message : 'Falha na solicitação'),
   });
 
   const anonymizeMutation = useMutation({
@@ -42,7 +56,7 @@ export function AdminUsersPage() {
       setSelected(null);
       void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
     },
-    onError: (err: unknown) => setError(err instanceof Error ? err.message : 'Request failed'),
+    onError: (err: unknown) => setError(err instanceof Error ? err.message : 'Falha na solicitação'),
   });
 
   const moderationMutation = useMutation({
@@ -52,14 +66,14 @@ export function AdminUsersPage() {
       setSelected(null);
       void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
     },
-    onError: (err: unknown) => setError(err instanceof Error ? err.message : 'Request failed'),
+    onError: (err: unknown) => setError(err instanceof Error ? err.message : 'Falha na solicitação'),
   });
 
   function flagError(err: unknown) {
     if (err instanceof ApiError) {
       return `${err.message} (${err.code})`;
     }
-    return err instanceof Error ? err.message : 'Request failed';
+    return err instanceof Error ? err.message : 'Falha na solicitação';
   }
 
   const users = usersQuery.data?.users ?? [];
@@ -67,16 +81,16 @@ export function AdminUsersPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">User management</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Gerenciamento de usuários</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Search, moderate, suspend, or anonymize accounts. Anonymization preserves the mentorship
-          lineage graph.
+          Pesquise, modere, suspenda ou anonimize contas. A anonimização preserva o grafo de
+          linhagem de mentorias.
         </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <Input
-          placeholder="Search by handle, email, or social name"
+          placeholder="Buscar por handle, e-mail ou nome social"
           value={query.q}
           onChange={(e) => setQuery({ ...query, q: e.target.value })}
           className="max-w-xs"
@@ -88,7 +102,7 @@ export function AdminUsersPage() {
         >
           {roleFilters.map((role) => (
             <option key={role} value={role}>
-              {role === '' ? 'All roles' : role}
+              {role === '' ? 'Todos os papéis' : (roleLabels[role] ?? role)}
             </option>
           ))}
         </select>
@@ -99,7 +113,7 @@ export function AdminUsersPage() {
         >
           {statusFilters.map((status) => (
             <option key={status} value={status}>
-              {status === '' ? 'All statuses' : status}
+              {status === '' ? 'Todos os status' : (statusLabels[status] ?? status)}
             </option>
           ))}
         </select>
@@ -110,11 +124,11 @@ export function AdminUsersPage() {
         <table className="w-full text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
-              <th className="px-4 py-3">Member</th>
-              <th className="px-4 py-3">Role</th>
-              <th className="px-4 py-3">Semester</th>
+              <th className="px-4 py-3">Membro</th>
+              <th className="px-4 py-3">Papel</th>
+              <th className="px-4 py-3">Semestre</th>
               <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3 text-right">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -124,7 +138,7 @@ export function AdminUsersPage() {
                   <p className="font-medium text-slate-900">{user.socialName ?? user.handle}</p>
                   <p className="text-xs text-slate-500">@{user.handle} · {user.email}</p>
                 </td>
-                <td className="px-4 py-3 capitalize">{user.role}</td>
+                <td className="px-4 py-3 capitalize">{roleLabels[user.role] ?? user.role}</td>
                 <td className="px-4 py-3">{user.semester}</td>
                 <td className="px-4 py-3">
                   <span
@@ -136,7 +150,7 @@ export function AdminUsersPage() {
                           : 'bg-slate-100 text-slate-600'
                     }`}
                   >
-                    {user.status}
+                    {statusLabels[user.status] ?? user.status}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right">
@@ -149,7 +163,7 @@ export function AdminUsersPage() {
             {users.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
-                  {usersQuery.isLoading ? 'Loading…' : 'No users match the filters.'}
+                  {usersQuery.isLoading ? 'Carregando…' : 'Nenhum usuário corresponde aos filtros.'}
                 </td>
               </tr>
             )}
@@ -161,15 +175,16 @@ export function AdminUsersPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
           <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-lg">
             <h2 className="text-lg font-bold text-slate-900">
-              Manage {selected.socialName ?? selected.handle}
+              Gerenciar {selected.socialName ?? selected.handle}
             </h2>
             <p className="mt-1 text-xs text-slate-500">
-              @{selected.handle} · {selected.role} · {selected.status}
+              @{selected.handle} · {roleLabels[selected.role] ?? selected.role} ·{' '}
+              {statusLabels[selected.status] ?? selected.status}
             </p>
 
             <div className="mt-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">Account status</span>
+                <span className="text-sm text-slate-600">Status da conta</span>
                 <div className="flex gap-2">
                   {(['active', 'suspended'] as const).map((status) => (
                     <Button
@@ -179,14 +194,14 @@ export function AdminUsersPage() {
                       disabled={statusMutation.isPending}
                       onClick={() => statusMutation.mutate({ id: selected.id, status })}
                     >
-                      {status}
+                      {statusLabels[status] ?? status}
                     </Button>
                   ))}
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">Moderate content</span>
+                <span className="text-sm text-slate-600">Moderar conteúdo</span>
                 <div className="flex gap-2">
                   <Button
                     size="sm"
@@ -196,7 +211,7 @@ export function AdminUsersPage() {
                       moderationMutation.mutate({ id: selected.id, action: 'clear_biography' })
                     }
                   >
-                    Clear bio
+                    Limpar bio
                   </Button>
                   <Button
                     size="sm"
@@ -206,14 +221,15 @@ export function AdminUsersPage() {
                       moderationMutation.mutate({ id: selected.id, action: 'clear_rich_cards' })
                     }
                   >
-                    Clear cards
+                    Limpar cards
                   </Button>
                 </div>
               </div>
 
               <div className="border-t border-slate-100 pt-3">
                 <p className="text-xs text-slate-500">
-                  Anonymization irreversibly removes personal data while keeping the lineage graph.
+                  A anonimização remove irreversivelmente os dados pessoais, mantendo o grafo de
+                  linhagem.
                 </p>
                 <Button
                   variant="destructive"
@@ -222,7 +238,7 @@ export function AdminUsersPage() {
                   disabled={anonymizeMutation.isPending || selected.deletedAt !== null}
                   onClick={() => anonymizeMutation.mutate(selected.id)}
                 >
-                  {selected.deletedAt !== null ? 'Already anonymized' : 'Anonymize account'}
+                  {selected.deletedAt !== null ? 'Já anonimizado' : 'Anonimizar conta'}
                 </Button>
               </div>
             </div>
@@ -231,7 +247,7 @@ export function AdminUsersPage() {
 
             <div className="mt-5 flex justify-end">
               <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>
-                Close
+                Fechar
               </Button>
             </div>
           </div>
