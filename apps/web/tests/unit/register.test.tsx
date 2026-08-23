@@ -38,14 +38,14 @@ describe('RegisterPage', () => {
     register.mockResolvedValue(undefined);
     renderPage();
 
-    await user.type(screen.getByLabelText(/Handle/), 'new_student');
-    await user.type(screen.getByLabelText(/University email/), 'new_student@cs.uni.edu');
-    const semester = screen.getByLabelText(/^Semester/) as HTMLInputElement;
+    await user.type(screen.getByLabelText(/Username/), 'new_student');
+    await user.type(screen.getByLabelText(/Email Acadêmico/), 'new_student@cs.uni.edu');
+    const semester = screen.getByLabelText(/^Período/) as HTMLInputElement;
     await user.clear(semester);
     await user.type(semester, '2');
-    await user.type(screen.getByLabelText(/Password/), 'StrongPassword123!');
+    await user.type(screen.getByLabelText(/Senha/), 'StrongPassword123!');
 
-    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await user.click(screen.getByRole('button', { name: 'Criar conta' }));
 
     await waitFor(() => {
       expect(register).toHaveBeenCalledWith({
@@ -63,13 +63,13 @@ describe('RegisterPage', () => {
     const user = userEvent.setup();
     renderPage();
 
-    await user.type(screen.getByLabelText(/Handle/), 'new_student');
-    await user.type(screen.getByLabelText(/University email/), 'not-an-email');
-    await user.type(screen.getByLabelText(/Password/), 'short');
+    await user.type(screen.getByLabelText(/Username/), 'new_student');
+    await user.type(screen.getByLabelText(/Email Acadêmico/), 'not-an-email');
+    await user.type(screen.getByLabelText(/Senha/), 'short');
 
-    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await user.click(screen.getByRole('button', { name: 'Criar conta' }));
 
-    expect(await screen.findByText(/email/i)).toBeInTheDocument();
+    expect(await screen.findByText('A valid email address is required')).toBeInTheDocument();
     expect(register).not.toHaveBeenCalled();
   });
 
@@ -78,15 +78,15 @@ describe('RegisterPage', () => {
     register.mockRejectedValue(new Error('boom'));
     renderPage();
 
-    await user.type(screen.getByLabelText(/Handle/), 'new_student');
-    await user.type(screen.getByLabelText(/University email/), 'new_student@cs.uni.edu');
-    const semester = screen.getByLabelText(/^Semester/) as HTMLInputElement;
+    await user.type(screen.getByLabelText(/Username/), 'new_student');
+    await user.type(screen.getByLabelText(/Email Acadêmico/), 'new_student@cs.uni.edu');
+    const semester = screen.getByLabelText(/^Período/) as HTMLInputElement;
     await user.clear(semester);
     await user.type(semester, '2');
-    await user.type(screen.getByLabelText(/Password/), 'StrongPassword123!');
+    await user.type(screen.getByLabelText(/Senha/), 'StrongPassword123!');
 
-    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await user.click(screen.getByRole('button', { name: 'Criar conta' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to register');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível completar o registro');
   });
 });

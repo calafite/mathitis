@@ -1,18 +1,18 @@
 import { expect, test } from '@playwright/test';
 import { login } from './helpers';
 
-const REGISTER_GENERIC = 'you will receive a verification email shortly';
+const REGISTER_GENERIC = 'você receberá uma mensagem de confirmação';
 
 test.describe('email enumeration prevention (UI)', () => {
   test('register with an existing email returns the identical generic success screen', async ({
     page,
   }) => {
     await page.goto('/register');
-    await page.getByLabel(/Handle/).fill(`e2e_dup_${Date.now()}`);
-    await page.getByLabel(/University email/).fill('ada@cs.uni.edu');
-    await page.getByLabel(/^Semester/).fill('2');
-    await page.getByLabel(/Password/).fill('StrongPassword123!');
-    await page.getByRole('button', { name: 'Create account' }).click();
+    await page.getByLabel(/Username/).fill(`e2e_dup_${Date.now()}`);
+    await page.getByLabel(/Email Acadêmico/).fill('ada@cs.uni.edu');
+    await page.getByLabel(/^Período/).fill('2');
+    await page.getByLabel(/^Senha/).fill('StrongPassword123!');
+    await page.getByRole('button', { name: 'Criar conta' }).click();
 
     await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible();
     await expect(page.getByText(REGISTER_GENERIC)).toBeVisible();
@@ -21,11 +21,11 @@ test.describe('email enumeration prevention (UI)', () => {
   test('register with a new email returns the same generic success screen', async ({ page }) => {
     await page.goto('/register');
     const handle = `e2e_fresh_${Date.now()}`;
-    await page.getByLabel(/Handle/).fill(handle);
-    await page.getByLabel(/University email/).fill(`${handle}@cs.uni.edu`);
-    await page.getByLabel(/^Semester/).fill('2');
-    await page.getByLabel(/Password/).fill('StrongPassword123!');
-    await page.getByRole('button', { name: 'Create account' }).click();
+    await page.getByLabel(/Username/).fill(handle);
+    await page.getByLabel(/Email Acadêmico/).fill(`${handle}@cs.uni.edu`);
+    await page.getByLabel(/^Período/).fill('2');
+    await page.getByLabel(/^Senha/).fill('StrongPassword123!');
+    await page.getByRole('button', { name: 'Criar conta' }).click();
 
     await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible();
     await expect(page.getByText(REGISTER_GENERIC)).toBeVisible();
