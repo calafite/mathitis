@@ -22,7 +22,7 @@ export class ConflictError extends DomainError {
 }
 
 export class UnauthorizedError extends DomainError {
-  constructor(message = 'Authentication required', code = 'UNAUTHORIZED') {
+  constructor(message = 'Autenticação obrigatória', code = 'UNAUTHORIZED') {
     super(code, 401, message);
   }
 }

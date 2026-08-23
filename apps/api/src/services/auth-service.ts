@@ -128,20 +128,20 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
   async function login(identifier: string, password: string): Promise<UserWithProfile> {
     const user = await userRepository.findByLoginIdentifier(identifier);
     if (!user || user.deletedAt !== null) {
-      throw new UnauthorizedError('Invalid credentials');
+      throw new UnauthorizedError('Credenciais inválidas');
     }
 
     const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
-      throw new UnauthorizedError('Invalid credentials');
+      throw new UnauthorizedError('Credenciais inválidas');
     }
 
     if (user.status === 'suspended') {
-      throw new DomainError('ACCOUNT_SUSPENDED', 403, 'This account has been suspended');
+      throw new DomainError('ACCOUNT_SUSPENDED', 403, 'Esta conta foi suspensa');
     }
 
     if (user.status !== 'active') {
-      throw new UnauthorizedError('Invalid credentials');
+      throw new UnauthorizedError('Credenciais inválidas');
     }
 
     return user;
@@ -150,7 +150,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
   async function getCurrentUser(userId: string): Promise<UserWithProfile> {
     const user = await userRepository.findActiveById(userId);
     if (!user) {
-      throw new UnauthorizedError('Session is no longer valid');
+      throw new UnauthorizedError('A sessão não é mais válida');
     }
     return user;
   }
@@ -169,19 +169,19 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
   async function resetPassword(token: string, newPassword: string): Promise<void> {
     const match = await verifyPlainToken(token, 'password_reset');
     if (!match) {
-      throw new DomainError('TOKEN_INVALID', 400, 'Invalid or expired reset token');
+      throw new DomainError('TOKEN_INVALID', 400, 'Token de redefinição inválido ou expirado');
     }
 
     const user = await userRepository.findActiveById(match.userId);
     if (!user) {
-      throw new DomainError('TOKEN_INVALID', 400, 'Invalid or expired reset token');
+      throw new DomainError('TOKEN_INVALID', 400, 'Token de redefinição inválido ou expirado');
     }
 
     const passwordHash = await hashPassword(newPassword);
     await userRepository.updatePassword(match.userId, passwordHash);
     const consumed = await tokenRepository.consume(match.tokenId);
     if (!consumed) {
-      throw new DomainError('TOKEN_ALREADY_USED', 400, 'This token has already been used');
+      throw new DomainError('TOKEN_ALREADY_USED', 400, 'Este token já foi utilizado');
     }
   }
 
@@ -201,7 +201,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       }
     }
     if (!match) {
-      throw new DomainError('TOKEN_INVALID', 400, 'Invalid or expired verification token');
+      throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
     }
     if (match.consumedAt) {
       // Already used. Verification only ever consumes this token after
@@ -210,7 +210,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       return;
     }
     if (match.expiresAt <= new Date()) {
-      throw new DomainError('TOKEN_INVALID', 400, 'Invalid or expired verification token');
+      throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
     }
     const consumed = await tokenRepository.consume(match.id);
     if (!consumed) {

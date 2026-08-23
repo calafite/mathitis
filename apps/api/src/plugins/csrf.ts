@@ -34,12 +34,12 @@ export function createCsrfGuard(allowedOrigins: ReadonlySet<string>) {
 
     const secFetchSite = request.headers['sec-fetch-site'];
     if (secFetchSite === 'cross-site') {
-      throw new ForbiddenError('Cross-site request rejected', 'CSRF_REJECTED');
+      throw new ForbiddenError('Requisição cross-site rejeitada', 'CSRF_REJECTED');
     }
 
     const origin = request.headers.origin;
     if (origin && allowedOrigins.size > 0 && !allowedOrigins.has(origin)) {
-      throw new ForbiddenError('Request from disallowed origin', 'CSRF_REJECTED');
+      throw new ForbiddenError('Requisição de origem não permitida', 'CSRF_REJECTED');
     }
 
     // No CSRF session yet (pre-login or non-browser clients) - nothing to check.
@@ -52,7 +52,7 @@ export function createCsrfGuard(allowedOrigins: ReadonlySet<string>) {
       headerToken.length === 0 ||
       !safeEqual(headerToken, cookieToken)
     ) {
-      throw new ForbiddenError('Invalid CSRF token', 'CSRF_INVALID');
+      throw new ForbiddenError('Token CSRF inválido', 'CSRF_INVALID');
     }
   };
 }

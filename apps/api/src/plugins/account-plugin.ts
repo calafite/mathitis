@@ -45,7 +45,7 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
 
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user || user.deletedAt !== null) {
-        return reply.code(404).send({ ok: false, error: 'User not found' });
+        return reply.code(404).send({ ok: false, error: 'Usuário não encontrado' });
       }
 
       const valid = await argon2.verify(user.passwordHash, currentPassword);
@@ -57,7 +57,7 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
           targetId: userId,
           details: { reason: 'invalid_current_password' },
         });
-        return reply.code(400).send({ ok: false, error: 'Current password is incorrect' });
+        return reply.code(400).send({ ok: false, error: 'A senha atual está incorreta' });
       }
 
       const passwordHash = await argon2.hash(newPassword, {
@@ -108,7 +108,7 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
       const userId = request.sessionUser!.sub;
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user || user.deletedAt !== null) {
-        return reply.code(404).send({ ok: false, error: 'User not found' });
+        return reply.code(404).send({ ok: false, error: 'Usuário não encontrado' });
       }
       return reply.send({
         email: user.email,
@@ -182,7 +182,7 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
       ]);
 
       if (!user || !profile) {
-        return reply.code(404).send({ ok: false, error: 'User not found' });
+        return reply.code(404).send({ ok: false, error: 'Usuário não encontrado' });
       }
 
       const ancestors: Array<{ handle: string; socialName: string | null; semester: number; relationship: 'mentor' | 'grand-mentor' | 'great-grand-mentor' }> = [];
@@ -295,7 +295,7 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
 
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user || user.deletedAt !== null) {
-        return reply.code(404).send({ ok: false, error: 'User not found' });
+        return reply.code(404).send({ ok: false, error: 'Usuário não encontrado' });
       }
 
       const valid = await argon2.verify(user.passwordHash, password);
@@ -307,7 +307,7 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
           targetId: userId,
           details: { reason: 'invalid_password' },
         });
-        return reply.code(400).send({ ok: false, error: 'Password is incorrect' });
+        return reply.code(400).send({ ok: false, error: 'A senha está incorreta' });
       }
 
       const anonHandle = `user_${userId.slice(0, 8)}`;

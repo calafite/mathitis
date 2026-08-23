@@ -222,7 +222,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
 
   app.addHook('onError', async (_request, _reply, error) => {
     if (error instanceof ZodError) {
-      throw new ValidationError('Invalid request payload');
+      throw new ValidationError('Corpo da requisição inválido');
     }
   });
   app.get('/health', async (_request, reply) => {

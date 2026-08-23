@@ -12,10 +12,10 @@ const knownPrismaCodes = new Map<string, { code: string; status: number; message
       message: 'A record with the same unique value already exists',
     },
   ],
-  ['P2025', { code: 'NOT_FOUND', status: 404, message: 'The requested record does not exist' }],
+  ['P2025', { code: 'NOT_FOUND', status: 404, message: 'O registro solicitado não existe' }],
   [
     'P2003',
-    { code: 'CONFLICT', status: 409, message: 'The operation violates a foreign key constraint' },
+    { code: 'CONFLICT', status: 409, message: 'A operação viola uma restrição de chave estrangeira' },
   ],
 ]);
 
@@ -55,7 +55,7 @@ export function buildErrorHandler() {
       return reply.code(422).send({
         error: {
           code: 'VALIDATION_ERROR',
-          message: 'Validation failed',
+          message: 'Falha na validação',
           statusCode: 422,
           details: validationError.validation,
         },
@@ -66,7 +66,7 @@ export function buildErrorHandler() {
       return reply.code(400).send({
         error: {
           code: 'BAD_REQUEST',
-          message: error instanceof Error ? error.message : 'Bad request',
+          message: error instanceof Error ? error.message : 'Requisição inválida',
           statusCode: 400,
         },
       });
@@ -80,7 +80,7 @@ export function buildErrorHandler() {
           message:
             typeof validationError.message === 'string'
               ? validationError.message
-              : 'Request rejected',
+              : 'Requisição rejeitada',
           statusCode: validationError.statusCode,
         },
       });
@@ -96,7 +96,7 @@ export function buildErrorHandler() {
     reply.code(500).send({
       error: {
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'An unexpected error occurred',
+        message: 'Ocorreu um erro inesperado',
         statusCode: 500,
       },
     });

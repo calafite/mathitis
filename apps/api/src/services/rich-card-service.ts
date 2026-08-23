@@ -107,11 +107,11 @@ export function createRichCardService(
   async function reorderCards(userId: string, order: string[]) {
     const existing = await richCardRepository.listByProfileId(userId);
     if (order.length !== existing.length) {
-      throw new ValidationError('Order must contain every card on the profile');
+      throw new ValidationError('A ordem deve conter todos os cartões do perfil');
     }
     const ownedIds = new Set(existing.map((card) => card.id));
     if (order.some((id) => !ownedIds.has(id))) {
-      throw new ValidationError('Order contains a card that does not belong to this profile');
+      throw new ValidationError('A ordem contém um cartão que não pertence a este perfil');
     }
     await richCardRepository.reorder(
       order.map((id, index) => ({ id, displayOrder: index })),

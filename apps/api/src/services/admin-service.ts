@@ -98,7 +98,7 @@ export function createAdminService(deps: {
   async function setUserStatus(actorId: string, ipAddress: string | null, id: string, status: string) {
     const existing = await adminRepository.findUserById(id);
     if (!existing) {
-      throw new NotFoundError('User not found', 'USER_NOT_FOUND');
+      throw new NotFoundError('Usuário não encontrado', 'USER_NOT_FOUND');
     }
     const user = await adminRepository.updateUserStatus(id, status as AdminUser['status']);
     await auditLogRepository.create({
@@ -115,10 +115,10 @@ export function createAdminService(deps: {
   async function anonymizeUser(actorId: string, ipAddress: string | null, id: string) {
     const existing = await adminRepository.findUserById(id);
     if (!existing) {
-      throw new NotFoundError('User not found', 'USER_NOT_FOUND');
+      throw new NotFoundError('Usuário não encontrado', 'USER_NOT_FOUND');
     }
     if (existing.deletedAt !== null) {
-      throw new ConflictError('This user has already been anonymized', 'USER_ALREADY_ANONYMIZED');
+      throw new ConflictError('Este usuário já foi anonimizado', 'USER_ALREADY_ANONYMIZED');
     }
     const user = await adminRepository.anonymizeUser(id);
     await auditLogRepository.create({
@@ -144,7 +144,7 @@ export function createAdminService(deps: {
   ) {
     const existing = await adminRepository.findUserById(userId);
     if (!existing) {
-      throw new NotFoundError('User not found', 'USER_NOT_FOUND');
+      throw new NotFoundError('Usuário não encontrado', 'USER_NOT_FOUND');
     }
     await adminRepository.clearProfileField(userId, action);
     await auditLogRepository.create({
@@ -157,7 +157,7 @@ export function createAdminService(deps: {
     });
     const updated = await adminRepository.findUserById(userId);
     if (!updated) {
-      throw new NotFoundError('User not found', 'USER_NOT_FOUND');
+      throw new NotFoundError('Usuário não encontrado', 'USER_NOT_FOUND');
     }
     return updated;
   }

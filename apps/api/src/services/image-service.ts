@@ -73,7 +73,7 @@ export function detectImageFormat(buffer: Buffer): ImageFormat | null {
 export async function processImage(input: Buffer, kind: ImageKind): Promise<ProcessedImage> {
   const format = detectImageFormat(input);
   if (!format) {
-    throw new ValidationError('Unsupported image type. Upload a JPEG, PNG, or WebP file');
+    throw new ValidationError('Tipo de imagem não suportado. Envie um arquivo JPEG, PNG ou WebP');
   }
   if (input.length > MAX_BYTES[kind]) {
     const limitMb = Math.round(MAX_BYTES[kind] / 1024 / 1024);

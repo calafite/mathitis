@@ -36,7 +36,7 @@ export function validateCardEmbedUrl(url: string | null | undefined): void {
   try {
     host = new URL(url).hostname;
   } catch {
-    throw new ValidationError('Embed URL must be a valid URL');
+    throw new ValidationError('A URL de incorporação deve ser uma URL válida');
   }
   if (!EMBED_HOST_WHITELIST.includes(host as (typeof EMBED_HOST_WHITELIST)[number])) {
     throw new ValidationError(`Embed URL host "${host}" is not permitted`);

@@ -39,7 +39,7 @@ export function createProfileService(deps: ProfileServiceDeps): ProfileService {
   async function getProfileByHandle(handle: string, viewer?: Viewer | null) {
     const profile = await profileRepository.findByHandle(handle);
     if (!profile) {
-      throw new NotFoundError('Profile not found', 'PROFILE_NOT_FOUND');
+      throw new NotFoundError('Perfil não encontrado', 'PROFILE_NOT_FOUND');
     }
 
     // Freshman privacy: hidden profiles are only visible to their owner and admins.
@@ -48,7 +48,7 @@ export function createProfileService(deps: ProfileServiceDeps): ProfileService {
       const isOwner = viewer?.sub === profile.userId;
       const isAdmin = viewer?.role === 'administrator';
       if (!isOwner && !isAdmin) {
-        throw new NotFoundError('Profile not found', 'PROFILE_NOT_FOUND');
+        throw new NotFoundError('Perfil não encontrado', 'PROFILE_NOT_FOUND');
       }
     }
 
@@ -58,7 +58,7 @@ export function createProfileService(deps: ProfileServiceDeps): ProfileService {
   async function getOwnProfile(userId: string) {
     const profile = await profileRepository.findByUserId(userId);
     if (!profile) {
-      throw new NotFoundError('Profile not found', 'PROFILE_NOT_FOUND');
+      throw new NotFoundError('Perfil não encontrado', 'PROFILE_NOT_FOUND');
     }
     return profile;
   }
@@ -68,7 +68,7 @@ export function createProfileService(deps: ProfileServiceDeps): ProfileService {
     await recomputeEffortScore(userId);
     const updated = await profileRepository.findByUserId(userId);
     if (!updated) {
-      throw new NotFoundError('Profile not found', 'PROFILE_NOT_FOUND');
+      throw new NotFoundError('Perfil não encontrado', 'PROFILE_NOT_FOUND');
     }
     return updated;
   }

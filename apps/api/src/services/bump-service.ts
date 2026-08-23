@@ -38,7 +38,7 @@ export function createBumpService(
   async function bump(freshmanId: string, seniorHandle: string, replaceHandle?: string) {
     const seniorId = await resolveSenior(seniorHandle);
     if (seniorId === freshmanId) {
-      throw new ValidationError('You cannot bump yourself');
+      throw new ValidationError('Você não pode se impulsionar');
     }
 
     const alreadyBumped = await bumpRepository.has(freshmanId, seniorId);
@@ -53,7 +53,7 @@ export function createBumpService(
       if (replaceHandle) {
         const replacedSeniorId = await resolveSenior(replaceHandle);
         if (replacedSeniorId === seniorId) {
-          throw new ValidationError('Cannot replace a bump with the same senior');
+          throw new ValidationError('Não é possível substituir um impulso pelo mesmo veterano');
         }
         const replaced = await bumpRepository.replace(freshmanId, replacedSeniorId, seniorId);
         if (!replaced) {

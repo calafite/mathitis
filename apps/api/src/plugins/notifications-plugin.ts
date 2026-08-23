@@ -81,7 +81,7 @@ export async function registerNotificationsPlugin(
             return reply.code(404).send({
               error: {
                 code: 'NOTIFICATION_NOT_FOUND',
-                message: 'Notification not found',
+                message: 'Notificação não encontrada',
                 statusCode: 404,
               },
             });

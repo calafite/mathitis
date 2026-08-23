@@ -25,7 +25,7 @@ import { clearCsrfCookie, createCsrfToken, setCsrfCookie } from './csrf.js';
 
 const GENERIC_OK = {
   ok: true,
-  message: 'If an account with that information exists, you will receive an email shortly.',
+  message: 'Se existir uma conta com essas informações, você receberá um e-mail em breve.',
 };
 
 function toAuthUser(user: {
@@ -140,7 +140,7 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
         async (_request, reply) => {
           session.clearSession(reply);
           clearCsrfCookie(reply);
-          return reply.send({ ok: true, message: 'Logged out successfully' });
+          return reply.send({ ok: true, message: 'Sessão encerrada com sucesso' });
         },
       );
 
@@ -186,7 +186,7 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
         async (request, reply) => {
           const { token, password } = request.body;
           await authService.resetPassword(token, password);
-          return reply.send({ ok: true, message: 'Password reset successfully' });
+          return reply.send({ ok: true, message: 'Senha redefinida com sucesso' });
         },
       );
 
@@ -200,7 +200,7 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
         },
         async (request, reply) => {
           await authService.verifyEmail(request.params.token);
-          return reply.send({ ok: true, message: 'Email verified successfully' });
+          return reply.send({ ok: true, message: 'E-mail verificado com sucesso' });
         },
       );
     },

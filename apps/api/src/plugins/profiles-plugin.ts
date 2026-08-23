@@ -124,7 +124,7 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
   ) {
     const data = await request.file();
     if (!data) {
-      throw new ValidationError('No file uploaded');
+      throw new ValidationError('Nenhum arquivo enviado');
     }
     const buffer = await readFileBuffer(data.file);
     const maxBytes = kind === 'avatar' ? AVATAR_MAX_BYTES : BANNER_MAX_BYTES;
