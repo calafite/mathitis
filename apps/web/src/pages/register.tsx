@@ -80,7 +80,7 @@ export function RegisterPage() {
           Junte-se ao programa de apadrinhamento e conheça nossos veteranos.
         </p>
 
-        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+        <form className="mt-6 space-y-4" onSubmit={onSubmit} noValidate>
           <div>
             <label htmlFor="handle" className="mb-1 block text-sm font-medium text-foreground">
               Username
