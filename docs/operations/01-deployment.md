@@ -7,7 +7,7 @@ Only nginx sits on the public network; every other service is on an `internal` b
 ## 1. Prerequisites
 
 - Docker Engine 24+ with Compose v2 on the host (Debian/Ubuntu or Alpine).
-- A DNS record pointing `mathitis.university.edu` at the host.
+- A DNS record pointing `pasteldemiolos.xyz` at the host.
 - TLS certificates placed at `./certs/fullchain.pem` and `./certs/privkey.pem` (see [TLS](#tls)).
 - `nginx.conf` (root) edited so every `server_name` matches your real domain.
 
@@ -36,7 +36,7 @@ docker compose -f docker-compose.production.yml up -d --build
 
 # 6. Verify
 docker compose -f docker-compose.production.yml ps
-curl -fsS https://mathitis.university.edu/api/health
+curl -fsS https://pasteldemiolos.xyz/api/health
 docker compose -f docker-compose.production.yml logs -f api
 ```
 

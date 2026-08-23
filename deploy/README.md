@@ -54,10 +54,10 @@ automatically on first boot.
 ## Verification
 
 ```sh
-curl -sI https://mathitis.university.edu | grep -i strict-transport-security
+curl -sI https://pasteldemiolos.xyz | grep -i strict-transport-security
 # Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
 
-curl -s https://mathitis.university.edu/health
+curl -s https://pasteldemiolos.xyz/health
 # {"status":"ok",...}
 ```
 

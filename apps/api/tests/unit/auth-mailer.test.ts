@@ -42,7 +42,7 @@ describe('createAuthMailer', () => {
     const q = queue();
     const mailer = createAuthMailer({
       publicBaseUrl: 'http://localhost:4000',
-      webBaseUrl: 'https://mathitis.university.edu/',
+      webBaseUrl: 'https://pasteldemiolos.xyz/',
       emailQueue: q as never,
       logger: log as never,
     });
@@ -51,7 +51,7 @@ describe('createAuthMailer', () => {
 
     const [, data] = q.add.mock.calls[0]! as [string, Record<string, unknown>];
     expect(data.type).toBe('password_reset');
-    expect(data.body).toContain('https://mathitis.university.edu/recover?token=reset-token-abc');
+    expect(data.body).toContain('https://pasteldemiolos.xyz/recover?token=reset-token-abc');
   });
 
   it('logs and swallows queue failures instead of throwing', async () => {

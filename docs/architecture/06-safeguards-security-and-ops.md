@@ -11,13 +11,13 @@ This domain covers all operational, security, and quality safeguards: TLS/HTTPS 
 # Example Nginx security headers
 server {
     listen 80;
-    server_name mathitis.university.edu;
+    server_name pasteldemiolos.xyz;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name mathitis.university.edu;
+    server_name pasteldemiolos.xyz;
 
     ssl_protocols TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;

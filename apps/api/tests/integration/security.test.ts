@@ -238,7 +238,7 @@ describe('Security hardening: rate limits, CSRF and CORS', () => {
     });
 
     it('rejects cross-origin requests from a non-allowlisted origin', async () => {
-      const app = await createApp({ WEB_ORIGIN: 'https://mathitis.university.edu' });
+      const app = await createApp({ WEB_ORIGIN: 'https://pasteldemiolos.xyz' });
       const res = await app.inject({
         method: 'GET',
         url: '/api/tags',
@@ -248,13 +248,13 @@ describe('Security hardening: rate limits, CSRF and CORS', () => {
     });
 
     it('allows a configured origin via WEB_ORIGIN', async () => {
-      const app = await createApp({ WEB_ORIGIN: 'https://mathitis.university.edu' });
+      const app = await createApp({ WEB_ORIGIN: 'https://pasteldemiolos.xyz' });
       const res = await app.inject({
         method: 'GET',
         url: '/api/tags',
-        headers: { origin: 'https://mathitis.university.edu' },
+        headers: { origin: 'https://pasteldemiolos.xyz' },
       });
-      expect(res.headers['access-control-allow-origin']).toBe('https://mathitis.university.edu');
+      expect(res.headers['access-control-allow-origin']).toBe('https://pasteldemiolos.xyz');
     });
   });
 });
