@@ -38,7 +38,7 @@ describe('RegisterPage', () => {
     register.mockResolvedValue(undefined);
     renderPage();
 
-    await user.type(screen.getByLabelText(/Username/), 'new_student');
+    await user.type(screen.getByLabelText(/Nome de usuário/), 'new_student');
     await user.type(screen.getByLabelText(/Email Acadêmico/), 'new_student@cs.uni.edu');
     const semester = screen.getByLabelText(/^Período/) as HTMLInputElement;
     await user.clear(semester);
@@ -56,20 +56,20 @@ describe('RegisterPage', () => {
         socialName: '',
       });
     });
-    expect(screen.getByRole('heading', { name: 'Check your inbox' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Verifique seu e-mail' })).toBeInTheDocument();
   });
 
   it('surfaces validation errors for an invalid email', async () => {
     const user = userEvent.setup();
     renderPage();
 
-    await user.type(screen.getByLabelText(/Username/), 'new_student');
+    await user.type(screen.getByLabelText(/Nome de usuário/), 'new_student');
     await user.type(screen.getByLabelText(/Email Acadêmico/), 'not-an-email');
     await user.type(screen.getByLabelText(/Senha/), 'short');
 
     await user.click(screen.getByRole('button', { name: 'Criar conta' }));
 
-    expect(await screen.findByText('A valid email address is required')).toBeInTheDocument();
+    expect(await screen.findByText('Informe um endereço de e-mail válido')).toBeInTheDocument();
     expect(register).not.toHaveBeenCalled();
   });
 
@@ -78,7 +78,7 @@ describe('RegisterPage', () => {
     register.mockRejectedValue(new Error('boom'));
     renderPage();
 
-    await user.type(screen.getByLabelText(/Username/), 'new_student');
+    await user.type(screen.getByLabelText(/Nome de usuário/), 'new_student');
     await user.type(screen.getByLabelText(/Email Acadêmico/), 'new_student@cs.uni.edu');
     const semester = screen.getByLabelText(/^Período/) as HTMLInputElement;
     await user.clear(semester);

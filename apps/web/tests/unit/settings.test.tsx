@@ -67,11 +67,11 @@ describe('SettingsPage', () => {
 
   it('renders the five settings tabs', async () => {
     renderPage();
-    expect(await screen.findByRole('tab', { name: /Account & Security/ })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /Appearance/ })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /Notifications/ })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /Data & Lineage/ })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /Danger Zone/ })).toBeInTheDocument();
+    expect(await screen.findByRole('tab', { name: /Conta e Segurança/ })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Aparência/ })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Notificações/ })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Dados e Linhagem/ })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Zona de Risco/ })).toBeInTheDocument();
   });
 
   it('submits the change-password form on the account tab', async () => {
@@ -79,9 +79,9 @@ describe('SettingsPage', () => {
     (settingsApi.changePassword as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true });
     renderPage();
 
-    await user.type(screen.getByLabelText(/Current password/), 'OldPassword123!');
-    await user.type(screen.getByLabelText(/New password/), 'NewPassword123!');
-    await user.click(screen.getByRole('button', { name: 'Update password' }));
+    await user.type(screen.getByLabelText(/Senha atual/), 'OldPassword123!');
+    await user.type(screen.getByLabelText(/Nova senha/), 'NewPassword123!');
+    await user.click(screen.getByRole('button', { name: 'Atualizar senha' }));
 
     await waitFor(() => {
       expect(settingsApi.changePassword).toHaveBeenCalledWith({
@@ -89,18 +89,18 @@ describe('SettingsPage', () => {
         newPassword: 'NewPassword123!',
       });
     });
-    expect(await screen.findByText(/password has been updated/i)).toBeInTheDocument();
+    expect(await screen.findByText(/senha foi atualizada/i)).toBeInTheDocument();
   });
 
   it('switches tabs and renders the theme selector', async () => {
     const user = userEvent.setup();
     renderPage();
 
-    await user.click(screen.getByRole('tab', { name: /Appearance/ }));
+    await user.click(screen.getByRole('tab', { name: /Aparência/ }));
 
-    expect(await screen.findByRole('button', { name: /Dark/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Light/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Sync with system/ })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /Escuro/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Claro/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Sincronizar com o sistema/ })).toBeInTheDocument();
   });
 
   it('downloads data export from the Data & Lineage tab', async () => {
@@ -119,13 +119,13 @@ describe('SettingsPage', () => {
     vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL });
 
     renderPage();
-    await user.click(screen.getByRole('tab', { name: /Data & Lineage/ }));
-    await user.click(await screen.findByRole('button', { name: /Download my data/i }));
+    await user.click(screen.getByRole('tab', { name: /Dados e Linhagem/ }));
+    await user.click(await screen.findByRole('button', { name: /Baixar meus dados/ }));
 
     await waitFor(() => {
       expect(settingsApi.exportData).toHaveBeenCalled();
     });
-    expect(await screen.findByText(/export has been downloaded/i)).toBeInTheDocument();
+    expect(await screen.findByText(/arquivo de dados foi baixado/i)).toBeInTheDocument();
     vi.unstubAllGlobals();
   });
 });

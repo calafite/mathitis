@@ -53,7 +53,7 @@ describe('RichCardManager', () => {
 
     expect(await screen.findByText('Paranoid Android')).toBeInTheDocument();
     expect(screen.getByText('song')).toBeInTheDocument();
-    expect(screen.getByText(/1 card/)).toBeInTheDocument();
+    expect(screen.getByText(/1 cartão/)).toBeInTheDocument();
   });
 
   it('creates a song card from the form', async () => {
@@ -61,10 +61,10 @@ describe('RichCardManager', () => {
     mockedApi.createCard.mockResolvedValue({ card: songCard } as never);
     renderManager();
 
-    await user.click(await screen.findByRole('button', { name: 'Add card' }));
-    await user.type(screen.getByPlaceholderText('Card title'), 'Karma Police');
+    await user.click(await screen.findByRole('button', { name: 'Adicionar cartão' }));
+    await user.type(screen.getByPlaceholderText('Título do cartão'), 'Karma Police');
     await user.type(screen.getByPlaceholderText('Radiohead'), 'Radiohead');
-    await user.click(screen.getByRole('button', { name: 'Save card' }));
+    await user.click(screen.getByRole('button', { name: 'Salvar cartão' }));
 
     await waitFor(() => {
       expect(mockedApi.createCard).toHaveBeenCalledWith(
@@ -82,12 +82,12 @@ describe('RichCardManager', () => {
     mockedApi.createCard.mockResolvedValue({ card: songCard } as never);
     renderManager();
 
-    await user.click(await screen.findByRole('button', { name: 'Add card' }));
+    await user.click(await screen.findByRole('button', { name: 'Adicionar cartão' }));
     await user.selectOptions(screen.getByRole('combobox'), 'project');
-    await user.type(screen.getByPlaceholderText('Card title'), 'Math Thesis');
+    await user.type(screen.getByPlaceholderText('Título do cartão'), 'Math Thesis');
     await user.type(screen.getByPlaceholderText('Python, NumPy, LaTeX'), 'Python,  , LaTeX');
 
-    await user.click(screen.getByRole('button', { name: 'Save card' }));
+    await user.click(screen.getByRole('button', { name: 'Salvar cartão' }));
 
     await waitFor(() => {
       expect(mockedApi.createCard).toHaveBeenCalledWith(
@@ -104,8 +104,8 @@ describe('RichCardManager', () => {
     const user = userEvent.setup();
     renderManager();
 
-    await user.click(await screen.findByRole('button', { name: 'Add card' }));
-    expect(screen.getByRole('button', { name: 'Save card' })).toBeDisabled();
+    await user.click(await screen.findByRole('button', { name: 'Adicionar cartão' }));
+    expect(screen.getByRole('button', { name: 'Salvar cartão' })).toBeDisabled();
   });
 
   it('does not include blank metadata values in the payload', async () => {
@@ -113,9 +113,9 @@ describe('RichCardManager', () => {
     mockedApi.createCard.mockResolvedValue({ card: songCard } as never);
     renderManager();
 
-    await user.click(await screen.findByRole('button', { name: 'Add card' }));
-    await user.type(screen.getByPlaceholderText('Card title'), 'No Artist');
-    await user.click(screen.getByRole('button', { name: 'Save card' }));
+    await user.click(await screen.findByRole('button', { name: 'Adicionar cartão' }));
+    await user.type(screen.getByPlaceholderText('Título do cartão'), 'No Artist');
+    await user.click(screen.getByRole('button', { name: 'Salvar cartão' }));
 
     await waitFor(() => {
       expect(mockedApi.createCard).toHaveBeenCalledWith(expect.objectContaining({ metadata: {} }));

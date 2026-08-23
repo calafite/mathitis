@@ -28,7 +28,7 @@ describe('ThemeToggle', () => {
       </ThemeProvider>,
     );
     expect(screen.getByTestId('resolved')).toHaveTextContent('dark');
-    expect(screen.getByLabelText('Switch to light theme')).toBeInTheDocument();
+    expect(screen.getByLabelText('Alternar para tema claro')).toBeInTheDocument();
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 
@@ -43,7 +43,7 @@ describe('ThemeToggle', () => {
     await user.click(screen.getByRole('button'));
 
     expect(screen.getByTestId('resolved')).toHaveTextContent('light');
-    expect(screen.getByLabelText('Switch to dark theme')).toBeInTheDocument();
+    expect(screen.getByLabelText('Alternar para tema escuro')).toBeInTheDocument();
     expect(document.documentElement.classList.contains('light')).toBe(true);
     expect(document.documentElement.classList.contains('dark')).toBe(false);
   });

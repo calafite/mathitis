@@ -14,12 +14,12 @@ describe('ThemePicker', () => {
   it('renders the current colour values and selected card style', () => {
     render(<ThemePicker value={value} onChange={() => {}} />);
 
-    const primary = screen.getByLabelText(/^Primary/) as HTMLInputElement;
+    const primary = screen.getByLabelText(/^Primária/) as HTMLInputElement;
     expect(primary.value).toBe('#6366f1');
 
-    const solid = screen.getByRole('button', { name: 'Solid' });
+    const solid = screen.getByRole('button', { name: 'Sólido' });
     expect(solid.className).not.toContain('border-indigo-500');
-    const glass = screen.getByRole('button', { name: 'Glassmorphic' });
+    const glass = screen.getByRole('button', { name: 'Vidro fosco' });
     expect(glass.className).toContain('border-indigo-500');
   });
 
@@ -28,7 +28,7 @@ describe('ThemePicker', () => {
     const onChange = vi.fn();
     render(<ThemePicker value={value} onChange={onChange} />);
 
-    await user.click(screen.getByRole('button', { name: 'Apply theme preset 2' }));
+    await user.click(screen.getByRole('button', { name: 'Aplicar predefinição de tema 2' }));
 
     expect(onChange).toHaveBeenCalledWith({
       primaryColor: '#0ea5e9',
@@ -42,7 +42,7 @@ describe('ThemePicker', () => {
     const onChange = vi.fn();
     render(<ThemePicker value={value} onChange={onChange} />);
 
-    const accent = screen.getByLabelText(/Accent/) as HTMLInputElement;
+    const accent = screen.getByLabelText(/Destaque/) as HTMLInputElement;
     fireEvent.change(accent, { target: { value: '#111111' } });
 
     expect(onChange).toHaveBeenCalledWith({ ...value, accentColor: '#111111' });
@@ -53,7 +53,7 @@ describe('ThemePicker', () => {
     const onChange = vi.fn();
     render(<ThemePicker value={value} onChange={onChange} />);
 
-    await user.click(screen.getByRole('button', { name: 'Bordered' }));
+    await user.click(screen.getByRole('button', { name: 'com borda' }));
 
     expect(onChange).toHaveBeenCalledWith({ ...value, cardStyle: 'bordered' });
   });

@@ -7,7 +7,7 @@ describe('BioEditor', () => {
   it('renders the current markdown value in the textarea', () => {
     render(<BioEditor value="Hello world" onChange={() => {}} />);
 
-    expect(screen.getByPlaceholderText(/Tell your story/)).toHaveValue('Hello world');
+    expect(screen.getByPlaceholderText(/Conte sua história/)).toHaveValue('Hello world');
   });
 
   it('emits typed changes', async () => {
@@ -15,7 +15,7 @@ describe('BioEditor', () => {
     const onChange = vi.fn();
     render(<BioEditor value="" onChange={onChange} />);
 
-    await user.type(screen.getByPlaceholderText(/Tell your story/), 'abc');
+    await user.type(screen.getByPlaceholderText(/Conte sua história/), 'abc');
     expect(onChange).toHaveBeenCalled();
   });
 
@@ -24,9 +24,9 @@ describe('BioEditor', () => {
     const onChange = vi.fn();
     render(<BioEditor value="some important text" onChange={onChange} />);
 
-    const textarea = screen.getByPlaceholderText(/Tell your story/) as HTMLTextAreaElement;
+    const textarea = screen.getByPlaceholderText(/Conte sua história/) as HTMLTextAreaElement;
     textarea.setSelectionRange(5, 14);
-    await user.click(screen.getByTitle('Bold'));
+    await user.click(screen.getByTitle('Negrito'));
 
     expect(onChange).toHaveBeenCalledWith('some **important** text');
   });
@@ -36,11 +36,11 @@ describe('BioEditor', () => {
     const onChange = vi.fn();
     render(<BioEditor value="bio" onChange={onChange} />);
 
-    const textarea = screen.getByPlaceholderText(/Tell your story/) as HTMLTextAreaElement;
+    const textarea = screen.getByPlaceholderText(/Conte sua história/) as HTMLTextAreaElement;
     textarea.setSelectionRange(1, 1);
-    await user.click(screen.getByTitle('Badge'));
+    await user.click(screen.getByTitle('Emblema'));
 
-    expect(onChange).toHaveBeenCalledWith('b[tag]{badge=Tag}io');
+    expect(onChange).toHaveBeenCalledWith('b[etiqueta]{badge=Etiqueta}io');
   });
 
   it('prepends a header marker at the current line', async () => {
@@ -48,9 +48,9 @@ describe('BioEditor', () => {
     const onChange = vi.fn();
     render(<BioEditor value={'first line\nsecond line'} onChange={onChange} />);
 
-    const textarea = screen.getByPlaceholderText(/Tell your story/) as HTMLTextAreaElement;
+    const textarea = screen.getByPlaceholderText(/Conte sua história/) as HTMLTextAreaElement;
     textarea.setSelectionRange(11, 11);
-    await user.click(screen.getByTitle('Header'));
+    await user.click(screen.getByTitle('Cabeçalho'));
 
     expect(onChange).toHaveBeenCalledWith('first line\n## second line');
   });

@@ -58,7 +58,7 @@ describe('MarkdownPreview', () => {
     expect(screen.getByText('Watch out!')).toBeInTheDocument();
     const callout = document.querySelector('.callout-warning');
     expect(callout).not.toBeNull();
-    expect(callout!.textContent).toContain('Warning');
+    expect(callout!.textContent).toContain('Aviso');
   });
 
   it('opens links in a new tab with rel=noopener', () => {
