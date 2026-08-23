@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /dev
+Disallow: /settings
+Disallow: /profile/studio
+Disallow: /requests
+Disallow: /verify-email
+
+Sitemap: https://pasteldemiolos.xyz/sitemap.xml
