@@ -13,10 +13,11 @@ test.describe('Freshman journey', () => {
     await seniorCard.getByRole('button', { name: 'Ada' }).click();
     await expect(page.getByRole('dialog')).toBeVisible({ timeout: 15_000 });
 
-    // Click "Apply for mentorship" in the modal (force click since it might be outside viewport)
+    // Click "Apply for mentorship" in the modal (scroll inside the dialog first)
     const applyBtn = page.getByRole('button', { name: 'Apply for mentorship' });
     await expect(applyBtn).toBeVisible({ timeout: 15_000 });
-    await applyBtn.click({ force: true });
+    await applyBtn.scrollIntoViewIfNeeded();
+    await applyBtn.click();
 
     // Wait for the request to be sent (modal closes)
     await expect(page.getByRole('dialog')).toBeHidden({ timeout: 15_000 });
