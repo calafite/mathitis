@@ -26,12 +26,14 @@ import { requestsApi } from '@/lib/requests-api';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { FieldError, Input } from '@/components/ui/input';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 interface AnonymizeForm {
   password: string;
 }
 
 export function SettingsPage() {
+  usePageMeta('Configurações', 'Gerencie sua conta, aparência, notificações, dados e privacidade.');
   const { user, logout } = useAuth();
   const { theme, preference, setPreference } = useTheme();
   const { muted, toggleMuted } = useNotifications();

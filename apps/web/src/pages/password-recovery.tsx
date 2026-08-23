@@ -13,8 +13,10 @@ import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { FieldError, Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 export function PasswordRecoveryPage() {
+  usePageMeta('Recuperar senha', 'Redefina a senha da sua conta Mathitis com segurança.');
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
 

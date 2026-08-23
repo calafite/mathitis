@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import type { SystemConfig } from '@mathitis/schemas';
 import { adminApi } from '@/lib/admin-api';
 import { Button } from '@/components/ui/button';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 const configLabels: Record<keyof SystemConfig, { label: string; hint: string }> = {
   REQUIRE_ADMIN_REQUEST_APPROVAL: {
@@ -40,6 +41,7 @@ const booleanKeys: Array<keyof SystemConfig> = [
 const numberKeys: Array<keyof SystemConfig> = ['MAX_FRESHMAN_REQUESTS', 'MAX_SENIOR_MENTEES'];
 
 export function AdminConfigPage() {
+  usePageMeta('Configuração do Sistema', 'Controle registros, temporada de descoberta e limites do programa.');
   const configQuery = useQuery({
     queryKey: ['admin', 'config'],
     queryFn: () => adminApi.getConfig(),

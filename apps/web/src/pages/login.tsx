@@ -8,8 +8,10 @@ import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { FieldError, Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 export function LoginPage() {
+  usePageMeta('Entrar', 'Acesse sua conta no Mathitis e continue sua trajetória na linhagem acadêmica.');
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import type { LineageEdge, LineageNode } from '@mathitis/schemas';
 import { lineageApi } from '@/lib/lineage-api';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 interface Position {
   x: number;
@@ -57,6 +58,7 @@ function yearForRank(edges: LineageEdge[], rank: number, positions: Map<string, 
 }
 
 export function LineagePage() {
+  usePageMeta('Linhagem', 'A árvore genealógica de mentorias do departamento, turma a turma.');
   const { handle } = useParams<{ handle?: string }>();
 
   const lineageQuery = useQuery({

@@ -3,8 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '@/lib/admin-api';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 export function AdminApprovalsPage() {
+  usePageMeta('Fila de Aprovação', 'Revise pedidos de apadrinhamento aguardando aprovação administrativa.');
   const queryClient = useQueryClient();
   const [error, setError] = useState('');
 

@@ -7,6 +7,7 @@ import { discoveryApi } from '@/lib/discovery-api';
 import { requestsApi } from '@/lib/requests-api';
 import { Button } from '@/components/ui/button';
 import { MentorProfileModal } from '@/components/profile/mentor-profile-modal';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 type TreeNode = {
   label: string;
@@ -171,6 +172,7 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 export function HomePage() {
+  usePageMeta('Início', 'Plataforma de apadrinhamento acadêmico do departamento de matemática: encontre um padrinho, construa sua linhagem.');
   const { user, logout } = useAuth();
   const isFreshman = user?.role === 'freshman';
   const isSenior = user?.role === 'senior';

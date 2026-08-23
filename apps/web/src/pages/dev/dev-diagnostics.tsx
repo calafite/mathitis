@@ -4,6 +4,7 @@ import { devApi } from '@/lib/dev-api';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 function formatBytes(bytes: number): string {
   if (bytes >= 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GiB`;
@@ -47,6 +48,7 @@ function LinkifiedText({ text }: { text: string }) {
 }
 
 export function DevDiagnosticsPage() {
+  usePageMeta('Diagnósticos', 'Telemetria do sistema: saúde dos serviços, filas e exposição de rede.');
   const { logout } = useAuth();
   const navigate = useNavigate();
 

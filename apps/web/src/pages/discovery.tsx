@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { discoveryApi } from '@/lib/discovery-api';
 import { Button } from '@/components/ui/button';
 import { MentorProfileModal } from '@/components/profile/mentor-profile-modal';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 function avatar(src: string | null, alt: string) {
   if (!src) {
@@ -128,6 +129,7 @@ function SeniorCard({
 }
 
 export function DiscoveryPage() {
+  usePageMeta('Descoberta de Padrinhos', 'Explore os veteranos disponíveis, filtre por interesses e encontre seu padrinho acadêmico.');
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [semester, setSemester] = useState<number | undefined>(undefined);

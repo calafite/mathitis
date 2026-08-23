@@ -9,8 +9,10 @@ import { Button } from '@/components/ui/button';
 import { FieldError, Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { PasswordStrength } from '@/components/ui/password-strength';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 export function RegisterPage() {
+  usePageMeta('Criar conta', 'Junte-se ao programa de apadrinhamento acadêmico do departamento de matemática.');
   const { register } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);

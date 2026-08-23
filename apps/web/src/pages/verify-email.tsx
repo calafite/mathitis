@@ -4,10 +4,12 @@ import { authApi } from '@/lib/auth-api';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 type VerifyState = 'verifying' | 'success' | 'error';
 
 export function VerifyEmailPage() {
+  usePageMeta('Verificar e-mail', 'Confirmação de e-mail da sua conta Mathitis.');
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
   const [state, setState] = useState<VerifyState>('verifying');

@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { requestsApi, buildIdempotencyKey, type RequestInbox } from '@/lib/requests-api';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Pendente',
@@ -111,6 +112,7 @@ function RequestRow({
 }
 
 export function RequestsPage() {
+  usePageMeta('Pedidos de apadrinhamento', 'Acompanhe seus pedidos enviados e recebidos de apadrinhamento acadêmico.');
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isFreshman = user?.role === 'freshman';

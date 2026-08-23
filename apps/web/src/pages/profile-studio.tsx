@@ -10,6 +10,7 @@ import { BioEditor } from '@/components/profile/bio-editor';
 import { MediaUpload } from '@/components/profile/media-upload';
 import { RichCardManager } from '@/components/profile/rich-card-manager';
 import { ProfilePreview, type ProfileDraft } from '@/components/profile/profile-preview';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 const DEFAULT_THEME: ThemePalette = {
   primaryColor: '#6366f1',
@@ -78,6 +79,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 export function ProfileStudioPage() {
+  usePageMeta('Estúdio de Perfil', 'Personalize seu perfil: biografia, tema, banners e cartões de vitrine.');
   const { user } = useAuth();
   const queryClient = useQueryClient();
 

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { adminApi } from '@/lib/admin-api';
 import { Button } from '@/components/ui/button';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 const roleLabels: Record<string, string> = {
   freshman: 'Calouro',
@@ -18,6 +19,7 @@ const statusLabels: Record<string, string> = {
 };
 
 export function AdminDashboardPage() {
+  usePageMeta('Painel Administrativo', 'Visão geral do programa de apadrinhamento: usuários, aprovações e configuração.');
   const configQuery = useQuery({
     queryKey: ['admin', 'config'],
     queryFn: () => adminApi.getConfig(),

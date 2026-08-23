@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { AuditLog } from '@mathitis/schemas';
 import { adminApi } from '@/lib/admin-api';
 import { Button } from '@/components/ui/button';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 const PAGE_SIZE = 25;
 
@@ -36,6 +37,7 @@ function formatDate(value: string | Date) {
 }
 
 export function AdminAuditLogsPage() {
+  usePageMeta('Registro de Auditoria', 'Histórico imutável das ações administrativas da plataforma.');
   const [filters, setFilters] = useState({
     action: '',
     entity: '',

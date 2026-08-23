@@ -5,6 +5,7 @@ import { adminApi } from '@/lib/admin-api';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { usePageMeta } from '@/lib/use-page-meta';
 
 const roleFilters = ['', 'freshman', 'senior', 'administrator', 'developer'] as const;
 const statusFilters = ['', 'pending_verification', 'active', 'suspended', 'deactivated'] as const;
@@ -24,6 +25,7 @@ const statusLabels: Record<string, string> = {
 };
 
 export function AdminUsersPage() {
+  usePageMeta('Gerenciamento de Usuários', 'Modere contas, anonimize usuários e preserve a linhagem acadêmica.');
   const queryClient = useQueryClient();
   const [query, setQuery] = useState({ q: '', role: '' as (typeof roleFilters)[number], status: '' as (typeof statusFilters)[number] });
   const [selected, setSelected] = useState<AdminUser | null>(null);
