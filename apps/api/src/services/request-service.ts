@@ -108,12 +108,12 @@ export function createRequestService(deps: {
           throw new NotFoundError('Senior not found', 'SENIOR_NOT_FOUND');
         }
         if (senior.id === freshmanId) {
-          throw new ValidationError('You cannot request mentorship from yourself');
+          throw new ValidationError('Você não pode pedir apadrinhamento para si mesmo(a)');
         }
 
         const seniorProfile = await profileRepository.findByUserId(senior.id);
         if (!seniorProfile?.isAcceptingRequests) {
-          throw new ValidationError('This senior is not accepting requests');
+          throw new ValidationError('Este veterano não está aceitando pedidos');
         }
 
         const maxRequests = await systemConfigRepository.getNumber(
@@ -137,8 +137,8 @@ export function createRequestService(deps: {
           notificationService?.dispatch({
             userId: senior.id,
             type: 'request_received',
-            title: 'New mentorship request',
-            body: `${created.freshman.handle} wants to be mentored by you`,
+            title: 'Novo pedido de apadrinhamento',
+            body: `${created.freshman.handle} quer ser apadrinhado(a) por você`,
             payload: { requestId: created.id, freshmanId, seniorId: senior.id },
           });
           return await attachFreshmanProfile(created);
@@ -181,7 +181,7 @@ export function createRequestService(deps: {
     const isFreshmanOwner = request.freshmanId === viewerId;
     const isAdmin = viewerRole === 'administrator' || viewerRole === 'developer';
     if (!isSeniorTarget && !isFreshmanOwner && !isAdmin) {
-      throw new ForbiddenError('You do not have access to this request');
+      throw new ForbiddenError('Você não tem acesso a este pedido');
     }
     return attachFreshmanProfile(request);
   }
@@ -194,7 +194,7 @@ export function createRequestService(deps: {
       async () => {
         const request = await requireRequest(requestId);
         if (request.seniorId !== seniorId) {
-          throw new ForbiddenError('You cannot accept a request not addressed to you');
+          throw new ForbiddenError('Você não pode aceitar um pedido não direcionado a você');
         }
         if (request.status !== 'pending' && request.status !== 'pending_admin_approval') {
           throw new ConflictError('This request can no longer be accepted', 'REQUEST_NOT_ACTIVE');
@@ -202,7 +202,7 @@ export function createRequestService(deps: {
 
         const freshman = await userRepository.findActiveById(request.freshmanId);
         if (!freshman) {
-          throw new ValidationError('The applicant account is no longer active');
+          throw new ValidationError('A conta do candidato não está mais ativa');
         }
 
         return prisma.$transaction(async (tx) => {
@@ -211,7 +211,7 @@ export function createRequestService(deps: {
             throw new NotFoundError('Senior profile not found', 'SENIOR_PROFILE_NOT_FOUND');
           }
           if (!seniorProfile.isAcceptingRequests) {
-            throw new ValidationError('This senior is not accepting requests');
+            throw new ValidationError('Este veterano não está aceitando pedidos');
           }
 
           const activeCount = await mentorshipRepository.countActiveBySenior(request.seniorId, tx);
@@ -228,8 +228,8 @@ export function createRequestService(deps: {
             await requestRepository.updateStatus(requestId, 'pending_admin_approval', undefined, tx);
             notificationService?.dispatchToAdmins({
               type: 'approval_required',
-              title: 'Mentorship request awaiting approval',
-              body: `${request.freshman.handle} was accepted by ${request.senior.handle} and needs admin approval`,
+              title: 'Pedido de apadrinhamento aguardando aprovação',
+              body: `${request.freshman.handle} foi aceito(a) por ${request.senior.handle} e precisa de aprovação administrativa`,
               payload: { requestId },
             });
           } else {
@@ -252,8 +252,8 @@ export function createRequestService(deps: {
             notificationService?.dispatch({
               userId: request.freshmanId,
               type: 'request_accepted',
-              title: 'Request accepted',
-              body: `${request.senior.handle} accepted your mentorship request`,
+              title: 'Pedido aceito',
+              body: `${request.senior.handle} aceitou seu pedido de apadrinhamento`,
               payload: { requestId },
             });
           }
@@ -268,7 +268,7 @@ export function createRequestService(deps: {
   async function reject(seniorId: string, requestId: string, reason?: string) {
     const request = await requireRequest(requestId);
     if (request.seniorId !== seniorId) {
-      throw new ForbiddenError('You cannot reject a request not addressed to you');
+      throw new ForbiddenError('Você não pode recusar um pedido não direcionado a você');
     }
     if (request.status !== 'pending' && request.status !== 'pending_admin_approval') {
       throw new ConflictError('This request can no longer be rejected', 'REQUEST_NOT_ACTIVE');
@@ -279,8 +279,8 @@ export function createRequestService(deps: {
     notificationService?.dispatch({
       userId: request.freshmanId,
       type: 'request_rejected',
-      title: 'Request declined',
-      body: `${request.senior.handle} declined your mentorship request`,
+      title: 'Pedido recusado',
+      body: `${request.senior.handle} recusou seu pedido de apadrinhamento`,
       payload: { requestId },
     });
     return requireRequest(requestId);
@@ -289,7 +289,7 @@ export function createRequestService(deps: {
   async function cancel(freshmanId: string, requestId: string) {
     const request = await requireRequest(requestId);
     if (request.freshmanId !== freshmanId) {
-      throw new ForbiddenError('You can only cancel your own requests');
+      throw new ForbiddenError('Você só pode cancelar seus próprios pedidos');
     }
     if (request.status !== 'pending' && request.status !== 'pending_admin_approval') {
       throw new ConflictError('This request can no longer be cancelled', 'REQUEST_NOT_ACTIVE');
@@ -298,8 +298,8 @@ export function createRequestService(deps: {
     notificationService?.dispatch({
       userId: request.seniorId,
       type: 'request_cancelled',
-      title: 'Request cancelled',
-      body: `${request.freshman.handle} cancelled their mentorship request`,
+      title: 'Pedido cancelado',
+      body: `${request.freshman.handle} cancelou o pedido de apadrinhamento`,
       payload: { requestId },
     });
     return requireRequest(requestId);
@@ -313,7 +313,7 @@ export function createRequestService(deps: {
 
     const freshman = await userRepository.findActiveById(request.freshmanId);
     if (!freshman) {
-      throw new ValidationError('The applicant account is no longer active');
+      throw new ValidationError('A conta do candidato não está mais ativa');
     }
 
     return prisma.$transaction(async (tx) => {
@@ -351,8 +351,8 @@ export function createRequestService(deps: {
       notificationService?.dispatch({
         userId: request.freshmanId,
         type: 'approval_decision',
-        title: 'Request approved',
-        body: `${request.senior.handle}'s admin approved your mentorship request`,
+        title: 'Pedido aprovado',
+        body: `A administração aprovou seu pedido de apadrinhamento com ${request.senior.handle}`,
         payload: { requestId },
       });
       return attachFreshmanProfile(updated);
@@ -371,8 +371,8 @@ export function createRequestService(deps: {
     notificationService?.dispatch({
       userId: request.freshmanId,
       type: 'approval_decision',
-      title: 'Request denied',
-      body: `${request.senior.handle}'s admin denied your mentorship request`,
+      title: 'Pedido recusado pela administração',
+      body: `A administração recusou seu pedido de apadrinhamento com ${request.senior.handle}`,
       payload: { requestId },
     });
     return requireRequest(requestId);

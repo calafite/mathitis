@@ -14,8 +14,8 @@ export interface AuthMailerDeps {
 
 const EMAIL_JOB = 'email-send';
 
-const VERIFICATION_SUBJECT = 'Verify your Mathitis email';
-const RESET_SUBJECT = 'Reset your Mathitis password';
+const VERIFICATION_SUBJECT = 'Verifique seu e-mail no Mathitis';
+const RESET_SUBJECT = 'Redefina sua senha no Mathitis';
 
 /**
  * Production auth mailer: builds the verification/reset links from the public
@@ -56,12 +56,12 @@ export function createAuthMailer(deps: AuthMailerDeps): Mailer {
         to,
         VERIFICATION_SUBJECT,
         [
-          'Welcome to Mathitis!',
+          'Bem-vindo(a) ao Mathitis!',
           '',
-          'Please confirm your email address to activate your account:',
+          'Confirme seu endereço de e-mail para ativar sua conta:',
           url,
           '',
-          'The link expires in 24 hours. If you did not create this account, you can ignore this email.',
+          'O link expira em 24 horas. Se você não criou esta conta, pode ignorar este e-mail.',
         ].join('\n'),
       );
     },
@@ -73,12 +73,12 @@ export function createAuthMailer(deps: AuthMailerDeps): Mailer {
         to,
         RESET_SUBJECT,
         [
-          'We received a request to reset your Mathitis password.',
+          'Recebemos uma solicitação de redefinição de senha do Mathitis.',
           '',
-          'Choose a new password here:',
+          'Escolha uma nova senha aqui:',
           url,
           '',
-          'The link expires in 24 hours. If you did not request this, you can safely ignore this email.',
+          'O link expira em 24 horas. Se você não fez esta solicitação, pode ignorar este e-mail com segurança.',
         ].join('\n'),
       );
     },

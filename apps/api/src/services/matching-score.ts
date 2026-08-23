@@ -69,34 +69,34 @@ export function buildMatchReasons(input: MatchReasonInput): string[] {
   if (shared.length > 0) {
     const shown = shared.slice(0, SHARED_TAGS_CAP).map((tag) => tag.name);
     const extra = shared.length - shown.length;
-    const suffix = extra > 0 ? ` +${extra} more` : '';
+    const suffix = extra > 0 ? ` +${extra}` : '';
     reasons.push(
       shared.length === 1
-        ? `1 shared tag: ${shown[0]}`
-        : `${shared.length} shared tags: ${shown.join(', ')}${suffix}`,
+        ? `1 interesse em comum: ${shown[0]}`
+        : `${shared.length} interesses em comum: ${shown.join(', ')}${suffix}`,
     );
   }
 
   if (input.effortScore >= REASON_THRESHOLDS.effortRich) {
-    reasons.push('Rich, highly detailed profile');
+    reasons.push('Perfil rico e muito detalhado');
   } else if (input.effortScore >= REASON_THRESHOLDS.effortDetailed) {
-    reasons.push('Detailed profile');
+    reasons.push('Perfil detalhado');
   }
 
   if (input.profileViews >= REASON_THRESHOLDS.viewsHighDemand) {
-    reasons.push('In high demand among students');
+    reasons.push('Em alta entre os estudantes');
   } else if (input.profileViews >= REASON_THRESHOLDS.viewsPopular) {
-    reasons.push('Popular profile with students');
+    reasons.push('Perfil popular entre estudantes');
   }
 
   if (input.bumpCount >= REASON_THRESHOLDS.bumpsFrequent) {
-    reasons.push('Frequently bumped by fellow freshmen');
+    reasons.push('Frequentemente impulsionado por calouros');
   } else if (input.bumpCount >= REASON_THRESHOLDS.bumpsNoticed) {
-    reasons.push('Recently bumped by a fellow freshman');
+    reasons.push('Recentemente impulsionado por um calouro');
   }
 
   if (input.isAcceptingRequests) {
-    reasons.push('Currently accepting new mentees');
+    reasons.push('Aceitando novos pupilos');
   }
 
   return reasons;
