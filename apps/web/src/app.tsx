@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/auth-context';
 import { NotificationsProvider } from '@/contexts/notifications-context';
@@ -12,6 +12,8 @@ import { LoginPage } from '@/pages/login';
 import { RegisterPage } from '@/pages/register';
 import { PasswordRecoveryPage } from '@/pages/password-recovery';
 import { VerifyEmailPage } from '@/pages/verify-email';
+import { PrivacyPage } from '@/pages/privacy';
+import { NotFoundPage } from '@/pages/not-found';
 import { ProfileStudioPage } from '@/pages/profile-studio';
 import { DiscoveryPage } from '@/pages/discovery';
 import { RequestsPage } from '@/pages/requests';
@@ -47,6 +49,7 @@ export function App() {
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/recover" element={<PasswordRecoveryPage />} />
                   <Route path="/verify-email" element={<VerifyEmailPage />} />
+                  <Route path="/privacidade" element={<PrivacyPage />} />
 
                   <Route element={<ProtectedRoute />}>
                     <Route element={<AppLayout />}>
@@ -137,7 +140,7 @@ export function App() {
                     }
                   />
 
-                  <Route path="*" element={<Navigate to="/" replace />} />
+                  <Route path="*" element={<NotFoundPage />} />
                 </Routes>
                 <NotificationToastStack />
               </NotificationsProvider>
