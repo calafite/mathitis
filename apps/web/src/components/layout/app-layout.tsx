@@ -1,7 +1,9 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth-context';
 import { NotificationBell } from '@/components/notifications/notification-bell';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+
+const APP_VERSION = __APP_VERSION__;
 
 const NAV_ITEMS = [
   { to: '/', label: 'Início', end: true },
@@ -64,6 +66,24 @@ export function AppLayout() {
       <main className="mx-auto w-full max-w-6xl px-4 py-8">
         <Outlet />
       </main>
+      <footer className="border-t border-border">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-muted-foreground sm:flex-row">
+          <span>
+            <span className="font-semibold text-foreground">Mathitis</span>{' '}
+            <span aria-hidden>·</span> μαθητής <span aria-hidden>·</span> © {new Date().getFullYear()}{' '}
+            Programa de Apadrinhamento Acadêmico
+          </span>
+          <span className="flex items-center gap-4">
+            <Link to="/lineage" className="hover:text-foreground">
+              Linhagem
+            </Link>
+            <Link to="/privacidade" className="hover:text-foreground">
+              Privacidade
+            </Link>
+            <span>v{APP_VERSION}</span>
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }
