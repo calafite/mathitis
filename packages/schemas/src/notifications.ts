@@ -38,7 +38,7 @@ export const notificationsResponseSchema = z.object({
 export type NotificationsResponse = z.infer<typeof notificationsResponseSchema>;
 
 export const notificationParamsSchema = z.object({
-  id: z.string().uuid('Notification id must be a valid UUID'),
+  id: z.string().uuid('O id da notificação deve ser um UUID válido'),
 });
 export type NotificationParams = z.infer<typeof notificationParamsSchema>;
 

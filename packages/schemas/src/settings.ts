@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
 export const changePasswordBodySchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
+  currentPassword: z.string().min(1, 'Informe a senha atual'),
   newPassword: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
+    .min(8, 'A senha deve ter pelo menos 8 caracteres')
+    .regex(/[A-Z]/, 'A senha deve conter pelo menos uma letra maiúscula')
+    .regex(/[a-z]/, 'A senha deve conter pelo menos uma letra minúscula')
+    .regex(/[0-9]/, 'A senha deve conter pelo menos um dígito numérico'),
 });
 
 export const updateAccountBodySchema = z.object({
@@ -122,7 +122,7 @@ export const userDataExportSchema = z.object({
 });
 
 export const anonymizeAccountBodySchema = z.object({
-  password: z.string().min(1, 'Password confirmation is required'),
+  password: z.string().min(1, 'Confirme a senha'),
 });
 
 export type ChangePasswordBody = z.infer<typeof changePasswordBodySchema>;

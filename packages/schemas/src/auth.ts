@@ -16,42 +16,42 @@ export type TokenType = z.infer<typeof tokenTypeSchema>;
 
 const handleSchema = z
   .string()
-  .min(3, 'Handle must be at least 3 characters')
-  .max(32, 'Handle must be at most 32 characters')
-  .regex(/^[a-z0-9_]+$/, 'Handle may only contain lowercase letters, numbers, and underscores');
+  .min(3, 'O nome de usuário deve ter pelo menos 3 caracteres')
+  .max(32, 'O nome de usuário deve ter no máximo 32 caracteres')
+  .regex(/^[a-z0-9_]+$/, 'O nome de usuário pode conter apenas letras minúsculas, números e underscores');
 
 const emailSchema = z
   .string()
-  .email('A valid email address is required')
-  .max(255, 'Email must be at most 255 characters')
+  .email('Informe um endereço de e-mail válido')
+  .max(255, 'O e-mail deve ter no máximo 255 caracteres')
   .transform((value) => value.toLowerCase().trim());
 
 const passwordSchema = z
   .string()
-  .min(8, 'Password must be at least 8 characters')
-  .max(128, 'Password must be at most 128 characters')
-  .regex(/[A-Z]/, 'Password must contain an uppercase letter')
-  .regex(/[a-z]/, 'Password must contain a lowercase letter')
-  .regex(/[0-9]/, 'Password must contain a number');
+  .min(8, 'A senha deve ter pelo menos 8 caracteres')
+  .max(128, 'A senha deve ter no máximo 128 caracteres')
+  .regex(/[A-Z]/, 'A senha deve conter uma letra maiúscula')
+  .regex(/[a-z]/, 'A senha deve conter uma letra minúscula')
+  .regex(/[0-9]/, 'A senha deve conter um dígito numérico');
 
 export const semesterSchema = z
   .number()
-  .int('Semester must be a whole number')
-  .min(1, 'Semester must be between 1 and 12')
-  .max(12, 'Semester must be between 1 and 12');
+  .int('O período deve ser um número inteiro')
+  .min(1, 'O período deve estar entre 1 e 12')
+  .max(12, 'O período deve estar entre 1 e 12');
 
 export const registerBodySchema = z.object({
   handle: handleSchema,
   email: emailSchema,
   password: passwordSchema,
   semester: semesterSchema,
-  socialName: z.string().max(60, 'Name must be at most 60 characters').optional(),
+  socialName: z.string().max(60, 'O nome deve ter no máximo 60 caracteres').optional(),
 });
 export type RegisterBody = z.infer<typeof registerBodySchema>;
 
 export const loginBodySchema = z.object({
-  identifier: z.string().min(3, 'Nome ou email is required').max(255),
-  password: z.string().min(1, 'Password is required').max(128),
+  identifier: z.string().min(3, 'Informe o nome de usuário ou e-mail').max(255),
+  password: z.string().min(1, 'Informe a senha').max(128),
 });
 export type LoginBody = z.infer<typeof loginBodySchema>;
 
@@ -61,13 +61,13 @@ export const recoverBodySchema = z.object({
 export type RecoverBody = z.infer<typeof recoverBodySchema>;
 
 export const resetPasswordBodySchema = z.object({
-  token: z.string().min(32, 'Token is invalid').max(256),
+  token: z.string().min(32, 'Token inválido').max(256),
   password: passwordSchema,
 });
 export type ResetPasswordBody = z.infer<typeof resetPasswordBodySchema>;
 
 export const verifyEmailParamsSchema = z.object({
-  token: z.string().min(32, 'Token is invalid').max(256),
+  token: z.string().min(32, 'Token inválido').max(256),
 });
 export type VerifyEmailParams = z.infer<typeof verifyEmailParamsSchema>;
 

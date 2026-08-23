@@ -69,7 +69,7 @@ export const adminUsersResponseSchema = z.object({
 export type AdminUsersResponse = z.infer<typeof adminUsersResponseSchema>;
 
 export const adminUserParamsSchema = z.object({
-  id: z.string().uuid('User id must be a valid UUID'),
+  id: z.string().uuid('O id do usuário deve ser um UUID válido'),
 });
 export type AdminUserParams = z.infer<typeof adminUserParamsSchema>;
 
@@ -137,7 +137,7 @@ export const approvalsResponseSchema = z.object({
 export type ApprovalsResponse = z.infer<typeof approvalsResponseSchema>;
 
 export const approvalParamsSchema = z.object({
-  id: z.string().uuid('Approval id must be a valid UUID'),
+  id: z.string().uuid('O id da aprovação deve ser um UUID válido'),
 });
 export type ApprovalParams = z.infer<typeof approvalParamsSchema>;
 

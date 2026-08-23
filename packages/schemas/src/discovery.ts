@@ -98,7 +98,7 @@ export const bumpParamsSchema = z.object({
     .string()
     .min(3)
     .max(32)
-    .regex(/^[a-z0-9_]+$/, 'Invalid handle'),
+    .regex(/^[a-z0-9_]+$/, 'Nome de usuário inválido'),
 });
 export type BumpParams = z.infer<typeof bumpParamsSchema>;
 
@@ -107,7 +107,7 @@ export const bumpBodySchema = z.object({
     .string()
     .min(3)
     .max(32)
-    .regex(/^[a-z0-9_]+$/, 'Invalid handle')
+    .regex(/^[a-z0-9_]+$/, 'Nome de usuário inválido')
     .optional(),
 });
 export type BumpBody = z.infer<typeof bumpBodySchema>;
@@ -138,8 +138,8 @@ export const createMentorshipRequestBodySchema = z.object({
     .string()
     .min(3)
     .max(32)
-    .regex(/^[a-z0-9_]+$/, 'Invalid handle'),
-  message: z.string().trim().min(1, 'A message is required').max(2000),
+    .regex(/^[a-z0-9_]+$/, 'Nome de usuário inválido'),
+  message: z.string().trim().min(1, 'A mensagem é obrigatória').max(2000),
 });
 export type CreateMentorshipRequestBody = z.infer<typeof createMentorshipRequestBodySchema>;
 
@@ -185,7 +185,7 @@ export const requestResponseSchema = z.object({
 export type RequestResponse = z.infer<typeof requestResponseSchema>;
 
 export const requestParamsSchema = z.object({
-  id: z.string().uuid('Request id must be a valid UUID'),
+  id: z.string().uuid('O id do pedido deve ser um UUID válido'),
 });
 export type RequestParams = z.infer<typeof requestParamsSchema>;
 

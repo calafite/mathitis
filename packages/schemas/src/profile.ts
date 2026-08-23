@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const hexColorSchema = z
   .string()
-  .regex(/^#[0-9a-fA-F]{6}$/, 'Colour must be a valid hex value such as #6366f1');
+  .regex(/^#[0-9a-fA-F]{6}$/, 'A cor deve ser um valor hexadecimal válido, como #6366f1');
 
 export const cardStyleSchema = z.enum(['glassmorphic', 'solid', 'bordered']);
 export type CardStyle = z.infer<typeof cardStyleSchema>;
@@ -16,16 +16,16 @@ export const themePaletteSchema = z.object({
 export type ThemePalette = z.infer<typeof themePaletteSchema>;
 
 export const socialLinksSchema = z.object({
-  github: z.string().url('GitHub URL must be a valid URL').max(255).optional(),
+  github: z.string().url('Informe uma URL válida do GitHub').max(255).optional(),
   discord: z.string().max(255).optional(),
-  linkedin: z.string().url('LinkedIn URL must be a valid URL').max(255).optional(),
-  website: z.string().url('Website URL must be a valid URL').max(255).optional(),
+  linkedin: z.string().url('Informe uma URL válida do LinkedIn').max(255).optional(),
+  website: z.string().url('Informe uma URL válida do site').max(255).optional(),
 });
 export type SocialLinks = z.infer<typeof socialLinksSchema>;
 
 export const bannerPresetSchema = z
   .string()
-  .regex(/^[a-z0-9_-]+$/, 'Banner preset must be alphanumeric (lowercase, dashes, underscores)')
+  .regex(/^[a-z0-9_-]+$/, 'O preset de banner deve ser alfanumérico (minúsculas, traços e underscores)')
   .max(40);
 
 const bannerPresetOptionalSchema = bannerPresetSchema.optional();
@@ -43,7 +43,7 @@ export const songMetadataSchema = z.object({
 export type SongMetadata = z.infer<typeof songMetadataSchema>;
 
 export const gameMetadataSchema = z.object({
-  steamAppId: z.string().regex(/^\d{1,8}$/, 'Steam App ID must be numeric').optional(),
+  steamAppId: z.string().regex(/^\d{1,8}$/, 'O Steam App ID deve ser numérico').optional(),
   platform: z.string().max(60).optional(),
   hoursPlayed: z.number().int().nonnegative().optional(),
 });
@@ -60,7 +60,7 @@ export type FilmMetadata = z.infer<typeof filmMetadataSchema>;
 export const projectMetadataSchema = z.object({
   techStack: z.array(z.string().max(60)).max(20).optional(),
   stars: z.number().int().nonnegative().optional(),
-  repository: z.string().url('Repository URL must be valid').max(255).optional(),
+  repository: z.string().url('Informe uma URL de repositório válida').max(255).optional(),
 });
 export type ProjectMetadata = z.infer<typeof projectMetadataSchema>;
 
@@ -115,14 +115,14 @@ export const profileSchema = z.object({
 export type Profile = z.infer<typeof profileSchema>;
 
 export const updateProfileBodySchema = z.object({
-  socialName: z.string().trim().max(60, 'Name must be at most 60 characters').optional(),
+  socialName: z.string().trim().max(60, 'O nome deve ter no máximo 60 caracteres').optional(),
   pronouns: z.string().trim().max(30).optional().nullable(),
   tagline: z.string().trim().max(120).optional().nullable(),
   biographyMarkdown: z.string().max(20_000).optional().nullable(),
   bannerPreset: bannerPresetOptionalSchema,
   themePalette: themePaletteSchema.optional(),
   socialLinks: socialLinksSchema.optional(),
-  contactEmail: z.string().email('Contact email must be valid').max(255).optional().nullable(),
+  contactEmail: z.string().email('Informe um e-mail de contato válido').max(255).optional().nullable(),
   maxMentees: z.number().int().min(1).max(10).optional(),
   isDiscoverable: z.boolean().optional(),
   isAcceptingRequests: z.boolean().optional(),
@@ -144,12 +144,12 @@ export type UploadImageResponse = z.infer<typeof uploadImageResponseSchema>;
 
 export const createRichCardBodySchema = z.object({
   cardType: richCardTypeSchema,
-  title: z.string().trim().min(1, 'Title is required').max(150),
+  title: z.string().trim().min(1, 'O título é obrigatório').max(150),
   subtitle: z.string().trim().max(150).optional().nullable(),
   description: z.string().max(5_000).optional().nullable(),
-  imageUrl: z.string().url('Image URL must be valid').max(512).optional().nullable(),
-  externalUrl: z.string().url('External URL must be valid').max(512).optional().nullable(),
-  embedUrl: z.string().url('Embed URL must be valid').max(512).optional().nullable(),
+  imageUrl: z.string().url('Informe uma URL de imagem válida').max(512).optional().nullable(),
+  externalUrl: z.string().url('Informe uma URL externa válida').max(512).optional().nullable(),
+  embedUrl: z.string().url('Informe uma URL de incorporação válida').max(512).optional().nullable(),
   accentColor: hexColorSchema.default('#6366f1'),
   metadata: z.record(z.unknown()).default({}),
 });
@@ -169,12 +169,12 @@ export const richCardResponseSchema = z.object({
 export type RichCardResponse = z.infer<typeof richCardResponseSchema>;
 
 export const reorderRichCardsBodySchema = z.object({
-  order: z.array(z.string().uuid()).min(1, 'Order must contain at least one card id'),
+  order: z.array(z.string().uuid()).min(1, 'A ordem deve conter pelo menos um id de cartão'),
 });
 export type ReorderRichCardsBody = z.infer<typeof reorderRichCardsBodySchema>;
 
 export const richCardParamsSchema = z.object({
-  id: z.string().uuid('Card id must be a valid UUID'),
+  id: z.string().uuid('O id do cartão deve ser um UUID válido'),
 });
 export type RichCardParams = z.infer<typeof richCardParamsSchema>;
 
@@ -183,6 +183,6 @@ export const profileHandleParamsSchema = z.object({
     .string()
     .min(3)
     .max(32)
-    .regex(/^[a-z0-9_]+$/, 'Invalid handle'),
+    .regex(/^[a-z0-9_]+$/, 'Nome de usuário inválido'),
 });
 export type ProfileHandleParams = z.infer<typeof profileHandleParamsSchema>;
