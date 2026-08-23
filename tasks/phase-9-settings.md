@@ -6,7 +6,7 @@ Implement a dedicated User Settings portal (`/settings`) allowing authenticated 
 ---
 
 ## Tasks
-- [ ] **9.1 Schemas & Contract Definition**
+- [x] **9.1 Schemas & Contract Definition**
   - Create `packages/schemas/src/settings.ts` and export from `packages/schemas/src/index.ts`:
     - `changePasswordBodySchema`: Current password verification + new password with standard complexity regex (`/[A-Z]/`, `/[a-z]/`, `/[0-9]/`, min 8 chars).
     - `updateAccountBodySchema`: Academic `semester` (1–12) and user `preferences` (theme: `dark` | `light` | `system`, `reducedMotion`: boolean, `soundEnabled`: boolean, `emailNotifications`: boolean).
@@ -14,7 +14,7 @@ Implement a dedicated User Settings portal (`/settings`) allowing authenticated 
     - `anonymizeAccountBodySchema`: Password confirmation payload required for self-service deactivation.
   - Update Prisma schema (`apps/api/prisma/schema.prisma`) to support user-level preference storage (`preferences Json?` on `User` or `Profile`) and generate migration.
 
-- [ ] **9.2 Backend Account Management & Security API**
+- [x] **9.2 Backend Account Management & Security API**
   - Implement Fastify route endpoints in `apps/api/src/plugins/auth-plugin.ts` or a new `account-plugin.ts`:
     - `POST /api/account/change-password`: Verifies current password hash via Argon2id, hashes new password, updates database, and emits audit log (`account.password.update`).
     - `PATCH /api/account`: Updates current academic semester and user preferences.
@@ -27,7 +27,7 @@ Implement a dedicated User Settings portal (`/settings`) allowing authenticated 
       - Clears session cookies and logs `account.self_anonymize` to `audit_logs`.
   - Apply strict rate-limiting (`RATE_LIMIT_AUTH_MAX`) on password change and anonymization endpoints to prevent brute-force attacks.
 
-- [ ] **9.3 Frontend Settings Hub UI**
+- [x] **9.3 Frontend Settings Hub UI**
   - Build `apps/web/src/pages/settings.tsx` with a responsive tabbed navigation layout using Radix UI Tabs:
     - **Tab 1: Account & Security**
       - Current semester selector (allowing students to advance their semester over time).
@@ -49,11 +49,11 @@ Implement a dedicated User Settings portal (`/settings`) allowing authenticated 
   - Register `/settings` route in `apps/web/src/app.tsx` inside `<ProtectedRoute />`.
   - Add navigation shortcuts to `/settings` in `HomePage` header and navigation bars.
 
-- [ ] **9.4 Frontend API Client & State Hooks**
+- [x] **9.4 Frontend API Client & State Hooks**
   - Create `apps/web/src/lib/settings-api.ts` supporting `changePassword`, `updateAccount`, `exportData`, and `anonymizeAccount`.
   - Integrate TanStack Query mutations with optimistic UI updates and cache invalidation for user session/profile queries.
 
-- [ ] **9.5 Testing & Automated Quality Gates**
+- [x] **9.5 Testing & Automated Quality Gates**
   - **Unit Tests (Vitest)**:
     - `apps/api/tests/unit/account-service.test.ts`: Password change validation, Argon2id verification, and data export builder.
     - `apps/web/tests/unit/settings.test.tsx`: Tab switching, password change form submission, and data export download trigger.

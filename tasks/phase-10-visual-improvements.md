@@ -13,7 +13,7 @@ Elevate the visual presentation and utility of the homepage dashboard while stri
 ---
 
 ## Tasks
-- [ ] **10.1 Grounded Homepage Dashboard (`HomePage`)**
+- [x] **10.1 Grounded Homepage Dashboard (`HomePage`)**
   - Redesign `apps/web/src/pages/home.tsx` into a clean, informative student dashboard matching the design system:
     - **Header & Standing**: Personalized greeting, user role badge, academic semester indicator, and active request/mentee capacity counters.
     - **Quick Launchpad**: Cohesive navigation cards routing to **Discovery** (`/discovery`), **Requests** (`/requests`), **Lineage** (`/lineage`), and **Profile Studio** (`/profile/studio`).
@@ -21,7 +21,7 @@ Elevate the visual presentation and utility of the homepage dashboard while stri
     - **Recommendation Spotlight (Freshmen)**: Renders top algorithmic matches with match percentages and explainable match reason chips (`matchReasons`).
     - **Recent Activity / Status**: Displays current pending mentorship applications and status badges (`pending`, `pending_admin_approval`, `accepted`).
 
-- [ ] **10.2 Comprehensive Mentor Profile Modal (`MentorProfileModal`)**
+- [x] **10.2 Comprehensive Mentor Profile Modal (`MentorProfileModal`)**
   - Create `apps/web/src/components/profile/mentor-profile-modal.tsx` (using `@radix-ui/react-dialog`):
     - **Banner & Avatar Header**: Displays user-uploaded banner or preset, avatar, social name, pronouns, handle, and semester badge.
     - **Custom Palette Wrapper**: Scopes the senior's customized `themePalette` CSS variables (`--profile-primary`, `--profile-accent`, `--profile-card-bg`) to the modal card container.
@@ -33,12 +33,12 @@ Elevate the visual presentation and utility of the homepage dashboard while stri
       - **Apply for Mentorship** button (opens the application drawer / submission form).
   - Connect the modal to profile cards in both `DiscoveryPage` (`discovery.tsx`) and `HomePage` (`home.tsx`).
 
-- [ ] **10.3 Visual Cohesion & Polish Across Views**
+- [x] **10.3 Visual Cohesion & Polish Across Views**
   - Harmonize spacing, border radius, and surface elevations across `discovery.tsx`, `requests.tsx`, `lineage.tsx`, and `profile-studio.tsx`.
   - Ensure all card containers, dropdowns, and modals strictly derive backgrounds and borders from semantic tokens (`bg-card`, `border-border`, `text-foreground`).
   - Verify that custom profile styling (glassmorphic, solid, bordered) is safely isolated within profile containers and does not bleed into global navigation or modal backdrops.
 
-- [ ] **10.4 Testing & Verification**
+- [x] **10.4 Testing & Verification**
   - **Unit Tests (`apps/web/tests/unit/mentor-profile-modal.test.tsx`)**:
     - Verify that clicking a mentor card triggers the modal.
     - Verify all rich profile sections (bio markdown, tags, contact widgets, rich cards) render correctly inside the modal.
