@@ -104,10 +104,10 @@ export function SettingsPage() {
       void queryClient.invalidateQueries({ queryKey: ['account', 'settings'] });
       void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
       void queryClient.invalidateQueries({ queryKey: ['profile', 'me'] });
-      setNotice('Preferences saved.');
+      setNotice('Preferências salvas.');
     },
     onError: () => {
-      setNotice('Could not save your preferences. Please try again.');
+      setNotice('Não foi possível salvar suas preferências. Tente novamente.');
     },
   });
 
@@ -156,7 +156,7 @@ export function SettingsPage() {
       resetPwd();
     },
     onError: (err: unknown) => {
-      setPwdError(err instanceof ApiError ? err.message : 'Unable to change password.');
+      setPwdError(err instanceof ApiError ? err.message : 'Não foi possível alterar a senha.');
     },
   });
 
@@ -166,7 +166,7 @@ export function SettingsPage() {
       await logout();
     },
     onError: (err: unknown) => {
-      setAnonymizeError(err instanceof ApiError ? err.message : 'Unable to anonymize account.');
+      setAnonymizeError(err instanceof ApiError ? err.message : 'Não foi possível anonimizar a conta.');
     },
   });
 
@@ -214,9 +214,9 @@ export function SettingsPage() {
       anchor.click();
       anchor.remove();
       URL.revokeObjectURL(url);
-      setNotice('Your data export has been downloaded.');
+      setNotice('Seu arquivo de dados foi baixado.');
     } catch {
-      setNotice('Could not export your data. Please try again.');
+      setNotice('Não foi possível exportar seus dados. Tente novamente.');
     }
   };
 
@@ -229,14 +229,14 @@ export function SettingsPage() {
         <header className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Settings className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+            <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
           </div>
           <div className="flex items-center gap-3">
             <Link
               to="/"
               className="text-sm font-medium text-muted-foreground hover:text-foreground"
             >
-              Back to home
+              Voltar para a página inicial
             </Link>
             <ThemeToggle />
           </div>
@@ -255,7 +255,7 @@ export function SettingsPage() {
               type="button"
               className="text-muted-foreground hover:text-foreground"
               onClick={() => setNotice(null)}
-              aria-label="Dismiss"
+              aria-label="Dispensar"
             >
               ×
             </button>
@@ -264,18 +264,18 @@ export function SettingsPage() {
 
         <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
           <Tabs.List className="mb-6 flex flex-wrap gap-1 border-b border-border">
-            <SettingsTab value="account" label="Account & Security" icon={<UserCog className="h-4 w-4" />} />
-            <SettingsTab value="appearance" label="Appearance" icon={<Sun className="h-4 w-4" />} />
-            <SettingsTab value="notifications" label="Notifications" icon={<Bell className="h-4 w-4" />} />
-            <SettingsTab value="data" label="Data & Lineage" icon={<Database className="h-4 w-4" />} />
-            <SettingsTab value="danger" label="Danger Zone" icon={<ShieldAlert className="h-4 w-4" />} />
+            <SettingsTab value="account" label="Conta e Segurança" icon={<UserCog className="h-4 w-4" />} />
+            <SettingsTab value="appearance" label="Aparência" icon={<Sun className="h-4 w-4" />} />
+            <SettingsTab value="notifications" label="Notificações" icon={<Bell className="h-4 w-4" />} />
+            <SettingsTab value="data" label="Dados e Linhagem" icon={<Database className="h-4 w-4" />} />
+            <SettingsTab value="danger" label="Zona de Risco" icon={<ShieldAlert className="h-4 w-4" />} />
           </Tabs.List>
 
           <Tabs.Content value="account" className="space-y-6">
             <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Account & Security</h2>
+              <h2 className="text-lg font-semibold text-foreground">Conta e Segurança</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Manage your academic semester and sign-in credentials.
+                Gerencie seu período acadêmico e suas credenciais de acesso.
               </p>
 
               <div className="mt-6 grid gap-6 sm:grid-cols-2">
@@ -284,7 +284,7 @@ export function SettingsPage() {
                     htmlFor="semester"
                     className="mb-1 block text-sm font-medium text-foreground"
                   >
-                    Current semester
+                    Período atual
                   </label>
                   <select
                     id="semester"
@@ -294,28 +294,28 @@ export function SettingsPage() {
                   >
                     {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
                       <option key={n} value={n}>
-                        Semester {n}
+                        Período {n}
                       </option>
                     ))}
                   </select>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Advance your semester as you progress through your studies.
+                    Avance seu período conforme progredir nos estudos.
                   </p>
                 </div>
 
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">
-                    University email
+                    E-mail universitário
                   </label>
                   <Input
                     readOnly
                     value={email}
-                    aria-label="University email"
+                    aria-label="E-mail universitário"
                     className="cursor-not-allowed opacity-80"
                   />
                   {emailDomain && (
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Verified via{' '}
+                      Verificado via{' '}
                       <span className="font-medium text-foreground">@{emailDomain}</span>
                     </p>
                   )}
@@ -324,10 +324,10 @@ export function SettingsPage() {
             </section>
 
             <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Change password</h2>
+              <h2 className="text-lg font-semibold text-foreground">Alterar senha</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Choose a strong password with at least 8 characters, an uppercase letter, a
-                lowercase letter, and a number.
+                Escolha uma senha forte com pelo menos 8 caracteres, uma letra maiúscula, uma
+                letra minúscula e um número.
               </p>
 
               <form className="mt-5 space-y-4" onSubmit={onPwdSubmit}>
@@ -336,7 +336,7 @@ export function SettingsPage() {
                     htmlFor="currentPassword"
                     className="mb-1 block text-sm font-medium text-foreground"
                   >
-                    Current password
+                    Senha atual
                   </label>
                   <Input
                     id="currentPassword"
@@ -351,7 +351,7 @@ export function SettingsPage() {
                     htmlFor="newPassword"
                     className="mb-1 block text-sm font-medium text-foreground"
                   >
-                    New password
+                    Nova senha
                   </label>
                   <Input
                     id="newPassword"
@@ -375,17 +375,17 @@ export function SettingsPage() {
                     className="rounded-md bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-400"
                     role="status"
                   >
-                    Your password has been updated.
+                    Sua senha foi atualizada.
                   </div>
                 )}
 
                 <Button type="submit" disabled={pwdSubmitting}>
                   {pwdSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating…
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Atualizando…
                     </>
                   ) : (
-                    'Update password'
+                    'Atualizar senha'
                   )}
                 </Button>
               </form>
@@ -394,30 +394,30 @@ export function SettingsPage() {
 
           <Tabs.Content value="appearance" className="space-y-6">
             <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Theme</h2>
+              <h2 className="text-lg font-semibold text-foreground">Tema</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Choose how Mathitis looks for you.
+                Escolha como o Mathitis aparece para você.
               </p>
 
               <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <ThemeOption
                   active={preference === 'dark'}
-                  label="Dark"
-                  description="Default theme"
+                  label="Escuro"
+                  description="Tema padrão"
                   icon={<Moon className="h-5 w-5" />}
                   onClick={() => handleThemeChange('dark')}
                 />
                 <ThemeOption
                   active={preference === 'light'}
-                  label="Light"
-                  description="Bright and airy"
+                  label="Claro"
+                  description="Claro e arejado"
                   icon={<Sun className="h-5 w-5" />}
                   onClick={() => handleThemeChange('light')}
                 />
                 <ThemeOption
                   active={preference === 'system'}
-                  label="Sync with system"
-                  description="Follow OS preference"
+                  label="Sincronizar com o sistema"
+                  description="Seguir a preferência do sistema operacional"
                   icon={<Monitor className="h-5 w-5" />}
                   onClick={() => handleThemeChange('system')}
                 />
@@ -425,52 +425,52 @@ export function SettingsPage() {
             </section>
 
             <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Accessibility</h2>
+              <h2 className="text-lg font-semibold text-foreground">Acessibilidade</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Tailor the interface to your comfort.
+                Ajuste a interface ao seu conforto.
               </p>
 
               <div className="mt-5 space-y-4">
                 <ToggleRow
                   checked={reducedMotion}
                   onChange={handleReducedMotion}
-                  title="Reduced motion"
-                  description="Disable heavy transitions and animations."
+                  title="Movimento reduzido"
+                  description="Desativa transições e animações pesadas."
                 />
                 <ToggleRow
                   checked={highContrast}
                   onChange={handleHighContrast}
-                  title="High-contrast accents"
-                  description="Increase contrast of interactive accents."
+                  title="Acentos de alto contraste"
+                  description="Aumenta o contraste dos acentos interativos."
                 />
               </div>
             </section>
 
             <p className="text-xs text-muted-foreground">
-              Current resolved theme:{' '}
+              Tema atual aplicado:{' '}
               <span className="font-medium capitalize text-foreground">{theme}</span>
             </p>
           </Tabs.Content>
 
           <Tabs.Content value="notifications" className="space-y-6">
             <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Alerts</h2>
+              <h2 className="text-lg font-semibold text-foreground">Alertas</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Control how you are notified about mentorship activity.
+                Controle como você é notificado sobre a atividade de apadrinhamento.
               </p>
 
               <div className="mt-5 space-y-4">
                 <ToggleRow
                   checked={soundEnabled}
                   onChange={handleSoundToggle}
-                  title="In-app sound chime"
-                  description="Play a short chime when a new notification arrives."
+                  title="Som de notificação no app"
+                  description="Toca um som curto quando uma nova notificação chega."
                 />
                 <ToggleRow
                   checked={emailNotifications}
                   onChange={handleEmailNotifications}
-                  title="Email notifications"
-                  description="Receive transactional emails about requests and admin reviews."
+                  title="Notificações por e-mail"
+                  description="Receba e-mails transacionais sobre solicitações e revisões administrativas."
                 />
               </div>
             </section>
@@ -478,42 +478,42 @@ export function SettingsPage() {
 
           <Tabs.Content value="data" className="space-y-6">
             <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Your data archive</h2>
+              <h2 className="text-lg font-semibold text-foreground">Seu arquivo de dados</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Download a complete JSON archive of your profile, tags, rich cards, request
-                history, and lineage tree.
+                Baixe um arquivo JSON completo do seu perfil, tags, cards avançados, histórico de
+                solicitações e árvore de linhagem.
               </p>
 
               <Button className="mt-5" onClick={handleDownload}>
-                <Download className="mr-2 h-4 w-4" /> Download my data
+                <Download className="mr-2 h-4 w-4" /> Baixar meus dados
               </Button>
             </section>
 
             <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Lineage summary</h2>
+              <h2 className="text-lg font-semibold text-foreground">Resumo da linhagem</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Your academic family tree is preserved even if you deactivate your account.
+                Sua árvore de família acadêmica é preservada mesmo se você desativar sua conta.
               </p>
               <p className="mt-4 text-sm text-foreground">
-                Active connections:{' '}
+                Conexões ativas:{' '}
                 <span className="font-semibold">{activeMentorships}</span>
               </p>
               <Link
                 to="/lineage"
                 className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
               >
-                View my lineage →
+                Ver minha linhagem →
               </Link>
             </section>
           </Tabs.Content>
 
           <Tabs.Content value="danger" className="space-y-6">
             <section className="rounded-xl border border-destructive/30 bg-destructive/5 p-6">
-              <h2 className="text-lg font-semibold text-destructive">Danger Zone</h2>
+              <h2 className="text-lg font-semibold text-destructive">Zona de Risco</h2>
               <div className="mt-3 rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
-                Deactivating your account removes your personal information, bio, and showcase
-                cards. Your ancestral nodes on the Mentorship Lineage Graph will remain preserved
-                as an anonymized alumnus to keep your academic family tree intact.
+                Desativar sua conta remove suas informações pessoais, bio e cards de vitrine. Seus
+                nós ancestrais no Grafo de Linhagem de Apadrinhamento permanecerão preservados
+                como um ex-aluno anonimizado para manter intacta sua árvore de família acadêmica.
               </div>
 
               <Button
@@ -524,7 +524,7 @@ export function SettingsPage() {
                   setAnonymizeOpen(true);
                 }}
               >
-                <ShieldAlert className="mr-2 h-4 w-4" /> Anonymize account
+                <ShieldAlert className="mr-2 h-4 w-4" /> Anonimizar conta
               </Button>
             </section>
           </Tabs.Content>
@@ -540,10 +540,11 @@ export function SettingsPage() {
             className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-semibold text-foreground">Anonymize account?</h2>
+            <h2 className="text-lg font-semibold text-foreground">Anonimizar conta?</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              This will permanently deactivate your account, scrub your personal information, and
-              preserve you as an anonymized alumnus on the lineage graph. This cannot be undone.
+              Isso desativará permanentemente sua conta, removerá suas informações pessoais e o
+              preservará como um ex-aluno anonimizado no grafo de linhagem. Esta ação não pode ser
+              desfeita.
             </p>
 
             <form className="mt-5 space-y-4" onSubmit={onAnonymizeSubmit}>
@@ -552,7 +553,7 @@ export function SettingsPage() {
                   htmlFor="anonymizePassword"
                   className="mb-1 block text-sm font-medium text-foreground"
                 >
-                  Enter your password to confirm
+                  Digite sua senha para confirmar
                 </label>
                 <Input
                   id="anonymizePassword"
@@ -578,7 +579,7 @@ export function SettingsPage() {
                   onClick={() => setAnonymizeOpen(false)}
                   disabled={anonymizeMutation.isPending}
                 >
-                  Cancel
+                  Cancelar
                 </Button>
                 <Button
                   type="submit"
@@ -587,10 +588,10 @@ export function SettingsPage() {
                 >
                   {anonymizeMutation.isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deactivating…
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Desativando…
                     </>
                   ) : (
-                    'Anonymize account'
+                    'Anonimizar conta'
                   )}
                 </Button>
               </div>

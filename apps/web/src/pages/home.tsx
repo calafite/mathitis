@@ -101,7 +101,7 @@ export function HomePage() {
               className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-300 hover:text-white"
             >
               <Settings className="h-4 w-4" />
-              Settings
+              Configurações
             </Link>
             <ThemeToggle />
           </div>
@@ -114,15 +114,15 @@ export function HomePage() {
               <div className="flex flex-wrap items-center gap-2.5">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold tracking-wide text-indigo-300">
                   <GraduationCap className="h-3.5 w-3.5" />
-                  Academic Mentorship Lineage
+                  Linhagem de apadrinhamento acadêmico
                 </span>
                 <span className="rounded-full border border-slate-700 bg-slate-800/80 px-2.5 py-0.5 text-xs font-medium text-slate-300 capitalize">
-                  {user?.role} · Semester {user?.semester}
+                  {user?.role} · Período {user?.semester}
                 </span>
               </div>
 
               <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-                Welcome,{' '}
+                Bem-vindo(a),{' '}
                 <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
                   {user?.socialName ?? user?.handle}
                 </span>
@@ -130,24 +130,24 @@ export function HomePage() {
 
               <p className="max-w-2xl text-sm leading-relaxed text-slate-400 sm:text-base">
                 {isFreshman
-                  ? 'Connect with senior scholars, explore their journeys, and discover a guide to light your academic path.'
-                  : 'Pass on your experience, mentor the next generation of pupils, and build a lasting departmental legacy.'}
+                  ? 'Conecte-se com veteranos, explore suas trajetórias e descubra um guia para iluminar seu caminho acadêmico.'
+                  : 'Transmita sua experiência, oriente a próxima geração de alunos e construa um legado duradouro no departamento.'}
               </p>
             </div>
 
             {/* Standing Status Pill Card */}
             <div className="flex shrink-0 flex-col gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
               <div className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                Mentorship Standing
+                Situação de apadrinhamento
               </div>
               <div className="flex items-center gap-4">
                 {isFreshman && (
                   <div>
                     <div className="text-2xl font-bold text-white">
                       {3 - pendingRequests.length}{' '}
-                      <span className="text-xs font-normal text-slate-400">/ 3 slots</span>
+                      <span className="text-xs font-normal text-slate-400">/ 3 vagas</span>
                     </div>
-                    <div className="text-[11px] text-slate-400">Applications Open</div>
+                    <div className="text-[11px] text-slate-400">Pedidos abertos</div>
                   </div>
                 )}
                 {isSenior && (
@@ -158,7 +158,7 @@ export function HomePage() {
                         / {profile?.maxMentees ?? 3}
                       </span>
                     </div>
-                    <div className="text-[11px] text-slate-400">Active Pupils</div>
+                    <div className="text-[11px] text-slate-400">Alunos ativos</div>
                   </div>
                 )}
                 <div className="h-8 w-px bg-white/10" />
@@ -167,7 +167,7 @@ export function HomePage() {
                     {profile?.effortScore ?? 0}
                     <span className="text-xs font-normal text-slate-400"> pts</span>
                   </div>
-                  <div className="text-[11px] text-slate-400">Profile Richness</div>
+                  <div className="text-[11px] text-slate-400">Riqueza do perfil</div>
                 </div>
               </div>
             </div>
@@ -184,13 +184,13 @@ export function HomePage() {
               <Compass className="h-5 w-5" />
             </div>
             <h3 className="mt-4 text-base font-semibold text-white group-hover:text-indigo-300">
-              Mentor Discovery
+              Descoberta de mentores
             </h3>
             <p className="mt-1 text-xs text-slate-400">
-              Find mentors aligned with your academic interests and projects.
+              Encontre mentores alinhados com seus interesses e projetos acadêmicos.
             </p>
             <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-indigo-400 group-hover:translate-x-1 transition-transform">
-              Browse mentors <ArrowRight className="h-3.5 w-3.5" />
+              Explorar mentores <ArrowRight className="h-3.5 w-3.5" />
             </span>
           </Link>
 
@@ -203,19 +203,19 @@ export function HomePage() {
             </div>
             <div className="mt-4 flex items-center justify-between">
               <h3 className="text-base font-semibold text-white group-hover:text-purple-300">
-                Mentorship Requests
+                Pedidos de apadrinhamento
               </h3>
               {pendingRequests.length > 0 && (
                 <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-xs font-semibold text-purple-300">
-                  {pendingRequests.length} pending
+                  {pendingRequests.length} pendentes
                 </span>
               )}
             </div>
             <p className="mt-1 text-xs text-slate-400">
-              Review candidate statements, pitch goals, and manage admissions.
+              Revise as cartas dos candidatos, os objetivos propostos e gerencie as admissões.
             </p>
             <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-purple-400 group-hover:translate-x-1 transition-transform">
-              View inbox <ArrowRight className="h-3.5 w-3.5" />
+              Ver caixa de entrada <ArrowRight className="h-3.5 w-3.5" />
             </span>
           </Link>
 
@@ -227,13 +227,13 @@ export function HomePage() {
               <GitBranch className="h-5 w-5" />
             </div>
             <h3 className="mt-4 text-base font-semibold text-white group-hover:text-cyan-300">
-              Lineage Tree
+              Árvore de linhagem
             </h3>
             <p className="mt-1 text-xs text-slate-400">
-              Trace academic ancestry, mentor trees, and co-pupil circles across cohorts.
+              Explore a ancestralidade acadêmica, as árvores de mentoria e os círculos de colegas entre turmas.
             </p>
             <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-cyan-400 group-hover:translate-x-1 transition-transform">
-              Explore genealogy <ArrowRight className="h-3.5 w-3.5" />
+              Explorar genealogia <ArrowRight className="h-3.5 w-3.5" />
             </span>
           </Link>
 
@@ -245,13 +245,13 @@ export function HomePage() {
               <Palette className="h-5 w-5" />
             </div>
             <h3 className="mt-4 text-base font-semibold text-white group-hover:text-pink-300">
-              Profile Studio
+              Estúdio de perfil
             </h3>
             <p className="mt-1 text-xs text-slate-400">
-              Curate your story with rich media cards, custom banners, and themes.
+              Crie sua história com cartões ricos em mídia, banners personalizados e temas.
             </p>
             <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-pink-400 group-hover:translate-x-1 transition-transform">
-              Customize showcase <ArrowRight className="h-3.5 w-3.5" />
+              Personalizar vitrine <ArrowRight className="h-3.5 w-3.5" />
             </span>
           </Link>
         </section>
@@ -265,17 +265,17 @@ export function HomePage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-indigo-400" />
-                    <h2 className="text-lg font-bold text-white">Suggested Mentors for You</h2>
+                    <h2 className="text-lg font-bold text-white">Mentores sugeridos para você</h2>
                   </div>
                   <Link to="/discovery" className="text-xs font-semibold text-indigo-400 hover:underline">
-                    View Catalog
+                    Ver catálogo
                   </Link>
                 </div>
 
                 <div className="mt-4 divide-y divide-slate-800/80">
                   {recommendationsQuery.isLoading && (
                     <p className="py-6 text-center text-sm text-slate-500">
-                      Finding matching mentors across the department…
+                      Buscando mentores compatíveis no departamento…
                     </p>
                   )}
                   {recommendationsQuery.data?.slice(0, 3).map((senior) => (
@@ -305,11 +305,11 @@ export function HomePage() {
                               {senior.socialName ?? senior.handle}
                             </button>
                             <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-[11px] font-semibold text-indigo-300">
-                              {senior.score}% compatibility
+                              {senior.score}% de compatibilidade
                             </span>
                           </div>
                           <p className="text-xs text-slate-400">
-                            @{senior.handle} · Semester {senior.semester}
+                            @{senior.handle} · Período {senior.semester}
                           </p>
                           {senior.matchReasons && senior.matchReasons.length > 0 && (
                             <p className="mt-1 text-xs text-slate-500">
@@ -325,13 +325,13 @@ export function HomePage() {
                         className="w-full border-slate-700 sm:w-auto"
                         onClick={() => setProfileModalHandle(senior.handle)}
                       >
-                        View Profile
+                        Ver perfil
                       </Button>
                     </div>
                   ))}
                   {recommendationsQuery.data?.length === 0 && (
                     <p className="py-6 text-center text-sm text-slate-500">
-                      No mentors found yet. Explore the full catalog in Discovery!
+                      Nenhum mentor encontrado ainda. Explore o catálogo completo na Descoberta!
                     </p>
                   )}
                 </div>
@@ -344,11 +344,11 @@ export function HomePage() {
                 <div className="flex items-center gap-2">
                   <UserCheck className="h-5 w-5 text-emerald-400" />
                   <h2 className="text-lg font-bold text-white">
-                    {isFreshman ? 'Your Senior Mentor' : 'Connected Pupils'}
+                    {isFreshman ? 'Seu mentor veterano' : 'Alunos conectados'}
                   </h2>
                 </div>
                 <Link to="/requests" className="text-xs font-semibold text-indigo-400 hover:underline">
-                  Manage
+                  Gerenciar
                 </Link>
               </div>
 
@@ -368,7 +368,7 @@ export function HomePage() {
                               {counterpart?.socialName ?? counterpart?.handle}
                             </p>
                             <p className="text-xs text-slate-400">
-                              @{counterpart?.handle} · Semester {counterpart?.semester}
+                              @{counterpart?.handle} · Período {counterpart?.semester}
                             </p>
                           </div>
                         </div>
@@ -379,12 +379,12 @@ export function HomePage() {
                   <div className="rounded-xl border border-dashed border-slate-800 py-8 text-center">
                     <p className="text-sm text-slate-500">
                       {isFreshman
-                        ? 'You have not connected with a mentor for this cohort yet.'
-                        : 'No active pupils confirmed for this semester.'}
+                        ? 'Você ainda não se conectou com um mentor nesta turma.'
+                        : 'Nenhum aluno ativo confirmado para este período.'}
                     </p>
                     <Link to={isFreshman ? '/discovery' : '/requests'}>
                       <Button size="sm" className="mt-3">
-                        {isFreshman ? 'Find a Mentor' : 'Review Incoming Requests'}
+                        {isFreshman ? 'Encontrar um mentor' : 'Revisar pedidos recebidos'}
                       </Button>
                     </Link>
                   </div>
@@ -398,7 +398,7 @@ export function HomePage() {
             {/* Quick Status / Application Tracker */}
             <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 backdrop-blur-md">
               <h2 className="text-sm font-bold tracking-wider text-slate-300 uppercase">
-                Activity &amp; Applications
+                Atividade e pedidos
               </h2>
 
               <div className="mt-4 space-y-3">
@@ -407,19 +407,19 @@ export function HomePage() {
                     <Clock className="h-4 w-4 text-amber-400 mt-0.5 shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-semibold text-white">
-                        {isFreshman ? `To @${req.senior?.handle}` : `From @${req.freshman?.handle}`}
+                        {isFreshman ? `Para @${req.senior?.handle}` : `De @${req.freshman?.handle}`}
                       </p>
                       <p className="line-clamp-1 text-[11px] text-slate-400">{req.message}</p>
                     </div>
                     <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
-                      Pending
+                      Pendente
                     </span>
                   </div>
                 ))}
 
                 {pendingRequests.length === 0 && (
                   <p className="py-4 text-center text-xs text-slate-500">
-                    No active applications in review.
+                    Nenhum pedido em análise no momento.
                   </p>
                 )}
               </div>
@@ -428,12 +428,12 @@ export function HomePage() {
             {/* Lineage Philosophy Banner */}
             <section className="relative overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-900/30 to-purple-900/20 p-6">
               <BookOpen className="absolute -bottom-2 -right-2 h-20 w-20 text-indigo-500/10" />
-              <h3 className="text-sm font-bold text-indigo-300">The Spirit of Mathitis</h3>
+              <h3 className="text-sm font-bold text-indigo-300">O espírito do Mathitis</h3>
               <p className="mt-2 text-xs leading-relaxed text-slate-400">
-                Mentorship here is not a temporary ticket — it is a permanent bond of shared scholarship. Every connection builds our department’s enduring family tree.
+                A mentoria aqui não é um bilhete temporário — é um vínculo permanente de conhecimento compartilhado. Cada conexão constrói a nossa duradoura árvore de família do departamento.
               </p>
               <Link to="/lineage" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300">
-                View Academic Genealogy <ArrowRight className="h-3.5 w-3.5" />
+                Ver genealogia acadêmica <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </section>
           </div>

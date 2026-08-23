@@ -9,12 +9,12 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'Pending',
-  pending_admin_approval: 'Awaiting admin approval',
-  accepted: 'Accepted',
-  rejected: 'Rejected',
-  cancelled: 'Cancelled',
-  cancelled_capacity_filled: 'Cancelled (capacity)',
+  pending: 'Pendente',
+  pending_admin_approval: 'Aguardando aprovação do administrador',
+  accepted: 'Aceito',
+  rejected: 'Recusado',
+  cancelled: 'Cancelado',
+  cancelled_capacity_filled: 'Cancelado (vagas preenchidas)',
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -27,7 +27,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function partyName(party: MentorshipRequest['freshman'] | MentorshipRequest['senior']) {
-  return party?.socialName ?? party?.handle ?? 'Unknown';
+  return party?.socialName ?? party?.handle ?? 'Desconhecido';
 }
 
 function RequestRow({
@@ -73,35 +73,35 @@ function RequestRow({
         </div>
         <p className="mt-1 line-clamp-2 text-sm text-slate-600">{request.message}</p>
         <p className="mt-1 text-xs text-slate-400">
-          {new Date(request.createdAt).toLocaleString()}
+          {new Date(request.createdAt).toLocaleString('pt-BR')}
         </p>
         {request.rejectionReason && (
-          <p className="mt-1 text-xs text-red-600">Reason: {request.rejectionReason}</p>
+          <p className="mt-1 text-xs text-red-600">Motivo: {request.rejectionReason}</p>
         )}
       </div>
       <div className="flex shrink-0 flex-col gap-2">
         <Button variant="outline" size="sm" onClick={() => onInspect(request)}>
-          Inspect profile
+          Inspecionar perfil
         </Button>
         {active && (
           <>
             {isSenior && (
               <Button size="sm" disabled={busy} onClick={() => onAccept(request)}>
-                Accept
+                Aceitar
               </Button>
             )}
             {(isSenior || isFreshman || isStaff) && (
               <Button variant="outline" size="sm" disabled={busy} onClick={() => onReject(request)}>
-                {isFreshman ? 'Cancel' : 'Reject'}
+                {isFreshman ? 'Cancelar' : 'Recusar'}
               </Button>
             )}
             {isStaff && request.status === 'pending_admin_approval' && (
               <>
                 <Button size="sm" disabled={busy} onClick={() => onApprove(request)}>
-                  Approve
+                  Aprovar
                 </Button>
                 <Button variant="outline" size="sm" disabled={busy} onClick={() => onDeny(request)}>
-                  Deny
+                  Recusar
                 </Button>
               </>
             )}
@@ -131,7 +131,7 @@ export function RequestsPage() {
       void queryClient.invalidateQueries({ queryKey: ['requests'] });
     },
     onError: (err: unknown) => {
-      setError(err instanceof ApiError ? err.message : 'Request failed');
+      setError(err instanceof ApiError ? err.message : 'Falha na solicitação');
     },
   };
 
@@ -168,13 +168,13 @@ export function RequestsPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Mentorship requests</h1>
+        <h1 className="text-2xl font-bold text-foreground">Pedidos de apadrinhamento</h1>
         <div className="flex items-center gap-3">
           <Link
             to="/settings"
             className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
           >
-            Settings
+            Configurações
           </Link>
           <ThemeToggle />
         </div>
@@ -188,14 +188,14 @@ export function RequestsPage() {
               onClick={() => setInbox('incoming')}
               className={`rounded px-3 py-1.5 text-sm ${inbox === 'incoming' ? 'bg-indigo-600 text-white' : 'text-slate-600'}`}
             >
-              Incoming
+              Recebidos
             </button>
             <button
               type="button"
               onClick={() => setInbox('sent')}
               className={`rounded px-3 py-1.5 text-sm ${inbox === 'sent' ? 'bg-indigo-600 text-white' : 'text-slate-600'}`}
             >
-              Sent
+              Enviados
             </button>
           </div>
         )}
@@ -204,7 +204,7 @@ export function RequestsPage() {
           value={status ?? ''}
           onChange={(e) => setStatus(e.target.value || undefined)}
         >
-          <option value="">All statuses</option>
+          <option value="">Todos os status</option>
           {Object.entries(STATUS_LABELS).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
@@ -216,9 +216,9 @@ export function RequestsPage() {
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
       <div className="mt-6 flex flex-col gap-3">
-        {requestsQuery.isLoading && <p className="text-slate-500">Loading…</p>}
+        {requestsQuery.isLoading && <p className="text-slate-500">Carregando…</p>}
         {requestsQuery.data?.length === 0 && (
-          <p className="text-slate-500">No requests yet.</p>
+          <p className="text-slate-500">Nenhum pedido ainda.</p>
         )}
         {requestsQuery.data?.map((request) => (
           <RequestRow
@@ -247,14 +247,14 @@ export function RequestsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">Applicant profile</h2>
+              <h2 className="text-lg font-semibold text-slate-900">Perfil do candidato</h2>
               <Button variant="outline" size="sm" onClick={() => setInspecting(null)}>
-                Close
+                Fechar
               </Button>
             </div>
             <p className="mt-1 text-sm text-slate-500">@{inspecting.freshman?.handle}</p>
             <p className="mt-2 text-sm text-slate-700">
-              <strong>Message:</strong> {inspecting.message}
+              <strong>Mensagem:</strong> {inspecting.message}
             </p>
 
             {inspecting.freshmanProfile ? (
@@ -276,7 +276,7 @@ export function RequestsPage() {
                       {inspecting.freshmanProfile.socialName ?? inspecting.freshman?.handle}
                     </p>
                     <p className="text-sm text-slate-500">
-                      Semester {inspecting.freshman?.semester ?? inspecting.freshmanProfile.semester}
+                      Período {inspecting.freshman?.semester ?? inspecting.freshmanProfile.semester}
                     </p>
                   </div>
                 </div>
@@ -303,7 +303,7 @@ export function RequestsPage() {
                 )}
               </div>
             ) : (
-              <p className="mt-4 text-sm text-slate-400">No rich profile available.</p>
+              <p className="mt-4 text-sm text-slate-400">Nenhum perfil detalhado disponível.</p>
             )}
           </div>
         </div>

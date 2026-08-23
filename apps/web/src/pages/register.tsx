@@ -56,13 +56,13 @@ export function RegisterPage() {
           <header className="mb-6 flex justify-end">
             <ThemeToggle />
           </header>
-          <h1 className="text-2xl font-semibold text-foreground">Check your inbox</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Verifique seu e-mail</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Se o e-mail suprido for válido, você receberá uma mensagem de confirmação
-            embreve. Clique no link na mensagem para verificar sua conta. Lembre-se de verificar o spam!
+            Se o e-mail informado for válido, você receberá uma mensagem de confirmação
+            em breve. Clique no link da mensagem para verificar sua conta. Lembre-se de checar o spam!
           </p>
           <Button className="mt-6" onClick={() => navigate('/login')}>
-            Back to sign in
+            Voltar para o login
           </Button>
         </div>
       </div>
@@ -83,7 +83,7 @@ export function RegisterPage() {
         <form className="mt-6 space-y-4" onSubmit={onSubmit} noValidate>
           <div>
             <label htmlFor="handle" className="mb-1 block text-sm font-medium text-foreground">
-              Username
+              Nome de usuário
             </label>
             <Input
               id="handle"
@@ -158,7 +158,7 @@ export function RegisterPage() {
         <p className="mt-4 text-center text-sm text-muted-foreground">
           Já possui uma conta?{' '}
           <Link to="/login" className="text-primary hover:underline">
-            Sign in
+            Entrar
           </Link>
         </p>
       </div>

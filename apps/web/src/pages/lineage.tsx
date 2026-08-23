@@ -45,7 +45,7 @@ function computeLayout(nodes: LineageNode[], edges: LineageEdge[]): Map<string, 
   return positions;
 }
 
-const ROOT_YEAR_MARKER = 'Root';
+const ROOT_YEAR_MARKER = 'Raiz';
 const YEAR_COLORS = ['#6366f1', '#0891b2', '#059669', '#d97706', '#dc2626', '#7c3aed'];
 
 function yearForRank(edges: LineageEdge[], rank: number, positions: Map<string, Position>): string {
@@ -84,9 +84,9 @@ export function LineagePage() {
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <header className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Mentorship lineage</h1>
+          <h1 className="text-2xl font-bold text-foreground">Linhagem de apadrinhamento</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {handle ? `Subgraph rooted at @${handle}` : 'The full department lineage across academic years.'}
+            {handle ? `Subgrafo com raiz em @${handle}` : 'A linhagem completa do departamento ao longo dos anos acadêmicos.'}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -94,15 +94,15 @@ export function LineagePage() {
             to="/settings"
             className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
           >
-            Settings
+            Configurações
           </Link>
           <ThemeToggle />
         </div>
       </header>
 
-      {lineageQuery.isLoading && <p className="mt-4 text-slate-500">Loading…</p>}
+      {lineageQuery.isLoading && <p className="mt-4 text-slate-500">Carregando…</p>}
       {!lineageQuery.isLoading && nodes.length === 0 && (
-        <p className="mt-4 text-slate-500">No mentorships recorded yet.</p>
+        <p className="mt-4 text-slate-500">Nenhum apadrinhamento registrado ainda.</p>
       )}
 
       {nodes.length > 0 && (

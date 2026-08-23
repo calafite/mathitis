@@ -42,12 +42,12 @@ function RequestRecovery() {
     setMessage(null);
     try {
       await authApi.recover(values);
-      setMessage('If an account with that email exists, a reset link has been sent.');
+      setMessage('Se existir uma conta com esse e-mail, um link de redefinição foi enviado.');
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
-        setError('Unable to process the request. Please try again.');
+        setError('Não foi possível processar a solicitação. Tente novamente.');
       }
     }
   });
@@ -58,15 +58,15 @@ function RequestRecovery() {
         <header className="mb-6 flex justify-end">
           <ThemeToggle />
         </header>
-        <h1 className="text-2xl font-semibold text-foreground">Reset your password</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Redefinir sua senha</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Enter your email address and we will send you a reset link if an account exists.
+          Informe seu endereço de e-mail e enviaremos um link de redefinição se uma conta existir.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
-              Email
+              E-mail
             </label>
             <Input id="email" type="email" autoComplete="email" {...register('email')} />
             <FieldError message={errors.email?.message} />
@@ -85,13 +85,13 @@ function RequestRecovery() {
           )}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Sending…' : 'Send reset link'}
+            {isSubmitting ? 'Enviando…' : 'Enviar link de redefinição'}
           </Button>
         </form>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
           <Link to="/login" className="text-primary hover:underline">
-            Back to sign in
+            Voltar para o login
           </Link>
         </p>
       </div>
@@ -117,12 +117,12 @@ function ResetPassword({ token }: { token: string }) {
     setMessage(null);
     try {
       await authApi.resetPassword({ token, password: values.password });
-      setMessage('Your password has been reset. You can now sign in.');
+      setMessage('Sua senha foi redefinida. Agora você pode entrar.');
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
-        setError('Unable to reset your password. Please try again.');
+        setError('Não foi possível redefinir sua senha. Tente novamente.');
       }
     }
   });
@@ -133,12 +133,12 @@ function ResetPassword({ token }: { token: string }) {
         <header className="mb-6 flex justify-end">
           <ThemeToggle />
         </header>
-        <h1 className="text-2xl font-semibold text-foreground">Choose a new password</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Escolha uma nova senha</h1>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
             <label htmlFor="new-password" className="mb-1 block text-sm font-medium text-foreground">
-              New password
+              Nova senha
             </label>
             <Input
               id="new-password"
@@ -162,13 +162,13 @@ function ResetPassword({ token }: { token: string }) {
           )}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Resetting…' : 'Reset password'}
+            {isSubmitting ? 'Redefinindo…' : 'Redefinir senha'}
           </Button>
         </form>
 
         <div className="mt-4 text-center text-sm">
           <Link to="/login" className="text-primary hover:underline">
-            Back to sign in
+            Voltar para o login
           </Link>
         </div>
       </div>

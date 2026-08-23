@@ -35,7 +35,7 @@ export function LoginPage() {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
-        setError('Unable to sign in. Please try again.');
+        setError('Não foi possível entrar. Tente novamente.');
       }
     }
   });
@@ -48,7 +48,7 @@ export function LoginPage() {
         </header>
         <h1 className="text-2xl font-semibold text-foreground">Junte-se ao Apadrinhamento</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Find your mentor and join the mathematics lineage.
+          Encontre seu mentor e faça parte da linhagem matemática.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
@@ -62,7 +62,7 @@ export function LoginPage() {
 
           <div>
             <label htmlFor="password" className="mb-1 block text-sm font-medium text-foreground">
-              Password
+              Senha
             </label>
             <Input
               id="password"
@@ -80,16 +80,16 @@ export function LoginPage() {
           )}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Signing in…' : 'Sign in'}
+            {isSubmitting ? 'Entrando…' : 'Entrar'}
           </Button>
         </form>
 
         <div className="mt-4 flex items-center justify-between text-sm">
           <Link to="/register" className="text-primary hover:underline">
-            Create an account
+            Criar conta
           </Link>
           <Link to="/recover" className="text-muted-foreground hover:underline">
-            Forgot password?
+            Esqueceu a senha?
           </Link>
         </div>
       </div>

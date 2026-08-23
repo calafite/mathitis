@@ -16,7 +16,7 @@ export function VerifyEmailPage() {
   useEffect(() => {
     if (!token) {
       setState('error');
-      setMessage('This verification link is missing its token and is invalid.');
+      setMessage('Este link de verificação está sem o token e é inválido.');
       return;
     }
     let cancelled = false;
@@ -29,7 +29,7 @@ export function VerifyEmailPage() {
         if (cancelled) return;
         setState('error');
         setMessage(
-          err instanceof ApiError ? err.message : 'Unable to verify your email. Please try again.',
+          err instanceof ApiError ? err.message : 'Não foi possível verificar seu e-mail. Tente novamente.',
         );
       });
     return () => {
@@ -45,36 +45,36 @@ export function VerifyEmailPage() {
         </header>
         {state === 'verifying' && (
           <>
-            <h1 className="text-2xl font-semibold text-foreground">Verifying your email…</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Please wait a moment.</p>
+            <h1 className="text-2xl font-semibold text-foreground">Verificando seu e-mail…</h1>
+            <p className="mt-2 text-sm text-muted-foreground">Aguarde um momento.</p>
           </>
         )}
 
         {state === 'success' && (
           <>
-            <h1 className="text-2xl font-semibold text-foreground">Email verified</h1>
+            <h1 className="text-2xl font-semibold text-foreground">E-mail verificado</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Your account is now active. Sign in to start exploring mentors.
+              Sua conta está ativa. Entre para começar a explorar mentores.
             </p>
             <Link to="/login">
-              <Button className="mt-6">Back to sign in</Button>
+              <Button className="mt-6">Voltar para o login</Button>
             </Link>
           </>
         )}
 
         {state === 'error' && (
           <>
-            <h1 className="text-2xl font-semibold text-foreground">Verification failed</h1>
+            <h1 className="text-2xl font-semibold text-foreground">Falha na verificação</h1>
             <p className="mt-2 text-sm text-muted-foreground">{message}</p>
             <p className="mt-2 text-sm text-muted-foreground">
-              You can request a new link by registering again or by visiting the recovery page.
+              Você pode solicitar um novo link cadastrando-se novamente ou visitando a página de recuperação.
             </p>
             <div className="mt-6 flex justify-center gap-2">
               <Link to="/register">
-                <Button variant="outline">Create account</Button>
+                <Button variant="outline">Criar conta</Button>
               </Link>
               <Link to="/recover">
-                <Button>Go to recovery</Button>
+                <Button>Ir para a recuperação</Button>
               </Link>
             </div>
           </>

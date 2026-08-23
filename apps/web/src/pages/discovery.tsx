@@ -53,12 +53,12 @@ function SeniorCard({
             </button>
             {score !== undefined && (
               <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">
-                {Math.round(score)}% match
+                {Math.round(score)}% de compatibilidade
               </span>
             )}
           </div>
           <p className="text-sm text-slate-500">
-            @{senior.handle} · Semester {senior.semester}
+            @{senior.handle} · Período {senior.semester}
           </p>
         </div>
       </div>
@@ -80,11 +80,11 @@ function SeniorCard({
       )}
 
       <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
-        <span>💬 {senior.effortScore} effort</span>
-        <span>👁 {senior.profileViews} views</span>
-        <span>⬆ {senior.bumpCount} bumps</span>
+        <span>💬 {senior.effortScore} de esforço</span>
+        <span>👁 {senior.profileViews} visualizações</span>
+        <span>⬆ {senior.bumpCount} impulsos</span>
         <span className={senior.isAcceptingRequests ? 'text-emerald-600' : 'text-slate-400'}>
-          {senior.isAcceptingRequests ? 'Accepting requests' : 'Not accepting'}
+          {senior.isAcceptingRequests ? 'Aceitando pedidos' : 'Fechado a pedidos'}
         </span>
       </div>
 
@@ -110,7 +110,7 @@ function SeniorCard({
             onClick={onBump}
             className="w-full"
           >
-            {bumping ? '…' : 'Bump'}
+            {bumping ? '…' : 'Impulsionar'}
           </Button>
         </div>
       )}
@@ -200,19 +200,19 @@ export function DiscoveryPage() {
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <header className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold text-foreground">Discovery</h1>
+          <h1 className="text-2xl font-bold text-foreground">Descoberta</h1>
         </div>
         <div className="flex items-center gap-3">
           {isFreshman && (
             <Button variant="outline" size="sm" onClick={() => setShowRecommendations((v) => !v)}>
-              {showRecommendations ? 'Show catalog' : 'Show recommendations'}
+              {showRecommendations ? 'Mostrar catálogo' : 'Mostrar recomendações'}
             </Button>
           )}
           <Link
             to="/settings"
             className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
           >
-            Settings
+            Configurações
           </Link>
           <ThemeToggle />
         </div>
@@ -224,10 +224,10 @@ export function DiscoveryPage() {
           value={semester ?? ''}
           onChange={(e) => setSemester(e.target.value ? Number(e.target.value) : undefined)}
         >
-          <option value="">All semesters</option>
+          <option value="">Todos os períodos</option>
           {Array.from({ length: 12 }, (_, i) => i + 1).map((s) => (
             <option key={s} value={s}>
-              Semester {s}
+              Período {s}
             </option>
           ))}
         </select>
@@ -238,9 +238,9 @@ export function DiscoveryPage() {
             setAvailability(e.target.value ? (e.target.value as 'accepting' | 'full') : undefined)
           }
         >
-          <option value="">Any availability</option>
-          <option value="accepting">Accepting requests</option>
-          <option value="full">At capacity</option>
+          <option value="">Qualquer disponibilidade</option>
+          <option value="accepting">Aceitando pedidos</option>
+          <option value="full">Sem vagas</option>
         </select>
         {groupedTags.map(([category, tags]) => (
           <div
@@ -268,7 +268,7 @@ export function DiscoveryPage() {
 
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {seniorsQuery.isLoading && <p className="text-slate-500">Loading…</p>}
+        {seniorsQuery.isLoading && <p className="text-slate-500">Carregando…</p>}
         {seniorsQuery.data?.map((senior) => (
           <SeniorCard
             key={senior.userId}

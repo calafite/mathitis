@@ -122,7 +122,7 @@ export function ProfileStudioPage() {
   };
 
   if (!profile || !draft) {
-    return <p className="px-4 py-10 text-center text-slate-500">Loading your profile…</p>;
+    return <p className="px-4 py-10 text-center text-slate-500">Carregando seu perfil…</p>;
   }
 
   return (
@@ -133,7 +133,7 @@ export function ProfileStudioPage() {
             <Link to="/" className="text-lg font-semibold text-foreground">
               Mathitis
             </Link>
-            <span className="text-sm text-muted-foreground">Profile Studio</span>
+            <span className="text-sm text-muted-foreground">Estúdio de Perfil</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground">{user?.handle}</span>
@@ -141,11 +141,11 @@ export function ProfileStudioPage() {
               to="/settings"
               className="text-sm font-medium text-muted-foreground hover:text-foreground"
             >
-              Settings
+              Configurações
             </Link>
             <ThemeToggle />
             <Button size="sm" disabled={!dirty || saveMutation.isPending} onClick={() => saveMutation.mutate(toUpdateBody(draft))}>
-              {saveMutation.isPending ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}
+              {saveMutation.isPending ? 'Salvando…' : dirty ? 'Salvar alterações' : 'Salvo'}
             </Button>
           </div>
         </div>
@@ -154,7 +154,7 @@ export function ProfileStudioPage() {
       <main className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-2">
         <div className="space-y-6">
           <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
-            <SectionTitle>Header &amp; media</SectionTitle>
+            <SectionTitle>Cabeçalho &amp; mídia</SectionTitle>
             <div className="space-y-3">
               <Field label="Avatar">
                 <MediaUpload
@@ -176,20 +176,20 @@ export function ProfileStudioPage() {
           </section>
 
           <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
-            <SectionTitle>Identity</SectionTitle>
+            <SectionTitle>Identidade</SectionTitle>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Social name">
-                <Input value={draft.socialName} onChange={(e) => set({ socialName: e.target.value })} placeholder="How you want to be known" />
+              <Field label="Nome social">
+                <Input value={draft.socialName} onChange={(e) => set({ socialName: e.target.value })} placeholder="Como você quer ser conhecido" />
               </Field>
-              <Field label="Pronouns">
+              <Field label="Pronomes">
                 <Input value={draft.pronouns} onChange={(e) => set({ pronouns: e.target.value })} placeholder="she/her" />
               </Field>
             </div>
-            <Field label="Tagline">
-              <Input value={draft.tagline} onChange={(e) => set({ tagline: e.target.value })} placeholder="A short one-liner" />
+              <Field label="Frase de destaque">
+                <Input value={draft.tagline} onChange={(e) => set({ tagline: e.target.value })} placeholder="Uma frase curta" />
             </Field>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Max mentees">
+              <Field label="Máx. de pupilos">
                 <Input
                   type="number"
                   min={1}
@@ -198,7 +198,7 @@ export function ProfileStudioPage() {
                   onChange={(e) => set({ maxMentees: Math.min(10, Math.max(1, Number(e.target.value) || 1)) })}
                 />
               </Field>
-              <Field label="Availability">
+              <Field label="Disponibilidade">
                 <button
                   type="button"
                   onClick={() => set({ isAcceptingRequests: !draft.isAcceptingRequests })}
@@ -206,7 +206,7 @@ export function ProfileStudioPage() {
                     draft.isAcceptingRequests ? 'border-green-300 bg-green-50 text-green-700' : 'border-slate-300 bg-slate-50 text-slate-500'
                   }`}
                 >
-                  {draft.isAcceptingRequests ? 'Accepting mentees' : 'Capacity full'}
+                  {draft.isAcceptingRequests ? 'Aceitando pupilos' : 'Capacidade cheia'}
                 </button>
               </Field>
             </div>
@@ -217,19 +217,19 @@ export function ProfileStudioPage() {
                 onChange={(e) => set({ isDiscoverable: e.target.checked })}
                 className="h-4 w-4 rounded"
               />
-              Show my profile in discovery ({user?.role === 'freshman' ? 'freshmen stay hidden by default' : 'seniors are discoverable'})
+              Mostrar meu perfil na descoberta ({user?.role === 'freshman' ? 'calouros ficam ocultos por padrão' : 'veteranos são visíveis'})
             </label>
           </section>
 
           <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
-            <SectionTitle>Theme &amp; palette</SectionTitle>
+            <SectionTitle>Tema &amp; paleta</SectionTitle>
             <ThemePicker value={draft.themePalette} onChange={(themePalette) => set({ themePalette })} />
           </section>
 
           <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
-            <SectionTitle>Contact (optional — shown publicly if added)</SectionTitle>
+            <SectionTitle>Contato (opcional — exibido publicamente se adicionado)</SectionTitle>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Contact email">
+              <Field label="E-mail de contato">
                 <Input value={draft.contactEmail} onChange={(e) => set({ contactEmail: e.target.value })} placeholder="me@example.com" />
               </Field>
               <Field label="Discord">
@@ -241,27 +241,27 @@ export function ProfileStudioPage() {
               <Field label="LinkedIn">
                 <Input value={draft.socialLinks.linkedin} onChange={(e) => set({ socialLinks: { ...draft.socialLinks, linkedin: e.target.value } })} placeholder="https://linkedin.com/in/you" />
               </Field>
-              <Field label="Website">
+              <Field label="Site">
                 <Input value={draft.socialLinks.website} onChange={(e) => set({ socialLinks: { ...draft.socialLinks, website: e.target.value } })} placeholder="https://you.dev" />
               </Field>
             </div>
           </section>
 
           <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
-            <SectionTitle>Biography (markdown)</SectionTitle>
+            <SectionTitle>Biografia (markdown)</SectionTitle>
             <BioEditor value={draft.biographyMarkdown} onChange={(biographyMarkdown) => set({ biographyMarkdown })} />
           </section>
 
           <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5">
-            <SectionTitle>Rich cards</SectionTitle>
+            <SectionTitle>Cards avançados</SectionTitle>
             <RichCardManager />
           </section>
         </div>
 
         <div className="lg:sticky lg:top-6 lg:self-start">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-700">Live preview</h2>
-            {dirty ? <span className="text-xs text-amber-600">Unsaved changes</span> : null}
+            <h2 className="text-sm font-semibold text-slate-700">Pré-visualização ao vivo</h2>
+            {dirty ? <span className="text-xs text-amber-600">Alterações não salvas</span> : null}
           </div>
           <ProfilePreview
             draft={draft}
