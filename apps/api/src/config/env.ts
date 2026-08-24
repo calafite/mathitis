@@ -11,6 +11,9 @@ export const envSchema = z.object({
   SESSION_MAX_AGE_DAYS: z.coerce.number().int().positive().default(7),
   WEB_ORIGIN: z.string().optional(),
 
+  LOGIN_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
+  LOGIN_LOCKOUT_MINUTES: z.coerce.number().positive().default(15),
+
   RATE_LIMIT_GLOBAL_MAX: z.coerce.number().int().positive().default(120),
   RATE_LIMIT_AUTH_MAX: z.coerce.number().int().positive().default(5),
   RATE_LIMIT_REQUEST_MAX: z.coerce.number().int().positive().default(10),
