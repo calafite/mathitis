@@ -4,13 +4,13 @@
 Close remaining hardening gaps: disable directory listing at the web-server layer, lock accounts after repeated failed logins, and invalidate all active sessions when a password changes.
 
 ## Tasks
-- [ ] **11.1 Disable directory listing**
+- [x] **11.1 Disable directory listing**
   - Ensure nginx never auto-indexes directories: set `autoindex off;` explicitly in the `http` block of `nginx.conf` (it is off by default, but make it explicit for auditability).
   - Verify no location block serves a filesystem path directly (all locations proxy to `web`/`api` containers); if any static root is ever added, confirm `autoindex off` and absence of `index` directives that would generate listings.
   - Add a smoke check to the deployment runbook (`docs/operations/01-deployment.md`): `curl -s https://pasteldemiolos.xyz/assets/uploads/ | grep -qi '<title>Index of' && fail`.
   - Return `403`/`404` (never a listing) for directory-style requests.
 
-- [ ] **11.2 Account lockout after repeated failed logins**
+- [x] **11.2 Account lockout after repeated failed logins**
   - Track failed login attempts per account (and per IP) in Redis: key `login:fail:{userId}` and `login:fail:ip:{ip}`, incrementing on each failed `POST /api/auth/login`.
   - Lock the account for a cool-down window (e.g. 15 minutes) after N consecutive failures (e.g. 5); return a generic error identical to invalid-credentials (no enumeration signal) but skip the Argon2id verification while locked.
   - Reset the failure counter on successful login.
@@ -18,7 +18,7 @@ Close remaining hardening gaps: disable directory listing at the web-server laye
   - Make thresholds configurable via env (`LOGIN_MAX_ATTEMPTS`, `LOGIN_LOCKOUT_MINUTES`) in `env.schema.ts` with sane defaults.
   - Tests: unit (counter/lock/expiry logic) + integration (5 failures → 6th attempt rejected even with correct password; counter resets after success).
 
-- [ ] **11.3 Invalidate sessions on password change**
+- [x] **11.3 Invalidate sessions on password change**
   - Introduce a per-user `sessionEpoch` (integer column on `users` via Prisma migration, or a Redis key `session:epoch:{userId}`).
   - Embed the epoch in the session JWT payload (`session.ts`) and reject tokens whose epoch does not match the current one during `verifySessionCookie`.
   - Bump the epoch whenever a password changes: `POST /api/account/change-password`, `POST /api/auth/reset-password`, and admin-forced suspensions/anonymization.
