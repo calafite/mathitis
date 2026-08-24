@@ -13,6 +13,75 @@ describe('Auth API', () => {
     await stopTestEnvironment(ctx);
   });
 
+
+  async function loginMailboxAdmin(): Promise<string> {
+    // The integration environment does not seed users, so create a dedicated
+    // administrator for privileged checks.
+    const argon2 = await import('argon2');
+    const passwordHash = await argon2.default.hash('MailboxAdmin123!', {
+      type: 2,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    });
+    await ctx.prisma.user.upsert({
+      where: { handle: 'mailbox_admin' },
+      update: { passwordHash },
+      create: {
+        handle: 'mailbox_admin',
+        email: 'mailbox_admin@cs.uni.edu',
+        passwordHash,
+        role: 'administrator',
+        semester: 12,
+        status: 'active',
+        profile: { create: { socialName: 'Mailbox Admin' } },
+      },
+    });
+
+    const adminLogin = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { identifier: 'mailbox_admin', password: 'MailboxAdmin123!' },
+      // Dedicated IP: the auth rate limit is per-IP and other tests share 127.0.0.1.
+      remoteAddress: '10.99.99.99',
+    });
+    if (!adminLogin.cookies[0]) {
+      throw new Error(`admin login failed: ${adminLogin.statusCode} ${adminLogin.body}`);
+    }
+    return adminLogin.cookies[0]!.value;
+  }
+
+
+  async function activateUser(handle: string) {
+    await ctx.prisma.user.update({
+      where: { handle },
+      data: { status: 'active' },
+    });
+  }
+
+  /** Creates a password_reset token the same way the auth service does. */
+  async function mintResetToken(userId: string): Promise<string> {
+    const { createHash, randomBytes } = await import('node:crypto');
+    const argon2 = await import('argon2');
+    const plainToken = randomBytes(32).toString('hex');
+    const digest = createHash('sha256').update(plainToken).digest();
+    const tokenHash = await argon2.default.hash(digest, {
+      type: 2,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    });
+    await ctx.prisma.userToken.create({
+      data: {
+        userId,
+        tokenHash,
+        type: 'password_reset',
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      },
+    });
+    return plainToken;
+  }
+
   const genericBody = {
     ok: true,
     message: 'Se existir uma conta com essas informações, você receberá um e-mail em breve.',
@@ -257,5 +326,119 @@ describe('Auth API', () => {
     });
     expect(res.statusCode).toBe(400);
     expect(res.json().error.code).toBe('TOKEN_INVALID');
+  });
+
+  it('locks an account after repeated failed logins and rejects the correct password while locked', async () => {
+    const handle = 'lockout_user';
+    await ctx.app.inject({
+      method: 'POST',
+      url: '/api/auth/register',
+      payload: {
+        handle,
+        email: `${handle}@cs.uni.edu`,
+        password: 'StrongPassword123!',
+        semester: 1,
+      },
+    });
+    // The integration env has no queue worker, so activate directly.
+    await activateUser(handle);
+
+    // Exhaust the attempt budget (LOGIN_MAX_ATTEMPTS = 5 in the test env).
+    for (let i = 0; i < 5; i += 1) {
+      const res = await ctx.app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        payload: { identifier: handle, password: 'WrongPassword123!' },
+        remoteAddress: '10.50.0.7',
+      });
+      expect(res.statusCode).toBe(401);
+    }
+
+    // Even the CORRECT password is rejected while the lock is active —
+    // with the same generic message (no oracle).
+    const locked = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { identifier: handle, password: 'StrongPassword123!' },
+      remoteAddress: '10.50.0.8',
+    });
+    expect(locked.statusCode).toBe(401);
+    expect(locked.json().message ?? locked.json().error).toBeDefined();
+
+    // The lockout was audited.
+    const mailboxCookie = await loginMailboxAdmin();
+    const audit = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/admin/audit-logs?action=account.lockout',
+      cookies: { mathitis_session: mailboxCookie },
+    });
+    expect(audit.statusCode).toBe(200);
+    expect(JSON.stringify(audit.json())).toContain('account.lockout');
+  });
+
+  it('invalidates existing sessions after a password reset via token', async () => {
+    const handle = 'reset_epoch_user';
+    await ctx.app.inject({
+      method: 'POST',
+      url: '/api/auth/register',
+      payload: {
+        handle,
+        email: `${handle}@cs.uni.edu`,
+        password: 'StrongPassword123!',
+        semester: 2,
+      },
+    });
+    await activateUser(handle);
+
+    // Sign in and keep the session cookie.
+    const login = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { identifier: handle, password: 'StrongPassword123!' },
+      remoteAddress: '10.51.0.1',
+    });
+    expect(login.statusCode).toBe(200);
+    const oldCookie = login.cookies[0]!.value;
+
+    const meBefore = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/auth/me',
+      cookies: { mathitis_session: oldCookie },
+    });
+    expect(meBefore.statusCode).toBe(200);
+
+    // Mint a reset token directly (no queue worker in the integration env).
+    const user = await ctx.prisma.user.findUnique({ where: { handle } });
+    const resetToken = await mintResetToken(user!.id);
+
+    const reset = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/auth/reset-password',
+      payload: { token: resetToken, password: 'NewStrongPassword123!' },
+    });
+    expect(reset.statusCode).toBe(200);
+
+    // The old session cookie is now dead (rejected as unauthenticated).
+    const meAfter = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/auth/me',
+      cookies: { mathitis_session: oldCookie },
+    });
+    expect(meAfter.statusCode).toBe(403);
+
+    // Login works with the new password and yields a working session.
+    const relogin = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { identifier: handle, password: 'NewStrongPassword123!' },
+      remoteAddress: '10.51.0.2',
+    });
+    expect(relogin.statusCode).toBe(200);
+    const meNew = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/auth/me',
+      cookies: { mathitis_session: relogin.cookies[0]!.value },
+    });
+    expect(meNew.statusCode).toBe(200);
   });
 });

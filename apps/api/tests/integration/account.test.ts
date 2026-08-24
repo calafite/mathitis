@@ -148,8 +148,44 @@ describe('Account management API', () => {
     expect(oldLogin.statusCode).toBe(401);
   });
 
+  it('change-password invalidates the previous session but keeps the current device logged in', async () => {
+    // Fresh login for acct_senior (created in the export test below may not
+    // exist yet, so use the freshman account and restore its password).
+    const first = await login('acct_freshman', 'NewPassword123!');
+    expect(first.statusCode).toBe(200);
+    const oldSessionCookie = session;
+
+    const change = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/account/change-password',
+      headers: { cookie: session, 'x-csrf-token': csrf },
+      payload: { currentPassword: 'NewPassword123!', newPassword: 'EpochPass123!' },
+    });
+    expect(change.statusCode).toBe(200);
+
+    // The pre-change cookie is dead (rejected as unauthenticated)...
+    const stale = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/auth/me',
+      headers: { cookie: oldSessionCookie },
+    });
+    expect(stale.statusCode).toBe(403); // invalid session == unauthenticated
+
+    // ...but the change response set a fresh cookie that still works.
+    const rawCookie = change.headers['set-cookie'];
+    const cookieList = Array.isArray(rawCookie) ? rawCookie : rawCookie ? [rawCookie] : [];
+    const setCookie = parseCookies(cookieList);
+    expect(setCookie['mathitis_session']).toBeTruthy();
+    const fresh = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/auth/me',
+      headers: { cookie: `mathitis_session=${setCookie['mathitis_session']}` },
+    });
+    expect(fresh.statusCode).toBe(200);
+  });
+
   it('GET /api/account/export returns complete data without password hash', async () => {
-    await login('acct_freshman', 'NewPassword123!');
+    await login('acct_freshman', 'EpochPass123!');
 
     const freshmenUser = await ctx.prisma.user.findUnique({ where: { handle: 'acct_freshman' } });
     await ctx.prisma.user.create({
@@ -216,7 +252,7 @@ describe('Account management API', () => {
       method: 'POST',
       url: '/api/account/anonymize',
       headers: { cookie: session, 'x-csrf-token': csrf },
-      payload: { password: 'NewPassword123!' },
+      payload: { password: 'EpochPass123!' },
     });
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({ ok: true });
@@ -238,7 +274,7 @@ describe('Account management API', () => {
     const reLogin = await ctx.app.inject({
       method: 'POST',
       url: '/api/auth/login',
-      payload: { identifier: 'acct_freshman', password: 'NewPassword123!' },
+      payload: { identifier: 'acct_freshman', password: 'EpochPass123!' },
     });
     expect(reLogin.statusCode).toBe(401);
   });

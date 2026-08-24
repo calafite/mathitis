@@ -19,6 +19,8 @@ function baseEnv(overrides: Partial<Env> = {}): Env {
     JWT_SECRET: 'test_jwt_secret_that_is_at_least_32_characters_long',
     COOKIE_SECRET: 'test_cookie_secret_that_is_at_least_32_chars_long',
     SESSION_MAX_AGE_DAYS: 7,
+    LOGIN_MAX_ATTEMPTS: 5,
+    LOGIN_LOCKOUT_MINUTES: 15,
     WEB_ORIGIN: undefined,
     RATE_LIMIT_GLOBAL_MAX: 120,
     RATE_LIMIT_AUTH_MAX: 5,
