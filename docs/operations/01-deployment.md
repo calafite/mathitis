@@ -78,7 +78,27 @@ docker compose -f docker-compose.production.yml exec -T postgres \
 0 2 * * * cd /opt/mathitis && docker compose -f docker-compose.production.yml exec -T postgres pg_dump -U mathitis_app -d mathitis | gzip > /backups/mathitis-$(date +\%F).sql.gz && find /backups -name '*.sql.gz' -mtime +14 -delete
 ```
 
-## 6. Troubleshooting
+## 6. Security smoke checks
+
+Run after every deploy:
+
+```bash
+# Directory listing must never be served (expect 403/404, not an index page)
+curl -s https://pasteldemiolos.xyz/assets/uploads/ | grep -qi '<title>Index of' && echo "FAIL: directory listing exposed" || echo "ok"
+curl -s -o /dev/null -w '%{http_code}\n' https://pasteldemiolos.xyz/.env/   # expect 403
+curl -s -o /dev/null -w '%{http_code}\n' https://pasteldemiolos.xyz/wp-admin  # expect 403
+
+# Bot protection: empty User-Agent must be rejected
+curl -s -o /dev/null -w '%{http_code}\n' -A "" https://pasteldemiolos.xyz/   # expect 403
+
+# Rate limiting: burst of bogus logins must end in 429/403, then lock out
+for i in $(seq 1 8); do curl -s -o /dev/null -w '%{http_code} ' -X POST \
+  -H 'Content-Type: application/json' \
+  -d '{"identifier":"nobody","password":"wrong"}' \
+  https://pasteldemiolos.xyz/api/auth/login; done; echo
+```
+
+## 7. Troubleshooting
 
 | Symptom | Likely cause / fix |
 | :--- | :--- |
