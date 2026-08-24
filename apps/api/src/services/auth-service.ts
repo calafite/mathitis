@@ -4,6 +4,7 @@ import type { UserRepository, UserWithProfile } from '../repositories/user-repos
 import type { TokenRepository } from '../repositories/token-repository.js';
 import type { SystemConfigRepository } from '../repositories/system-config-repository.js';
 import { DomainError, UnauthorizedError } from '../errors.js';
+import type { LoginGuard } from '../lib/login-guard.js';
 
 const ARGON2_OPTIONS = {
   type: argon2.argon2id,
@@ -24,6 +25,9 @@ export interface AuthServiceDeps {
   tokenRepository: TokenRepository;
   systemConfigRepository: SystemConfigRepository;
   mailer?: Mailer;
+  loginGuard?: LoginGuard;
+  /** Called when repeated failures trigger an account lockout (for audit logging). */
+  onLockout?: (userId: string) => Promise<void>;
 }
 
 export interface RegisterInput {
@@ -36,10 +40,10 @@ export interface RegisterInput {
 
 export interface AuthService {
   register(input: RegisterInput): Promise<void>;
-  login(identifier: string, password: string): Promise<UserWithProfile>;
+  login(identifier: string, password: string, clientIp?: string): Promise<UserWithProfile>;
   getCurrentUser(userId: string): Promise<UserWithProfile>;
   recover(email: string): Promise<void>;
-  resetPassword(token: string, newPassword: string): Promise<void>;
+  resetPassword(token: string, newPassword: string): Promise<{ userId: string }>;
   verifyEmail(token: string): Promise<void>;
 }
 
@@ -48,7 +52,7 @@ function sha256(input: string): Buffer {
 }
 
 export function createAuthService(deps: AuthServiceDeps): AuthService {
-  const { userRepository, tokenRepository, systemConfigRepository, mailer } = deps;
+  const { userRepository, tokenRepository, systemConfigRepository, mailer, loginGuard, onLockout } = deps;
 
   async function hashPassword(password: string): Promise<string> {
     return argon2.hash(password, ARGON2_OPTIONS);
@@ -125,14 +129,34 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
     await mailer?.sendVerificationEmail(user.email, token);
   }
 
-  async function login(identifier: string, password: string): Promise<UserWithProfile> {
+  async function login(
+    identifier: string,
+    password: string,
+    clientIp = 'unknown',
+  ): Promise<UserWithProfile> {
     const user = await userRepository.findByLoginIdentifier(identifier);
+
+    // Brute-force lockout: reject before any expensive Argon2id work and
+    // with the same generic message used for bad credentials (no
+    // account-existence oracle while the lock is active).
+    if (loginGuard && (await loginGuard.isLocked(user?.id ?? null, clientIp))) {
+      throw new UnauthorizedError('Credenciais inválidas');
+    }
+
     if (!user || user.deletedAt !== null) {
+      if (loginGuard) await loginGuard.recordFailure(null, clientIp);
       throw new UnauthorizedError('Credenciais inválidas');
     }
 
     const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
+      if (loginGuard) {
+        const wasLocked = await loginGuard.isLocked(user.id, clientIp);
+        await loginGuard.recordFailure(user.id, clientIp);
+        if (!wasLocked && (await loginGuard.isLocked(user.id, clientIp))) {
+          await onLockout?.(user.id);
+        }
+      }
       throw new UnauthorizedError('Credenciais inválidas');
     }
 
@@ -143,6 +167,8 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
     if (user.status !== 'active') {
       throw new UnauthorizedError('Credenciais inválidas');
     }
+
+    if (loginGuard) await loginGuard.reset(user.id, clientIp);
 
     return user;
   }
@@ -166,7 +192,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
     await mailer?.sendPasswordResetEmail(user.email, token);
   }
 
-  async function resetPassword(token: string, newPassword: string): Promise<void> {
+  async function resetPassword(token: string, newPassword: string): Promise<{ userId: string }> {
     const match = await verifyPlainToken(token, 'password_reset');
     if (!match) {
       throw new DomainError('TOKEN_INVALID', 400, 'Token de redefinição inválido ou expirado');
@@ -183,6 +209,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
     if (!consumed) {
       throw new DomainError('TOKEN_ALREADY_USED', 400, 'Este token já foi utilizado');
     }
+    return { userId: match.userId };
   }
 
   async function verifyEmail(token: string): Promise<void> {

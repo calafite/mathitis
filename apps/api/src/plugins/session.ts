@@ -11,13 +11,20 @@ export interface SessionPayload {
 
 const SESSION_COOKIE = 'mathitis_session';
 
+/** Returns the current session epoch for a user (0 when none is tracked). */
+export type GetSessionEpoch = (userId: string) => Promise<number>;
+
 export interface SessionManager {
   createSessionCookie(payload: SessionPayload): Promise<string>;
   verifySessionCookie(cookieValue: string | undefined): Promise<SessionPayload | null>;
   clearSession(reply: FastifyReply): void;
 }
 
-export function createSessionManager(secrets: SessionSecrets, maxAgeDays: number): SessionManager {
+export function createSessionManager(
+  secrets: SessionSecrets,
+  maxAgeDays: number,
+  getEpoch?: GetSessionEpoch,
+): SessionManager {
   const currentKey = new TextEncoder().encode(secrets.current);
   const verifyKeys = [
     currentKey,
@@ -25,7 +32,8 @@ export function createSessionManager(secrets: SessionSecrets, maxAgeDays: number
   ];
 
   async function createSessionCookie(payload: SessionPayload): Promise<string> {
-    return new SignJWT({ role: payload.role, handle: payload.handle })
+    const epoch = getEpoch ? await getEpoch(payload.sub) : 0;
+    return new SignJWT({ role: payload.role, handle: payload.handle, ep: epoch })
       .setProtectedHeader({ alg: 'HS256' })
       .setSubject(payload.sub)
       .setIssuedAt()
@@ -44,6 +52,15 @@ export function createSessionManager(secrets: SessionSecrets, maxAgeDays: number
           algorithms: ['HS256'],
         });
         if (!payload.sub || typeof payload.role !== 'string') return null;
+
+        // Reject sessions issued before the latest epoch bump (e.g. the
+        // password changed and every prior device must be logged out).
+        if (getEpoch) {
+          const currentEpoch = await getEpoch(payload.sub);
+          const tokenEpoch = typeof payload.ep === 'number' ? payload.ep : 0;
+          if (tokenEpoch < currentEpoch) return null;
+        }
+
         return {
           sub: payload.sub,
           role: payload.role as UserRole,

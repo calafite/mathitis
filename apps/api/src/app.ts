@@ -28,6 +28,9 @@ import { createEmailQueue } from './lib/queue.js';
 import { initSentry } from './lib/sentry.js';
 import { parseKeyring } from './lib/keyring.js';
 import { createCsrfGuard } from './plugins/csrf.js';
+import { createRedisLoginGuard } from './lib/login-guard.js';
+import { createRedisSessionEpoch } from './lib/session-epoch.js';
+import { createAuditLogRepository } from './repositories/audit-log-repository.js';
 import { createUserRepository } from './repositories/user-repository.js';
 import { createTokenRepository } from './repositories/token-repository.js';
 import { createSystemConfigRepository } from './repositories/system-config-repository.js';
@@ -183,10 +186,16 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     cache: 5000,
   });
 
+  const sessionEpoch = createRedisSessionEpoch(redis);
   const session = createSessionManager(
     parseKeyring(env.JWT_SECRET, env.JWT_KEYRING),
     env.SESSION_MAX_AGE_DAYS,
+    sessionEpoch.get,
   );
+  const loginGuard = createRedisLoginGuard(redis, {
+    maxAttempts: env.LOGIN_MAX_ATTEMPTS,
+    lockoutSeconds: env.LOGIN_LOCKOUT_MINUTES * 60,
+  });
   const storage = createStorage(env);
   const idempotencyStore = createRedisIdempotencyStore(redis);
 
@@ -229,6 +238,8 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     return reply.send({ status: 'ok' });
   });
 
+  const auditLogRepository = createAuditLogRepository(prisma);
+
   await app.register(registerAuthPlugin, {
     jwtSecret: env.JWT_SECRET,
     cookieSecret: env.COOKIE_SECRET,
@@ -238,11 +249,23 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     tokenRepository: createTokenRepository(prisma),
     systemConfigRepository: createSystemConfigRepository(prisma),
     mailer,
+    loginGuard,
+    sessionEpoch,
+    onLockout: async (userId) => {
+      await auditLogRepository.create({
+        actorId: userId,
+        action: 'account.lockout',
+        targetEntity: 'user',
+        targetId: userId,
+        details: { reason: 'max_failed_logins' },
+      });
+    },
   });
 
   await app.register(registerAccountPlugin, {
     prisma,
     session,
+    sessionEpoch,
   });
 
   await app.register(registerProfilesPlugin, {
@@ -267,6 +290,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     idempotencyStore,
     emailQueue: queue,
     logger: app.log,
+    sessionEpoch,
   });
 
   await app.register(registerDevPlugin, {

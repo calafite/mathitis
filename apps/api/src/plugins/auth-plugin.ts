@@ -22,6 +22,8 @@ import type { SystemConfigRepository } from '../repositories/system-config-repos
 import { createSessionManager, type SessionManager } from './session.js';
 import { createRequireAuth } from './auth-guard.js';
 import { clearCsrfCookie, createCsrfToken, setCsrfCookie } from './csrf.js';
+import type { LoginGuard } from '../lib/login-guard.js';
+import type { SessionEpochStore } from '../lib/session-epoch.js';
 
 const GENERIC_OK = {
   ok: true,
@@ -58,6 +60,9 @@ export interface AuthPluginOptions {
   systemConfigRepository: SystemConfigRepository;
   mailer?: Mailer;
   session?: SessionManager;
+  loginGuard?: LoginGuard;
+  sessionEpoch?: SessionEpochStore;
+  onLockout?: (userId: string) => Promise<void>;
 }
 
 export async function registerAuthPlugin(app: FastifyInstance, options: AuthPluginOptions) {
@@ -66,6 +71,8 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
     tokenRepository: options.tokenRepository,
     systemConfigRepository: options.systemConfigRepository,
     mailer: options.mailer,
+    loginGuard: options.loginGuard,
+    onLockout: options.onLockout,
   });
 
   const session: SessionManager =
@@ -123,7 +130,7 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
         },
         async (request, reply) => {
           const { identifier, password } = request.body;
-          const user = await authService.login(identifier, password);
+          const user = await authService.login(identifier, password, request.ip);
           await setSessionCookie(reply, user.id, user.role, user.handle);
           return reply.send({ user: toAuthUser(user) });
         },
@@ -185,7 +192,9 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
         },
         async (request, reply) => {
           const { token, password } = request.body;
-          await authService.resetPassword(token, password);
+          const result = await authService.resetPassword(token, password);
+          // Invalidate every existing session for this user (all devices).
+          if (options.sessionEpoch) await options.sessionEpoch.bump(result.userId);
           return reply.send({ ok: true, message: 'Senha redefinida com sucesso' });
         },
       );
