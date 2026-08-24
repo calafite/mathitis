@@ -11,6 +11,7 @@ import {
   type AnonymizeAccountBody,
 } from '@mathitis/schemas';
 import { createRequireAuth } from './auth-guard.js';
+import type { SessionEpochStore } from '../lib/session-epoch.js';
 import { createAuditLogRepository } from '../repositories/audit-log-repository.js';
 import type { PrismaClient } from '@prisma/client';
 import { Prisma } from '@prisma/client';
@@ -19,12 +20,13 @@ import type { SessionManager } from './session.js';
 interface AccountPluginOptions {
   prisma: PrismaClient;
   session: SessionManager;
+  sessionEpoch?: SessionEpochStore;
 }
 
 const RATE_LIMIT_AUTH_MAX = 10;
 
 export async function registerAccountPlugin(app: FastifyInstance, options: AccountPluginOptions) {
-  const { prisma, session } = options;
+  const { prisma, session, sessionEpoch } = options;
   const requireAuth = createRequireAuth(session);
   const auditLogRepository = createAuditLogRepository(prisma);
 
@@ -72,11 +74,28 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
         data: { passwordHash },
       });
 
+      // Invalidate all existing sessions (every other device) ...
+      if (sessionEpoch) await sessionEpoch.bump(userId);
+
       await auditLogRepository.create({
         actorId: userId,
         action: 'account.password.update',
         targetEntity: 'user',
         targetId: userId,
+      });
+
+      // ... then keep THIS device logged in with a fresh epoch-valid cookie.
+      const token = await session.createSessionCookie({
+        sub: user.id,
+        role: user.role,
+        handle: user.handle,
+      });
+      reply.setCookie('mathitis_session', token, {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: app.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60,
       });
 
       return reply.send({ ok: true });

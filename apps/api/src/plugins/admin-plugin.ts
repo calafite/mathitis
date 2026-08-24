@@ -33,6 +33,7 @@ import type { SessionManager } from './session.js';
 import { createRequireRole } from './auth-guard.js';
 import { createAdminRepository } from '../repositories/admin-repository.js';
 import { createAuditLogRepository } from '../repositories/audit-log-repository.js';
+import type { SessionEpochStore } from '../lib/session-epoch.js';
 import { createSystemConfigRepository } from '../repositories/system-config-repository.js';
 import { createUserRepository } from '../repositories/user-repository.js';
 import { createProfileRepository } from '../repositories/profile-repository.js';
@@ -52,10 +53,11 @@ export interface AdminPluginOptions {
   idempotencyStore: IdempotencyStore;
   emailQueue: Queue;
   logger: LoggerLike;
+  sessionEpoch?: SessionEpochStore;
 }
 
 export async function registerAdminPlugin(app: FastifyInstance, options: AdminPluginOptions) {
-  const { prisma } = options;
+  const { prisma, sessionEpoch } = options;
 
   const adminRepository = createAdminRepository(prisma);
   const auditLogRepository = createAuditLogRepository(prisma);
@@ -159,6 +161,8 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
             request.params.id,
             request.body.status,
           );
+          // Status overrides (suspension/deactivation) kick the user out everywhere.
+          if (sessionEpoch) await sessionEpoch.bump(request.params.id);
           return reply.send({ user });
         },
       );
@@ -178,6 +182,7 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
             request.ip,
             request.params.id,
           );
+          if (sessionEpoch) await sessionEpoch.bump(request.params.id);
           return reply.send(result);
         },
       );
