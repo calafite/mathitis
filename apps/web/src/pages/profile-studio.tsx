@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Profile, ThemePalette, UpdateProfileBody } from '@mathitis/schemas';
 import { useAuth } from '@/contexts/auth-context';
 import { profileApi } from '@/lib/profile-api';
+import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ThemePicker } from '@/components/profile/theme-picker';
@@ -121,6 +122,23 @@ export function ProfileStudioPage() {
       void queryClient.invalidateQueries({ queryKey: ['profile', 'me'] });
     },
   });
+
+  // Never lose unsaved work to an accidental refresh/close.
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [dirty]);
+
+  const saveError =
+    saveMutation.isError && saveMutation.error instanceof ApiError
+      ? saveMutation.error.message
+      : saveMutation.isError
+        ? 'Não foi possível salvar. Verifique os campos e tente novamente.'
+        : null;
 
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -303,9 +321,16 @@ export function ProfileStudioPage() {
           role="status"
         >
           <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 sm:flex-row">
-            <p className="font-mono text-xs font-bold uppercase tracking-widest">
-              Você tem alterações não salvas no seu perfil
-            </p>
+            <div>
+              <p className="font-mono text-xs font-bold uppercase tracking-widest">
+                Você tem alterações não salvas no seu perfil
+              </p>
+              {saveError ? (
+                <p role="alert" className="mt-1 text-xs font-semibold text-[#b3261e]">
+                  {saveError}
+                </p>
+              ) : null}
+            </div>
             <div className="flex items-center gap-2">
               {justSaved ? (
                 <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-700">

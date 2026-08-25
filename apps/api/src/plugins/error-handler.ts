@@ -52,12 +52,24 @@ export function buildErrorHandler() {
       message?: string;
     };
     if (validationError.validation) {
+      // Surface actionable, per-field messages instead of a blanket failure.
+      const issues = validationError.validation;
+      const fieldMessages = issues
+        .map((issue) => {
+          const path = (issue.instancePath ?? '').replace(/^\.*/, '');
+          return path && issue.message ? `${path}: ${issue.message}` : issue.message;
+        })
+        .filter((message): message is string => typeof message === 'string' && message.length > 0);
+      const message =
+        fieldMessages.length > 0
+          ? fieldMessages.slice(0, 3).join('; ')
+          : 'Falha na validação';
       return reply.code(422).send({
         error: {
           code: 'VALIDATION_ERROR',
-          message: 'Falha na validação',
+          message,
           statusCode: 422,
-          details: validationError.validation,
+          details: issues,
         },
       });
     }
