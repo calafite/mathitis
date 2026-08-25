@@ -29,7 +29,14 @@ export interface TestContext {
 
 let started = false;
 
-export async function startTestEnvironment(): Promise<TestContext> {
+export interface StartTestEnvironmentOptions {
+  /** Injectable fetch forwarded into buildApp (rich-card scraper network mock). */
+  scrapeFetch?: typeof fetch;
+}
+
+export async function startTestEnvironment(
+  options: StartTestEnvironmentOptions = {},
+): Promise<TestContext> {
   if (!started) {
     execSync(
       `docker run -d --name ${CONTAINER} -e POSTGRES_USER=${DB_USER} -e POSTGRES_PASSWORD=${DB_PASS} -e POSTGRES_DB=${DB_NAME} -p ${PORT}:5432 ${POSTGRES_IMAGE}`,
@@ -107,7 +114,7 @@ export async function startTestEnvironment(): Promise<TestContext> {
     SMTP_FROM: undefined,
   };
 
-  const app = await buildApp({ env, prisma, redis });
+  const app = await buildApp({ env, prisma, redis, scrapeFetch: options.scrapeFetch });
 
   return { app, prisma, redis, env };
 }
