@@ -46,7 +46,8 @@ function CardEmbed({ card }: { card: RichCard }) {
       title={card.title}
       loading="lazy"
       sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox"
-      className="mt-2 aspect-video w-full rounded-md border-0"
+      className="mt-2 w-full rounded-none border-0"
+      style={{ height: 152 }}
     />
   );
 }
@@ -58,9 +59,9 @@ function CardLink({ card }: { card: RichCard }) {
       href={card.externalUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="mt-2 inline-block text-xs font-medium underline"
+      className="mt-2 inline-block font-mono text-[10px] font-bold uppercase tracking-widest underline underline-offset-4 hover:bg-foreground hover:text-background"
     >
-      Código aberto
+      Código aberto ↗
     </a>
   );
 }
@@ -69,16 +70,20 @@ function CardContent({ card }: { card: RichCard }) {
   const meta = card.metadata as Record<string, unknown> | null;
   const artistName = meta?.artistName;
   if (card.cardType === 'song' && typeof artistName === 'string' && artistName) {
-    return <p className="text-xs text-muted-foreground">{artistName}</p>;
+    return <p className="font-mono text-[10px] uppercase tracking-widest">{artistName}</p>;
   }
   const steamAppId = meta?.steamAppId;
   if (card.cardType === 'game' && typeof steamAppId === 'string') {
-    return <p className="text-xs text-muted-foreground">App Steam {steamAppId}</p>;
+    return <p className="font-mono text-[10px] uppercase tracking-widest">Steam · {steamAppId}</p>;
   }
   if (card.cardType === 'film') {
     const rating = meta?.rating;
     if (typeof rating === 'number') {
-      return <p className="text-xs text-muted-foreground">Avaliação {rating.toFixed(1)}/10</p>;
+      return (
+        <p className="font-mono text-[10px] uppercase tracking-widest">
+          ★ {rating.toFixed(1)}/10
+        </p>
+      );
     }
   }
   if (card.cardType === 'project' && Array.isArray(meta?.techStack)) {
@@ -86,7 +91,10 @@ function CardContent({ card }: { card: RichCard }) {
     return (
       <div className="mt-2 flex flex-wrap gap-1">
         {stack.map((item) => (
-          <span key={String(item)} className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white" style={{ background: 'var(--profile-badge, #3b82f6)' }}>
+          <span
+            key={String(item)}
+            className="border border-foreground px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase"
+          >
             {String(item)}
           </span>
         ))}
@@ -98,24 +106,43 @@ function CardContent({ card }: { card: RichCard }) {
 
 function RichCardView({ card }: { card: RichCard }) {
   const meta = CARD_META[card.cardType] ?? { label: 'Cartão', icon: '✦' };
-  const styleVar = { '--profile-card-accent': card.accentColor } as CSSProperties;
   return (
-    <article
-      className="profile-card flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm"
-      style={styleVar}
-    >
+    <article className="flex flex-col rounded-none border border-foreground bg-card p-3">
+      {card.imageUrl ? (
+        <img
+          src={card.imageUrl}
+          alt=""
+          loading="lazy"
+          className="-mx-3 -mt-3 mb-2 h-32 w-[calc(100%+1.5rem)] object-cover border-b border-foreground"
+        />
+      ) : null}
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-sm font-semibold text-foreground">{card.title}</h3>
-        <span className="text-base text-muted-foreground" aria-hidden>
-          {meta.icon}
+        <h3 className="text-sm font-bold leading-tight text-foreground">{card.title}</h3>
+        <span
+          className="shrink-0 border border-foreground px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest"
+          aria-label={meta.label}
+        >
+          {meta.icon} {meta.label}
         </span>
       </div>
-      {card.subtitle ? <p className="text-xs text-muted-foreground">{card.subtitle}</p> : null}
-      {card.description ? <p className="mt-1 text-xs text-foreground/80">{card.description}</p> : null}
+      {card.subtitle ? (
+        <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          {card.subtitle}
+        </p>
+      ) : null}
+      {card.description ? <p className="mt-1 text-xs text-foreground">{card.description}</p> : null}
       <CardContent card={card} />
       <CardEmbed card={card} />
       <CardLink card={card} />
     </article>
+  );
+}
+
+function SectionHeader({ children }: { children: string }) {
+  return (
+    <h3 className="py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+      {children}
+    </h3>
   );
 }
 
@@ -125,28 +152,20 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
     '--profile-primary': theme.primaryColor,
     '--profile-accent': theme.accentColor,
     '--profile-badge': theme.badgeColor,
-    '--profile-card-bg':
-      theme.cardStyle === 'glassmorphic'
-        ? 'rgba(255, 255, 255, 0.65)'
-        : theme.cardStyle === 'solid'
-          ? 'rgba(255, 255, 255, 0.98)'
-          : 'transparent',
   } as CSSProperties;
 
-  const cardClass =
-    theme.cardStyle === 'glassmorphic'
-      ? 'backdrop-blur-md bg-card/60 border-border/40'
-      : theme.cardStyle === 'solid'
-        ? 'bg-card'
-        : 'bg-transparent border-2';
+  const linkFields: Array<{ label: string; href: string }> = [];
+  if (draft.socialLinks.github) linkFields.push({ label: 'GitHub', href: draft.socialLinks.github });
+  if (draft.socialLinks.linkedin) linkFields.push({ label: 'LinkedIn', href: draft.socialLinks.linkedin });
+  if (draft.socialLinks.discord) linkFields.push({ label: 'Discord', href: draft.socialLinks.discord });
+  if (draft.socialLinks.website) linkFields.push({ label: 'Site', href: draft.socialLinks.website });
+  if (draft.contactEmail) linkFields.push({ label: 'Email', href: `mailto:${draft.contactEmail}` });
 
   return (
-    <div
-      className="overflow-hidden rounded-2xl border border-border shadow-sm"
-      style={cssVars}
-    >
+    <div className="rounded-none border-2 border-foreground" style={cssVars}>
+      {/* Banner */}
       <div
-        className="relative h-28 bg-gradient-to-r"
+        className="relative h-28 border-b border-foreground/50"
         style={{
           backgroundImage: bannerUrl
             ? `url(${bannerUrl})`
@@ -158,71 +177,103 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
         }}
       >
         {bannerPreset && !bannerUrl ? (
-          <span className="absolute bottom-2 right-3 text-xs font-medium text-white/80">
+          <span className="absolute bottom-2 right-3 font-mono text-[10px] uppercase tracking-widest text-white">
             {bannerPreset}
           </span>
         ) : null}
       </div>
 
-      <div className={`px-6 pb-6 pt-4 ${cardClass}`}>
-        <div className="flex items-end justify-between">
-          <div className="flex items-center gap-3">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="Pré-visualização do avatar" className="h-16 w-16 -mt-8 rounded-full border-4 border-card object-cover shadow" />
-            ) : (
-              <div className="flex h-16 w-16 -mt-8 items-center justify-center rounded-full border-4 border-card text-2xl font-bold text-white shadow" style={{ background: theme.primaryColor }}>
-                {(draft.socialName || '?').charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div>
-              <h2 className="text-xl font-bold text-foreground">{draft.socialName || 'Seu nome'}</h2>
-              {draft.pronouns ? <p className="text-xs text-muted-foreground">{draft.pronouns}</p> : null}
+      {/* Header */}
+      <div className="flex items-end justify-between border-b border-foreground/50 px-4 pb-3">
+        <div className="flex items-end gap-3">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Pré-visualização do avatar"
+              className="-mt-10 h-20 w-20 rounded-full border-2 border-foreground bg-background object-cover"
+            />
+          ) : (
+            <div
+              className="-mt-10 flex h-20 w-20 items-center justify-center rounded-full border-2 border-foreground bg-background font-sans text-3xl font-bold text-foreground"
+            >
+              {(draft.socialName || '?').charAt(0).toUpperCase()}
             </div>
+          )}
+          <div className="pb-1">
+            <h2 className="font-sans text-2xl font-bold uppercase leading-tight text-foreground">
+              {draft.socialName || 'Seu nome'}
+            </h2>
+            {draft.pronouns ? (
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                {draft.pronouns}
+              </p>
+            ) : null}
           </div>
-          <span
-            className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-white"
-            style={{ background: draft.isAcceptingRequests ? '#16a34a' : '#64748b' }}
-          >
-            {draft.isAcceptingRequests ? 'Aceitando ferinhas' : 'Capacidade cheia'}
-          </span>
         </div>
+        <span
+          className={`mb-1 shrink-0 rounded-none px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest ${
+            draft.isAcceptingRequests
+              ? 'bg-primary text-primary-foreground'
+              : 'border border-foreground text-muted-foreground'
+          }`}
+        >
+          {draft.isAcceptingRequests ? 'Aceitando ferinhas' : 'Capacidade cheia'}
+        </span>
+      </div>
 
-        {draft.tagline ? <p className="mt-3 text-sm text-foreground/80">{draft.tagline}</p> : null}
+      {/* Tagline */}
+      {draft.tagline ? (
+        <div className="border-b border-foreground/50 px-4 py-2">
+          <p className="font-mono text-xs italic uppercase text-foreground">{draft.tagline}</p>
+        </div>
+      ) : null}
 
-        <div className="mt-4">
+      {/* Biography */}
+      {draft.biographyMarkdown ? (
+        <div className="border-b border-foreground/50 px-4 pb-3">
+          <SectionHeader>Biografia</SectionHeader>
           <MarkdownPreview markdown={draft.biographyMarkdown} />
         </div>
+      ) : null}
 
-        {draft.socialLinks.github || draft.socialLinks.linkedin || draft.contactEmail ? (
-          <div className="mt-4 flex flex-wrap gap-2 text-xs">
-            {draft.socialLinks.github ? (
-              <a href={draft.socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                GitHub
+      {/* Links */}
+      {linkFields.length > 0 ? (
+        <div className="border-b border-foreground/50 px-4 pb-3">
+          <SectionHeader>Contato</SectionHeader>
+          <div className="flex flex-wrap gap-x-3 gap-y-1">
+            {linkFields.map((field) => (
+              <a
+                key={field.label}
+                href={field.href}
+                target={field.href.startsWith('mailto:') ? undefined : '_blank'}
+                rel="noopener noreferrer"
+                className="font-mono text-[10px] font-bold uppercase tracking-widest text-foreground underline underline-offset-4 hover:bg-foreground hover:text-background"
+              >
+                {field.label}
               </a>
-            ) : null}
-            {draft.socialLinks.linkedin ? (
-              <a href={draft.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                LinkedIn
-              </a>
-            ) : null}
-            {draft.contactEmail ? <span className="text-foreground/80">{draft.contactEmail}</span> : null}
-          </div>
-        ) : null}
-
-        {cards.length > 0 ? (
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {cards.map((card) => (
-              <RichCardView key={card.id} card={card} />
             ))}
           </div>
-        ) : (
-          <p className="mt-5 text-xs text-muted-foreground">Adicione cartões ricos para exibir músicas, jogos, filmes ou projetos.</p>
-        )}
-
-        <div className="mt-5 flex items-center justify-between text-[10px] text-muted-foreground">
-          <span>Até {draft.maxMentees} ferinhas</span>
-          <span>Pontuação de esforço {effortScore}</span>
         </div>
+      ) : null}
+
+      {/* Cards */}
+      <div className={`px-4 ${cards.length > 0 ? 'pb-4' : ''}`}>
+        {cards.length > 0 ? (
+          <>
+            <SectionHeader>Coleção</SectionHeader>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {cards.map((card) => (
+                <RichCardView key={card.id} card={card} />
+              ))}
+            </div>
+          </>
+        ) : null}
+      </div>
+
+      {/* Footer stats */}
+      <div className="flex justify-between border-t border-foreground py-1 pl-2 pr-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+        <span>Até {draft.maxMentees} ferinhas</span>
+        <span>Pontuação de esforço {effortScore}</span>
       </div>
     </div>
   );
