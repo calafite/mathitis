@@ -227,6 +227,14 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
       maxAge: '1y',
       immutable: true,
     });
+  } else {
+    // When using S3/MinIO, redirect asset requests to the public URL
+    app.get('/assets/uploads/*', async (request, reply) => {
+      const params = request.params as { ['*']: string };
+      const key = params['*'];
+      const publicUrl = `${env.S3_PUBLIC_BASE_URL!.replace(/\/$/, '')}/assets/uploads/${key}`;
+      return reply.redirect(publicUrl);
+    });
   }
 
   registerErrorHandler(app);
@@ -277,6 +285,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     uploadDir: resolve(env.UPLOAD_DIR),
     publicBaseUrl: env.PUBLIC_BASE_URL,
     scrapeFetch: options.scrapeFetch,
+    redis,
   });
 
   await app.register(registerDiscoveryPlugin, {
