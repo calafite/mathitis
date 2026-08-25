@@ -1,6 +1,12 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, posix } from 'node:path';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  CreateBucketCommand,
+  HeadBucketCommand,
+  PutBucketPolicyCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import type { Env } from '../config/env.js';
 
 export interface StoredAsset {
@@ -33,7 +39,53 @@ export function createS3Storage(env: Env): ObjectStorage {
     tls: env.S3_USE_SSL,
   });
 
+  // Idempotently create the bucket on first use so a fresh MinIO/ S3
+  // deployment never fails uploads with NoSuchBucket. Errors are swallowed:
+  // a read-only-credentials deployment will surface its own error on upload.
+  let bucketReady = false;
+  async function ensureBucket(): Promise<void> {
+    if (bucketReady) return;
+    try {
+      await client.send(new HeadBucketCommand({ Bucket: bucket }));
+      bucketReady = true;
+    } catch {
+      try {
+        await client.send(new CreateBucketCommand({ Bucket: bucket }));
+      } catch {
+        // Bucket creation failed (permissions?) - uploads will report the
+        // underlying storage error to the client.
+        return;
+      }
+      // Profile assets are public by design (visible on mentor profiles).
+      // Apply an anonymous-download policy; ignore failures on providers
+      // that manage policies externally (CDN-signed setups).
+      try {
+        await client.send(
+          new PutBucketPolicyCommand({
+            Bucket: bucket,
+            Policy: JSON.stringify({
+              Version: '2012-10-17',
+              Statement: [
+                {
+                  Sid: 'PublicReadGetObject',
+                  Effect: 'Allow',
+                  Principal: '*',
+                  Action: 's3:GetObject',
+                  Resource: `arn:aws:s3:::${bucket}/*`,
+                },
+              ],
+            }),
+          }),
+        );
+      } catch {
+        // Policy application is best-effort.
+      }
+      bucketReady = true;
+    }
+  }
+
   async function putObject(key: string, body: Buffer, contentType: string): Promise<StoredAsset> {
+    await ensureBucket();
     const safeKey = sanitizeKey(key);
     await client.send(
       new PutObjectCommand({

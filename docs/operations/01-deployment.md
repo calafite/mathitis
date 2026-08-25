@@ -42,13 +42,29 @@ docker compose -f docker-compose.production.yml logs -f api
 
 Migrations apply automatically: the API image runs `pnpm db:deploy` (Prisma `migrate deploy`) before starting the HTTP server (see `apps/api/Dockerfile`).
 
-## 3. TLS
+## 3. Object storage (MinIO/S3)
+
+The API creates the bucket automatically on first upload (`ensureBucket`) and
+applies an anonymous-download policy so profile assets (avatars, banners) are
+publicly readable, as designed. For manual setup or air-gapped deployments:
+
+```bash
+docker run --rm --network host --entrypoint /bin/sh minio/mc -c \
+  'mc alias set local http://localhost:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD" && \
+   mc mb --ignore-existing local/mathitis && \
+   mc anonymous set download local/mathitis'
+```
+
+Upload failures surface in the UI as an inline error in the Profile Studio
+("Falha ao enviar o avatar/banner: ...") and in the API logs.
+
+## 4. TLS
 
 - Terminate TLS at the edge nginx container. Certificates are mounted read-only from `./certs/`.
 - The edge config pins TLSv1.3, enables HSTS + preload, and a strict CSP. To (re)issue certificates, keep the paths `fullchain.pem` / `privkey.pem` and run `docker compose ... restart nginx`.
 - Backend traffic between nginx and the internal services is plain HTTP on the internal-only bridge, which is acceptable because the bridge is not routable from outside.
 
-## 4. Deploying a new release
+## 5. Deploying a new release
 
 ```bash
 git pull
@@ -59,7 +75,7 @@ docker compose -f docker-compose.production.yml up -d --build
 
 The web bundle is built with `VITE_SENTRY_DSN`/`VITE_RELEASE` baked in via `build.args`; if unset the bundle is built without Sentry. `VITE_RELEASE` should track your git tag (`git describe --tags`).
 
-## 5. Routine operations
+## 6. Routine operations
 
 ```bash
 # View status / logs
@@ -78,7 +94,7 @@ docker compose -f docker-compose.production.yml exec -T postgres \
 0 2 * * * cd /opt/mathitis && docker compose -f docker-compose.production.yml exec -T postgres pg_dump -U mathitis_app -d mathitis | gzip > /backups/mathitis-$(date +\%F).sql.gz && find /backups -name '*.sql.gz' -mtime +14 -delete
 ```
 
-## 6. Security smoke checks
+## 7. Security smoke checks
 
 Run after every deploy:
 
@@ -98,7 +114,7 @@ for i in $(seq 1 8); do curl -s -o /dev/null -w '%{http_code} ' -X POST \
   https://pasteldemiolos.xyz/api/auth/login; done; echo
 ```
 
-## 7. Troubleshooting
+## 8. Troubleshooting
 
 | Symptom | Likely cause / fix |
 | :--- | :--- |

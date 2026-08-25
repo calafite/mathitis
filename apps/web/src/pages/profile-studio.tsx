@@ -105,14 +105,34 @@ export function ProfileStudioPage() {
     },
   });
 
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
   const avatarMutation = useMutation({
     mutationFn: (file: File) => profileApi.uploadAvatar(file),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['profile', 'me'] }),
+    onSuccess: () => {
+      setUploadError(null);
+      void queryClient.invalidateQueries({ queryKey: ['profile', 'me'] });
+    },
+    onError: (err) =>
+      setUploadError(
+        err instanceof Error
+          ? `Falha ao enviar o avatar: ${err.message}`
+          : 'Falha ao enviar o avatar. Tente novamente.',
+      ),
   });
 
   const bannerMutation = useMutation({
     mutationFn: (file: File) => profileApi.uploadBanner(file),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['profile', 'me'] }),
+    onSuccess: () => {
+      setUploadError(null);
+      void queryClient.invalidateQueries({ queryKey: ['profile', 'me'] });
+    },
+    onError: (err) =>
+      setUploadError(
+        err instanceof Error
+          ? `Falha ao enviar o banner: ${err.message}`
+          : 'Falha ao enviar o banner. Tente novamente.',
+      ),
   });
 
   const profile = profileQuery.data;
@@ -158,6 +178,11 @@ export function ProfileStudioPage() {
                 />
               </Field>
             </div>
+            {uploadError && (
+              <div className="border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+                {uploadError}
+              </div>
+            )}
           </section>
 
           <section className="space-y-4 border-2 border-white/15 bg-card p-5">
