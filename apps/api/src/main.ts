@@ -3,6 +3,8 @@ import { buildApp } from './app.js';
 import { createPrismaClient } from './db/client.js';
 import { createEmailSender } from './lib/mailer.js';
 import { createEmailWorker } from './lib/worker.js';
+import { createViewsQueue, scheduleViewsFlush } from './lib/views-queue.js';
+import { createViewsWorker } from './lib/views-worker-runner.js';
 import Redis from 'ioredis';
 
 async function main() {
@@ -18,8 +20,20 @@ async function main() {
   });
   app.log.info('email worker started');
 
+  // Buffered profile views: periodic flush job + worker.
+  const viewsQueue = createViewsQueue(new Redis(env.REDIS_URL, { maxRetriesPerRequest: null }));
+  await scheduleViewsFlush(viewsQueue);
+  const viewsWorker = createViewsWorker({
+    connection: new Redis(env.REDIS_URL, { maxRetriesPerRequest: null }),
+    prisma,
+    logger: app.log,
+  });
+  app.log.info('views flush worker started');
+
   const shutdown = async (signal: string) => {
     app.log.info({ signal }, 'Shutting down');
+    await viewsWorker.close();
+    await viewsQueue.close();
     await emailWorker.close();
     await app.close();
     await prisma.$disconnect();
