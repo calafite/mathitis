@@ -52,15 +52,15 @@ export const seniorSummarySchema = z.object({
 });
 export type SeniorSummary = z.infer<typeof seniorSummarySchema>;
 
-const uuidListSchema = z
-  .union([z.string().uuid(), z.array(z.string().uuid())])
-  .transform((value) => (Array.isArray(value) ? value : [value]))
-  .optional();
+const uuidListSchema = z.preprocess(
+  (val) => (typeof val === 'string' ? val.split(',') : val),
+  z.array(z.string().uuid()).optional(),
+);
 
-const cardTypeListSchema = z
-  .union([richCardTypeSchema, z.array(richCardTypeSchema)])
-  .transform((value) => (Array.isArray(value) ? value : [value]))
-  .optional();
+const cardTypeListSchema = z.preprocess(
+  (val) => (typeof val === 'string' ? val.split(',') : val),
+  z.array(richCardTypeSchema).optional(),
+);
 
 export const seniorsQuerySchema = z.object({
   semester: z.coerce.number().int().min(1).max(12).optional(),
