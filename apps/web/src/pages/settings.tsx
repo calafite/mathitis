@@ -665,13 +665,17 @@ function ToggleRow({
         aria-checked={checked}
         aria-label={title}
         onClick={onChange}
-        className={`relative h-6 w-11 shrink-0 border-2 transition-colors ${
-          checked ? 'border-primary bg-primary' : 'border-[#c9ced8]/40 bg-muted'
+        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-none border-2 p-0.5 transition-colors ${
+          checked
+            ? 'border-primary bg-primary'
+            : 'border-[#c9ced8]/40 bg-card'
         }`}
       >
         <span
-          className={`absolute left-1/2 top-1/2 h-4 w-4 -translate-y-1/2 transition-transform ${
-            checked ? 'translate-x-[6px] bg-primary-foreground' : '-translate-x-[14px] bg-background'
+          className={`pointer-events-none block h-4 w-4 transform transition-transform ${
+            checked
+              ? 'translate-x-5 bg-black'
+              : 'translate-x-0 bg-[#c9ced8]'
           }`}
         />
       </button>

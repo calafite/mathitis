@@ -17,6 +17,19 @@ const CARD_META: Record<string, { label: string; icon: string }> = {
   custom: { label: 'Cartão', icon: '✦' },
 };
 
+const CARD_LINK_LABELS: Record<string, string> = {
+  song: 'Ouvir',
+  game: 'Página na loja',
+  film: 'Ver no Letterboxd',
+  book: 'Ver na OpenLibrary',
+  project: 'Código aberto',
+  custom: 'Abrir link',
+};
+
+function cardLinkLabel(cardType: string): string {
+  return CARD_LINK_LABELS[cardType] ?? 'Abrir link';
+}
+
 function CardEmbed({ card }: { card: RichCard }) {
   if (!card.embedUrl) return null;
   return (
@@ -40,7 +53,7 @@ function CardLink({ card }: { card: RichCard }) {
       rel="noopener noreferrer"
       className="mt-2 inline-block font-mono text-[10px] font-bold uppercase tracking-widest underline underline-offset-4 hover:bg-foreground hover:text-background"
     >
-      Código aberto ↗
+      {cardLinkLabel(card.cardType)} ↗
     </a>
   );
 }
@@ -230,7 +243,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
           {profile && (
             <>
               {/* Header */}
-              <div className="flex items-end justify-between border-b border-foreground/50 px-4 pb-3">
+              <div className="relative z-10 flex items-end justify-between border-b border-foreground/50 px-4 pb-3">
                 <div className="flex items-end gap-3">
                   {profile.avatarUrl ? (
                     <img
