@@ -176,7 +176,7 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
     async (request, reply) => {
       const userId = request.sessionUser!.sub;
 
-      const [user, profile, tags, richCards, sentRequests, receivedRequests, mentorships] = await Promise.all([
+      const [user, profile, tags, richCards, sentRequests, receivedRequests] = await Promise.all([
         prisma.user.findUnique({ where: { id: userId } }),
         prisma.profile.findUnique({ where: { userId } }),
         prisma.tag.findMany({ where: { profiles: { some: { profile: { userId } } } } }),
@@ -191,13 +191,6 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
           include: { freshman: { include: { profile: true } } },
           orderBy: { createdAt: 'desc' },
         }),
-        prisma.mentorship.findMany({
-          where: { OR: [{ freshmanId: userId }, { seniorId: userId }] },
-          include: {
-            freshman: { include: { profile: true } },
-            senior: { include: { profile: true } },
-          },
-        }),
       ]);
 
       if (!user || !profile) {
@@ -207,22 +200,95 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
       const ancestors: Array<{ handle: string; socialName: string | null; semester: number; relationship: 'mentor' | 'grand-mentor' | 'great-grand-mentor' }> = [];
       const descendants: Array<{ handle: string; socialName: string | null; semester: number; relationship: 'pupil' | 'grand-pupil' | 'great-grand-pupil' }> = [];
 
-      for (const m of mentorships) {
-        const mTyped = m as unknown as { freshmanId: string; senior: { handle: string; socialName: string | null; semester: number; profile: { socialName: string | null } | null }; freshman: { handle: string; socialName: string | null; semester: number; profile: { socialName: string | null } | null } };
-        if (mTyped.freshmanId === userId) {
+      // Build complete lineage (up to 3 levels) using recursive CTE-style queries
+      async function getMentors(freshmanId: string) {
+        return prisma.mentorship.findMany({
+          where: { freshmanId },
+          include: { senior: { include: { profile: true } } },
+        });
+      }
+
+      async function getPupils(seniorId: string) {
+        return prisma.mentorship.findMany({
+          where: { seniorId },
+          include: { freshman: { include: { profile: true } } },
+        });
+      }
+
+      // Level 1: Direct mentor/pupil
+      const directMentors = await getMentors(userId);
+      for (const m of directMentors) {
+        ancestors.push({
+          handle: m.senior.handle,
+          socialName: m.senior.profile?.socialName ?? null,
+          semester: m.senior.semester,
+          relationship: 'mentor',
+        });
+      }
+
+      const directPupils = await getPupils(userId);
+      for (const m of directPupils) {
+        descendants.push({
+          handle: m.freshman.handle,
+          socialName: m.freshman.profile?.socialName ?? null,
+          semester: m.freshman.semester,
+          relationship: 'pupil',
+        });
+      }
+
+      // Level 2: Grand-mentor / Grand-pupil
+      for (const m of directMentors) {
+        const grandMentors = await getMentors(m.seniorId);
+        for (const gm of grandMentors) {
           ancestors.push({
-            handle: mTyped.senior.handle,
-            socialName: mTyped.senior.profile?.socialName ?? null,
-            semester: mTyped.senior.semester,
-            relationship: 'mentor',
+            handle: gm.senior.handle,
+            socialName: gm.senior.profile?.socialName ?? null,
+            semester: gm.senior.semester,
+            relationship: 'grand-mentor',
           });
-        } else {
+        }
+      }
+
+      for (const m of directPupils) {
+        const grandPupils = await getPupils(m.freshmanId);
+        for (const gp of grandPupils) {
           descendants.push({
-            handle: mTyped.freshman.handle,
-            socialName: mTyped.freshman.profile?.socialName ?? null,
-            semester: mTyped.freshman.semester,
-            relationship: 'pupil',
+            handle: gp.freshman.handle,
+            socialName: gp.freshman.profile?.socialName ?? null,
+            semester: gp.freshman.semester,
+            relationship: 'grand-pupil',
           });
+        }
+      }
+
+      // Level 3: Great-grand-mentor / Great-grand-pupil
+      for (const m of directMentors) {
+        const grandMentors = await getMentors(m.seniorId);
+        for (const gm of grandMentors) {
+          const greatGrandMentors = await getMentors(gm.seniorId);
+          for (const ggm of greatGrandMentors) {
+            ancestors.push({
+              handle: ggm.senior.handle,
+              socialName: ggm.senior.profile?.socialName ?? null,
+              semester: ggm.senior.semester,
+              relationship: 'great-grand-mentor',
+            });
+          }
+        }
+      }
+
+      for (const m of directPupils) {
+        const grandPupils = await getPupils(m.freshmanId);
+        for (const gp of grandPupils) {
+          const greatGrandPupils = await getPupils(gp.freshmanId);
+          for (const ggp of greatGrandPupils) {
+            descendants.push({
+              handle: ggp.freshman.handle,
+              socialName: ggp.freshman.profile?.socialName ?? null,
+              semester: ggp.freshman.semester,
+              relationship: 'great-grand-pupil',
+            });
+          }
         }
       }
 
