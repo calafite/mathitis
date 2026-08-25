@@ -4,6 +4,10 @@ import type {
   DevMetricsResponse,
   DevMailboxResponse,
   DevLinkResponse,
+  DevAdminsResponse,
+  DevAdminSummary,
+  PromoteAdminResponse,
+  RevokeAdminResponse,
 } from '@mathitis/schemas';
 
 export const devApi = {
@@ -30,4 +34,21 @@ export const devApi = {
   async resetLink(email: string): Promise<DevLinkResponse> {
     return apiFetch<DevLinkResponse>(`/dev/reset-link?email=${encodeURIComponent(email)}`);
   },
+
+  async listAdmins(): Promise<DevAdminsResponse> {
+    return apiFetch<DevAdminsResponse>('/dev/admins');
+  },
+
+  async promoteAdmin(identifier: string): Promise<PromoteAdminResponse> {
+    return apiFetch<PromoteAdminResponse>('/dev/admins', {
+      method: 'POST',
+      body: JSON.stringify({ identifier }),
+    });
+  },
+
+  async revokeAdmin(id: string): Promise<RevokeAdminResponse> {
+    return apiFetch<RevokeAdminResponse>(`/dev/admins/${id}`, { method: 'DELETE' });
+  },
 };
+
+export type { DevAdminSummary };

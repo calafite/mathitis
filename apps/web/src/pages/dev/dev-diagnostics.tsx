@@ -1,6 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { Loader2, Trash2 } from 'lucide-react';
 import { devApi } from '@/lib/dev-api';
+import { ApiError } from '@/lib/api';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -44,6 +47,162 @@ function LinkifiedText({ text }: { text: string }) {
         ),
       )}
     </>
+  );
+}
+
+function AdminManagementSection() {
+  const queryClient = useQueryClient();
+  const [identifier, setIdentifier] = useState('');
+  const [confirmRevokeId, setConfirmRevokeId] = useState<string | null>(null);
+
+  const adminsQuery = useQuery({
+    queryKey: ['dev', 'admins'],
+    queryFn: () => devApi.listAdmins(),
+  });
+
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: ['dev', 'admins'] });
+    void queryClient.invalidateQueries({ queryKey: ['dev', 'health'] });
+  };
+
+  const promoteMutation = useMutation({
+    mutationFn: (id: string) => devApi.promoteAdmin(id),
+    onSuccess: () => {
+      setIdentifier('');
+      invalidate();
+    },
+  });
+
+  const revokeMutation = useMutation({
+    mutationFn: (id: string) => devApi.revokeAdmin(id),
+    onSuccess: () => {
+      setConfirmRevokeId(null);
+      invalidate();
+    },
+  });
+
+  const promoteError =
+    promoteMutation.isError && promoteMutation.error instanceof ApiError
+      ? promoteMutation.error.message
+      : promoteMutation.isError
+        ? 'Falha ao promover usuário'
+        : null;
+  const revokeError =
+    revokeMutation.isError && revokeMutation.error instanceof ApiError
+      ? revokeMutation.error.message
+      : revokeMutation.isError
+        ? 'Falha ao revogar privilégios'
+        : null;
+
+  return (
+    <section className="mt-4 rounded-xl border border-border bg-card p-4" data-testid="admin-management">
+      <h2 className="font-semibold">Corpo Administrativo (Administradores)</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Promova ou revogue privilégios administrativos. Cada transição gera um registro de auditoria
+        e encerra as sessões ativas do usuário.
+      </p>
+
+      <form
+        className="mt-4 flex flex-col gap-2 sm:flex-row"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!identifier.trim() || promoteMutation.isPending) return;
+          promoteMutation.mutate(identifier.trim());
+        }}
+      >
+        <input
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
+          placeholder="Nome de usuário ou e-mail acadêmico"
+          aria-label="Identificador do novo administrador"
+          className="h-10 flex-1 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        />
+        <Button type="submit" disabled={!identifier.trim() || promoteMutation.isPending}>
+          {promoteMutation.isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+          ) : null}
+          Promover novo administrador
+        </Button>
+      </form>
+      {promoteError ? (
+        <p role="alert" className="mt-2 text-sm font-medium text-red-600 dark:text-red-400">
+          {promoteError}
+        </p>
+      ) : null}
+      {promoteMutation.isSuccess ? (
+        <p role="status" className="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+          Administrador promovido ✓
+        </p>
+      ) : null}
+
+      <div className="mt-4 space-y-2">
+        {adminsQuery.isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : (
+          adminsQuery.data?.admins.map((admin) => (
+            <div
+              key={admin.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2"
+            >
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {admin.socialName ?? admin.handle}{' '}
+                  <span className="font-mono text-xs text-muted-foreground">@{admin.handle}</span>
+                  {admin.role === 'developer' ? (
+                    <span className="ml-2 border border-border px-1.5 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
+                      developer
+                    </span>
+                  ) : null}
+                </p>
+                <p className="font-mono text-[11px] text-muted-foreground">
+                  {admin.email} · período {String(admin.semester).padStart(2, '0')} · desde{' '}
+                  {new Date(admin.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+              {admin.role === 'administrator' ? (
+                confirmRevokeId === admin.id ? (
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[11px] uppercase text-muted-foreground">
+                      Confirmar?
+                    </span>
+                    <button
+                      type="button"
+                      disabled={revokeMutation.isPending}
+                      onClick={() => revokeMutation.mutate(admin.id)}
+                      className="border-2 border-red-600 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-widest text-red-600 hover:bg-red-600 hover:text-white disabled:opacity-50"
+                    >
+                      Revogar acesso
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmRevokeId(null)}
+                      className="border border-border px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmRevokeId(admin.id)}
+                    aria-label={`Revogar administrador ${admin.handle}`}
+                    className="inline-flex items-center gap-1.5 border border-border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-foreground hover:border-red-600 hover:text-red-600"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                    Revogar acesso
+                  </button>
+                )
+              ) : null}
+            </div>
+          ))
+        )}
+      </div>
+      {revokeError ? (
+        <p role="alert" className="mt-2 text-sm font-medium text-red-600 dark:text-red-400">
+          {revokeError}
+        </p>
+      ) : null}
+    </section>
   );
 }
 
@@ -295,6 +454,8 @@ export function DevDiagnosticsPage() {
           </ul>
         )}
       </section>
+
+      <AdminManagementSection />
     </div>
   );
 }

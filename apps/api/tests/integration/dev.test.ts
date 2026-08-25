@@ -29,6 +29,7 @@ describe('Developer Diagnostics API', () => {
   };
 
   let developerCookie = '';
+  let developerId = '';
   let freshmanCookie = '';
 
   async function createUser(user: TestUser) {
@@ -64,7 +65,8 @@ describe('Developer Diagnostics API', () => {
 
   beforeAll(async () => {
     ctx = await startTestEnvironment();
-    await createUser(developer);
+    const devUser = await createUser(developer);
+    developerId = devUser.id;
     await createUser(freshman);
     developerCookie = await login(developer.handle, developer.password);
     freshmanCookie = await login(freshman.handle, freshman.password);
@@ -230,6 +232,140 @@ describe('Developer Diagnostics API', () => {
       });
       expect(res.statusCode).toBe(200);
       expect(res.json().url).toBeNull();
+    });
+  });
+
+  // -- Administrator management (developer-only) -----------------------------
+
+  describe('admin management', () => {
+    let adminCookie = '';
+    let adminId = '';
+    const adminUser: TestUser = {
+      handle: 'managed_admin',
+      email: 'managed_admin@cs.uni.edu',
+      password: 'Pass12345!',
+      role: 'administrator',
+      semester: 8,
+    };
+    const student: TestUser = {
+      handle: 'promote_me',
+      email: 'promote_me@cs.uni.edu',
+      password: 'Pass12345!',
+      role: 'senior',
+      semester: 6,
+    };
+
+    beforeAll(async () => {
+      const created = await createUser(adminUser);
+      adminId = created.id;
+      await createUser(student);
+      adminCookie = await login(adminUser.handle, adminUser.password);
+    });
+
+    it('forbids administrators, seniors and freshmen from managing admins', async () => {
+      for (const cookie of [adminCookie, freshmanCookie]) {
+        const list = await ctx.app.inject({
+          method: 'GET',
+          url: '/api/dev/admins',
+          headers: { cookie },
+        });
+        expect(list.statusCode).toBe(403);
+
+        const promote = await ctx.app.inject({
+          method: 'POST',
+          url: '/api/dev/admins',
+          headers: { cookie },
+          payload: { identifier: student.handle },
+        });
+        expect(promote.statusCode).toBe(403);
+
+        const revoke = await ctx.app.inject({
+          method: 'DELETE',
+          url: `/api/dev/admins/${adminId}`,
+          headers: { cookie },
+        });
+        expect(revoke.statusCode).toBe(403);
+      }
+    });
+
+    it('lets a developer promote a student by handle', async () => {
+      const res = await ctx.app.inject({
+        method: 'POST',
+        url: '/api/dev/admins',
+        headers: { cookie: developerCookie },
+        payload: { identifier: student.handle },
+      });
+      expect(res.statusCode, res.body).toBe(200);
+      expect(res.json().admin).toMatchObject({ handle: student.handle, role: 'administrator' });
+
+      // The roster now includes the new administrator.
+      const roster = await ctx.app.inject({
+        method: 'GET',
+        url: '/api/dev/admins',
+        headers: { cookie: developerCookie },
+      });
+      const handles = roster.json().admins.map((a: { handle: string }) => a.handle);
+      expect(handles).toContain(student.handle);
+    });
+
+    it('rejects promoting an unknown user or an existing admin', async () => {
+      const ghost = await ctx.app.inject({
+        method: 'POST',
+        url: '/api/dev/admins',
+        headers: { cookie: developerCookie },
+        payload: { identifier: 'ghost_user' },
+      });
+      expect(ghost.statusCode).toBe(404);
+
+      const duplicate = await ctx.app.inject({
+        method: 'POST',
+        url: '/api/dev/admins',
+        headers: { cookie: developerCookie },
+        payload: { identifier: adminUser.email },
+      });
+      expect(duplicate.statusCode).toBe(409);
+    });
+
+    it('kicks the revoked admin out of /api/admin routes via session epoch invalidation', async () => {
+      // Sanity: the admin can currently reach admin-only endpoints.
+      const before = await ctx.app.inject({
+        method: 'GET',
+        url: '/api/admin/audit-logs',
+        headers: { cookie: adminCookie },
+      });
+      expect(before.statusCode).toBe(200);
+
+      const revoke = await ctx.app.inject({
+        method: 'DELETE',
+        url: `/api/dev/admins/${adminId}`,
+        headers: { cookie: developerCookie },
+      });
+      expect(revoke.statusCode).toBe(200);
+
+      // The stale session is rejected immediately.
+      const after = await ctx.app.inject({
+        method: 'GET',
+        url: '/api/admin/audit-logs',
+        headers: { cookie: adminCookie },
+      });
+      expect(after.statusCode).toBe(403);
+
+      // Audit trail: the promotion targeted the student, the revocation the admin.
+      const demoteLogs = await ctx.prisma.auditLog.findMany({
+        where: { targetId: adminId, action: 'developer.admin.demote' },
+      });
+      expect(demoteLogs).toHaveLength(1);
+      expect(demoteLogs[0]!.actorId).toBe(developerId);
+      expect((demoteLogs[0]!.details as { previousRole?: string }).previousRole).toBe(
+        'administrator',
+      );
+
+      const promoteLogs = await ctx.prisma.auditLog.findMany({
+        where: { action: 'developer.admin.promote' },
+      });
+      const studentPromotion = promoteLogs.find((log) => log.details !== null);
+      expect(studentPromotion).toBeDefined();
+      expect((studentPromotion!.details as { previousRole?: string }).previousRole).toBe('senior');
     });
   });
 });

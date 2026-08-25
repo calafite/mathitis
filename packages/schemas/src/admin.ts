@@ -279,3 +279,47 @@ export const devLinkResponseSchema = z.object({
   url: z.string().nullable(),
 });
 export type DevLinkResponse = z.infer<typeof devLinkResponseSchema>;
+
+// ---------------------------------------------------------------------------
+// Developer portal: administrator management (phase 20)
+// ---------------------------------------------------------------------------
+
+export const devAdminSummarySchema = z.object({
+  id: z.string().uuid(),
+  handle: z.string(),
+  email: z.string().email(),
+  role: userRoleSchema,
+  semester: z.number().int(),
+  socialName: z.string().nullable(),
+  createdAt: z.coerce.date(),
+});
+export type DevAdminSummary = z.infer<typeof devAdminSummarySchema>;
+
+export const devAdminsResponseSchema = z.object({
+  admins: z.array(devAdminSummarySchema),
+});
+export type DevAdminsResponse = z.infer<typeof devAdminsResponseSchema>;
+
+export const promoteAdminBodySchema = z.object({
+  identifier: z
+    .string()
+    .trim()
+    .min(3, 'Informe o nome de usuário ou e-mail')
+    .max(255),
+});
+export type PromoteAdminBody = z.infer<typeof promoteAdminBodySchema>;
+
+export const promoteAdminResponseSchema = z.object({
+  admin: devAdminSummarySchema,
+});
+export type PromoteAdminResponse = z.infer<typeof promoteAdminResponseSchema>;
+
+export const revokeAdminParamsSchema = z.object({
+  id: z.string().uuid('ID de usuário inválido'),
+});
+export type RevokeAdminParams = z.infer<typeof revokeAdminParamsSchema>;
+
+export const revokeAdminResponseSchema = z.object({
+  ok: z.boolean(),
+});
+export type RevokeAdminResponse = z.infer<typeof revokeAdminResponseSchema>;
