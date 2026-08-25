@@ -227,19 +227,19 @@ describe('Auth API', () => {
     const verify = await ctx.app.inject({
       method: 'GET',
       url: '/verify-email?token=sample',
-      maxRedirects: 0,
+     
     });
     expect(verify.statusCode).toBe(302);
     expect(verify.headers.location).toBe('http://localhost:5173/verify-email?token=sample');
 
-    const recover = await ctx.app.inject({ method: 'GET', url: '/recover', maxRedirects: 0 });
+    const recover = await ctx.app.inject({ method: 'GET', url: '/recover' });
     expect(recover.statusCode).toBe(302);
     expect(recover.headers.location).toBe('http://localhost:5173/recover');
 
     const reset = await ctx.app.inject({
       method: 'GET',
       url: '/reset-password?token=abc.def',
-      maxRedirects: 0,
+     
     });
     expect(reset.statusCode).toBe(302);
     expect(reset.headers.location).toBe('http://localhost:5173/recover?token=abc.def');
