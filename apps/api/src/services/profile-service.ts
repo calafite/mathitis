@@ -23,11 +23,20 @@ export interface ProfileService {
   getOwnProfile(userId: string): Promise<ProfileWithRelations>;
   updateProfile(userId: string, input: UpdateProfileBody): Promise<ProfileWithRelations>;
   incrementViews(userId: string): Promise<void>;
+  recordUniqueView(userId: string, viewerIdentifier: string): Promise<boolean>;
   uploadImage(userId: string, kind: ImageKind, buffer: Buffer): Promise<UploadImageResponse>;
 }
 
-export function createProfileService(deps: ProfileServiceDeps): ProfileService {
-  const { profileRepository, storage } = deps;
+export function createProfileService(
+  deps: ProfileServiceDeps & {
+    /** When provided, view increments are buffered in Redis (flushed by a worker). */
+    redis?: {
+      hincrby(key: string, field: string, increment: number): Promise<number>;
+      pfadd(key: string, member: string): Promise<number>;
+    };
+  },
+): ProfileService {
+  const { profileRepository, storage, redis } = deps;
 
   async function recomputeEffortScore(userId: string) {
     const profile = await profileRepository.findByUserId(userId);
@@ -74,7 +83,28 @@ export function createProfileService(deps: ProfileServiceDeps): ProfileService {
   }
 
   async function incrementViews(userId: string) {
+    if (redis) {
+      // Buffer in Redis; a background worker flushes aggregated increments to
+      // PostgreSQL every few minutes (keeps reads lock-free in matching season).
+      await redis.hincrby('profile:views', userId, 1);
+      return;
+    }
     await profileRepository.incrementViews(userId);
+  }
+
+  async function recordUniqueView(userId: string, viewerIdentifier: string): Promise<boolean> {
+    if (!redis) {
+      // Without Redis, we can't track unique views; always increment
+      await incrementViews(userId);
+      return true;
+    }
+    // Use HyperLogLog to track unique viewers
+    const isNewViewer = await redis.pfadd(`profile:unique_views:${userId}`, viewerIdentifier);
+    if (isNewViewer === 1) {
+      await incrementViews(userId);
+      return true;
+    }
+    return false;
   }
 
   async function uploadImage(userId: string, kind: ImageKind, buffer: Buffer) {
@@ -108,6 +138,7 @@ export function createProfileService(deps: ProfileServiceDeps): ProfileService {
     getOwnProfile,
     updateProfile,
     incrementViews,
+    recordUniqueView,
     uploadImage,
   };
 }

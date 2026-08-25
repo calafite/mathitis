@@ -133,15 +133,31 @@ describe('Profiles API', () => {
     });
 
     const first = await ctx.app.inject({ method: 'GET', url: '/api/profiles/viewed_profile' });
-    expect(first.json().profile.profileViews).toBe(1);
+    // Views are buffered in Redis (phase 14): the DB count is eventually consistent.
+    expect(first.json().profile.profileViews).toBe(0);
     const viewCookie = String(first.headers['set-cookie']).split(';')[0];
 
-    const second = await ctx.app.inject({
+    const viewedUser = await ctx.prisma.user.findUnique({ where: { handle: 'viewed_profile' } });
+    expect(await ctx.redis.hget('profile:views', viewedUser!.id)).toBe('1');
+
+    // Repeat visit from the same visitor is deduplicated (no new increment).
+    await ctx.app.inject({
       method: 'GET',
       url: '/api/profiles/viewed_profile',
       headers: { cookie: viewCookie },
     });
-    expect(second.json().profile.profileViews).toBe(1);
+    expect(await ctx.redis.hget('profile:views', viewedUser!.id)).toBe('1');
+
+    // Flushing moves the buffered increments into PostgreSQL atomically.
+    // Other tests may have buffered views for their own profiles — the viewed
+    // user's entry must be consumed and persisted regardless.
+    const { flushProfileViews } = await import('../../src/services/views-worker.js');
+    const flushed = await flushProfileViews({ redis: ctx.redis, prisma: ctx.prisma });
+    expect(flushed).toBeGreaterThanOrEqual(1);
+    expect(await ctx.redis.hget('profile:views', viewedUser!.id)).toBeNull();
+
+    const afterFlush = await ctx.app.inject({ method: 'GET', url: '/api/profiles/viewed_profile' });
+    expect(afterFlush.json().profile.profileViews).toBe(1);
   });
 
   it('hides non-discoverable freshman profiles from anonymous visitors', async () => {

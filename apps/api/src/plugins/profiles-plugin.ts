@@ -33,6 +33,7 @@ import type { ObjectStorage } from '../storage/storage-service.js';
 import type { SessionManager } from './session.js';
 import { getSessionCookie } from './session.js';
 import { createRequireAuth } from './auth-guard.js';
+import type { Redis } from 'ioredis';
 import { createRichCardScraper } from '../services/rich-card-scraper.js';
 import { createProfileService, type ProfileService } from '../services/profile-service.js';
 import { createRichCardService, type RichCardService } from '../services/rich-card-service.js';
@@ -40,7 +41,6 @@ import { ValidationError } from '../errors.js';
 
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 const BANNER_MAX_BYTES = 5 * 1024 * 1024;
-const VIEW_COOKIE_MAX_AGE = 24 * 60 * 60;
 
 function toProfileResponse(profile: ProfileWithRelations) {
   return {
@@ -89,6 +89,8 @@ export interface ProfilesPluginOptions {
   publicBaseUrl: string;
   /** Injectable fetch for tests (scraper never touches the real network in CI). */
   scrapeFetch?: typeof fetch;
+  /** Enables Redis-buffered profile view counting when provided. */
+  redis?: Redis;
 }
 
 export async function registerProfilesPlugin(app: FastifyInstance, options: ProfilesPluginOptions) {
@@ -99,6 +101,7 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
     profileRepository,
     richCardRepository,
     storage: options.storage,
+    redis: options.redis,
   });
   const richCardService: RichCardService = createRichCardService(
     richCardRepository,
@@ -155,21 +158,15 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
         },
         async (request, reply) => {
           const handle = request.params.handle;
-          const viewCookie = `mathitis_profile_view_${handle}`;
-          const alreadyViewed = Boolean(request.cookies[viewCookie]);
 
           let profile = await profileService.getProfileByHandle(handle, request.sessionUser);
 
-          if (!alreadyViewed) {
-            await profileService.incrementViews(profile.userId);
+          // Self-view prevention: don't track views when the profile owner views their own profile
+          const isSelfView = request.sessionUser?.sub === profile.userId;
+          if (!isSelfView) {
+            const viewerIdentifier = request.sessionUser?.sub ?? request.ip;
+            await profileService.recordUniqueView(profile.userId, viewerIdentifier);
             profile = await profileService.getProfileByHandle(handle, request.sessionUser);
-            reply.setCookie(viewCookie, '1', {
-              path: '/',
-              maxAge: VIEW_COOKIE_MAX_AGE,
-              httpOnly: true,
-              sameSite: 'lax',
-              secure: app.env.NODE_ENV === 'production',
-            });
           }
 
           return reply.send({ profile: toProfileResponse(profile) });
