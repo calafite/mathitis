@@ -7,6 +7,7 @@ import { useAuth, type RegisterInput } from '@/contexts/auth-context';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { FieldError, Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { PasswordStrength } from '@/components/ui/password-strength';
 import { usePageMeta } from '@/lib/use-page-meta';
@@ -150,9 +151,8 @@ export function RegisterPage() {
             <label htmlFor="password" className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-widest">
               Senha
             </label>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="new-password"
               {...field('password')}
             />

@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginBodySchema, type LoginBody } from '@mathitis/schemas';
 import { useAuth } from '@/contexts/auth-context';
 import { ApiError } from '@/lib/api';
+import { PasswordInput } from '@/components/ui/password-input';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { usePageMeta } from '@/lib/use-page-meta';
 
@@ -106,9 +107,8 @@ export function LoginPage() {
             <label htmlFor="password" className={labelCls}>
               Senha
             </label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="current-password"
               className={inputCls}
               {...register('password')}
