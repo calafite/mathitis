@@ -221,6 +221,52 @@ describe('Auth API', () => {
     expect(res.statusCode).toBe(422);
   });
 
+  // -- SPA redirect fallbacks --------------------------------------------------
+
+  it('redirects browser auth routes from the API to the web origin preserving query strings', async () => {
+    const verify = await ctx.app.inject({
+      method: 'GET',
+      url: '/verify-email?token=sample',
+      maxRedirects: 0,
+    });
+    expect(verify.statusCode).toBe(302);
+    expect(verify.headers.location).toBe('http://localhost:5173/verify-email?token=sample');
+
+    const recover = await ctx.app.inject({ method: 'GET', url: '/recover', maxRedirects: 0 });
+    expect(recover.statusCode).toBe(302);
+    expect(recover.headers.location).toBe('http://localhost:5173/recover');
+
+    const reset = await ctx.app.inject({
+      method: 'GET',
+      url: '/reset-password?token=abc.def',
+      maxRedirects: 0,
+    });
+    expect(reset.statusCode).toBe(302);
+    expect(reset.headers.location).toBe('http://localhost:5173/recover?token=abc.def');
+  });
+
+  it('mints verification links against the web origin in development', async () => {
+    await ctx.app.inject({
+      method: 'POST',
+      url: '/api/auth/register',
+      payload: {
+        handle: 'link_origin_user',
+        email: 'link_origin@cs.uni.edu',
+        password: 'StrongPassword123!',
+        semester: 1,
+      },
+    });
+
+    // No worker runs in tests: read the queued email directly.
+    const jobs = await ctx.app.emailQueue.getWaiting();
+    const job = jobs.find((j) => (j.data as { to?: string }).to === 'link_origin@cs.uni.edu');
+    expect(job).toBeDefined();
+    const body = (job!.data as { body?: string }).body ?? '';
+    expect(body).toMatch(
+      /^[\s\S]*http:\/\/localhost:5173\/verify-email\?token=[0-9a-f-]+\.[0-9a-f]+/,
+    );
+  });
+
   // -- user_tokens flow -------------------------------------------------------
 
   async function issueKnownToken(

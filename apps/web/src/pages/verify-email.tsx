@@ -4,6 +4,7 @@ import { authApi } from '@/lib/auth-api';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { ErrorPage } from '@/pages/error-page';
 import { usePageMeta } from '@/lib/use-page-meta';
 
 type VerifyState = 'verifying' | 'success' | 'error';
@@ -14,6 +15,7 @@ export function VerifyEmailPage() {
   const token = searchParams.get('token') ?? '';
   const [state, setState] = useState<VerifyState>('verifying');
   const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
     if (!token) {
@@ -30,6 +32,7 @@ export function VerifyEmailPage() {
       .catch((err) => {
         if (cancelled) return;
         setState('error');
+        setError(err);
         setMessage(
           err instanceof ApiError ? err.message : 'Não foi possível verificar seu e-mail. Tente novamente.',
         );
@@ -65,21 +68,11 @@ export function VerifyEmailPage() {
         )}
 
         {state === 'error' && (
-          <>
-            <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">Falha na verificação</h1>
-            <p className="mt-2 text-sm text-muted-foreground">{message}</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Você pode solicitar um novo link cadastrando-se novamente ou visitando a página de recuperação.
-            </p>
-            <div className="mt-6 flex justify-center gap-2">
-              <Link to="/register">
-                <Button variant="outline">Criar conta</Button>
-              </Link>
-              <Link to="/recover">
-                <Button>Ir para a recuperação</Button>
-              </Link>
-            </div>
-          </>
+          <ErrorPage
+            error={error}
+            title="Falha na verificação"
+            message={message ?? 'Não foi possível verificar seu e-mail.'}
+          />
         )}
       </div>
     </div>

@@ -201,6 +201,12 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   const storage = createStorage(env);
   const idempotencyStore = createRedisIdempotencyStore(redis);
 
+  // Email links must always open the SPA, never the API port. In development
+  // WEB_ORIGIN is often unset, so default to Vite's port.
+  const webRedirectTarget =
+    env.WEB_ORIGIN?.split(',')[0]?.trim() ||
+    (env.NODE_ENV === 'development' ? 'http://localhost:5173' : env.PUBLIC_BASE_URL);
+
   const queue = options.queue ?? createEmailQueue(new Redis(env.REDIS_URL));
   app.decorate('emailQueue', queue);
 
@@ -208,7 +214,9 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     options.mailer ??
     createAuthMailer({
       publicBaseUrl: env.PUBLIC_BASE_URL,
-      webBaseUrl: env.WEB_ORIGIN ?? env.PUBLIC_BASE_URL,
+      // Email links must always open the SPA, never the API port. In
+      // development WEB_ORIGIN is often unset, so default to Vite's port.
+      webBaseUrl: webRedirectTarget,
       emailQueue: queue,
       logger: app.log,
     });
@@ -238,6 +246,18 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   }
 
   registerErrorHandler(app);
+
+  // Fail-safe browser-route redirects: email links occasionally land on the
+  // API origin (wrong WEB_ORIGIN, old bookmarks). Send visitors to the SPA
+  // with query strings intact instead of a raw JSON 404.
+  for (const path of ['/verify-email', '/recover', '/reset-password', '/login', '/register']) {
+    app.get(path, async (request, reply) => {
+      const target = path === '/reset-password' ? '/recover' : path;
+      const queryIndex = request.url.indexOf('?');
+      const queryString = queryIndex >= 0 ? request.url.slice(queryIndex) : '';
+      return reply.redirect(`${webRedirectTarget.replace(/\/$/, '')}${target}${queryString}`);
+    });
+  }
 
   app.addHook('onError', async (_request, _reply, error) => {
     if (error instanceof ZodError) {

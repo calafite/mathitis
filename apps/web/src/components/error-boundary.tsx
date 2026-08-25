@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import * as Sentry from '@sentry/react';
+import { ErrorPage } from '@/pages/error-page';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -9,13 +10,14 @@ interface ErrorBoundaryProps {
 
 interface ErrorBoundaryState {
   hasError: boolean;
+  error: unknown;
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  state: ErrorBoundaryState = { hasError: false };
+  state: ErrorBoundaryState = { hasError: false, error: undefined };
 
-  static getDerivedStateFromError(): ErrorBoundaryState {
-    return { hasError: true };
+  static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
@@ -32,18 +34,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (this.state.hasError) {
       return (
         this.props.fallback ?? (
-          <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-8 text-center">
-            <h1 className="text-2xl font-bold text-foreground">Algo deu errado</h1>
-            <p className="text-sm text-muted-foreground">
-              Ocorreu um erro inesperado. O incidente foi registrado.
-            </p>
-            <button
-              type="button"
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              onClick={() => window.location.reload()}
-            >
-              Recarregar página
-            </button>
+          <div className="min-h-screen bg-background p-8">
+            <ErrorPage
+              error={this.state.error}
+              title="Falha na interface"
+              message="Ocorreu um erro inesperado ao renderizar esta tela."
+              onRetry={() => window.location.reload()}
+            />
           </div>
         )
       );
