@@ -41,20 +41,20 @@ export function VerifyEmailPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 text-center shadow-sm">
+      <div className="auth-card-light w-full max-w-md border-2 border-black bg-[#d3d7de] p-8 text-center text-[#0b0b0e]" style={{ boxShadow: '10px 10px 0 0 rgba(201, 206, 216, 0.18)' }}>
         <header className="mb-6 flex justify-end">
           <ThemeToggle />
         </header>
         {state === 'verifying' && (
           <>
-            <h1 className="text-2xl font-semibold text-foreground">Verificando seu e-mail…</h1>
+            <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">Verificando seu e-mail…</h1>
             <p className="mt-2 text-sm text-muted-foreground">Aguarde um momento.</p>
           </>
         )}
 
         {state === 'success' && (
           <>
-            <h1 className="text-2xl font-semibold text-foreground">E-mail verificado</h1>
+            <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">E-mail verificado</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Sua conta está ativa. Entre para começar a explorar mentores.
             </p>
@@ -66,7 +66,7 @@ export function VerifyEmailPage() {
 
         {state === 'error' && (
           <>
-            <h1 className="text-2xl font-semibold text-foreground">Falha na verificação</h1>
+            <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">Falha na verificação</h1>
             <p className="mt-2 text-sm text-muted-foreground">{message}</p>
             <p className="mt-2 text-sm text-muted-foreground">
               Você pode solicitar um novo link cadastrando-se novamente ou visitando a página de recuperação.

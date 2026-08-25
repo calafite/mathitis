@@ -168,7 +168,7 @@ export function RequestsPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Pedidos de apadrinhamento</h1>
+        <h1 className="font-mono text-xl font-bold uppercase tracking-[0.15em] text-foreground">Pedidos de apadrinhamento</h1>
       </header>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">

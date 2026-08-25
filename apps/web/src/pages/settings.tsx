@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ThemedSelect } from '@/components/ui/select';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Tabs from '@radix-ui/react-tabs';
 import { useForm } from 'react-hook-form';
@@ -229,12 +230,12 @@ export function SettingsPage() {
       <div className="mx-auto w-full max-w-4xl px-4 py-8">
         <header className="mb-6 flex items-center gap-3">
           <Settings className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
+          <h1 className="font-mono text-xl font-bold uppercase tracking-[0.15em] text-foreground">Configurações</h1>
         </header>
 
         {notice && (
           <div
-            className="mb-6 flex items-center justify-between rounded-lg border border-border bg-card p-3 text-sm text-foreground"
+            className="mb-6 flex items-center justify-between border-2 border-white/15 bg-card p-3 text-sm text-foreground"
             role="status"
           >
             <span className="flex items-center gap-2">
@@ -262,8 +263,8 @@ export function SettingsPage() {
           </Tabs.List>
 
           <Tabs.Content value="account" className="space-y-6">
-            <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Conta e Segurança</h2>
+            <section className="border-2 border-white/15 bg-card p-6">
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Conta e Segurança</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Gerencie seu período acadêmico e suas credenciais de acesso.
               </p>
@@ -276,18 +277,15 @@ export function SettingsPage() {
                   >
                     Período atual
                   </label>
-                  <select
-                    id="semester"
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"
-                    value={semester}
-                    onChange={(e) => handleSemesterChange(Number(e.target.value))}
-                  >
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
-                      <option key={n} value={n}>
-                        Período {n}
-                      </option>
-                    ))}
-                  </select>
+                  <ThemedSelect
+                    ariaLabel="Período atual"
+                    value={String(semester)}
+                    onChange={(v) => handleSemesterChange(Number(v))}
+                    options={Array.from({ length: 12 }, (_, i) => i + 1).map((n) => ({
+                      value: String(n),
+                      label: `Período ${n}`,
+                    }))}
+                  />
                   <p className="mt-1 text-xs text-muted-foreground">
                     Avance seu período conforme progredir nos estudos.
                   </p>
@@ -313,8 +311,8 @@ export function SettingsPage() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Alterar senha</h2>
+            <section className="border-2 border-white/15 bg-card p-6">
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Alterar senha</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Escolha uma senha forte com pelo menos 8 caracteres, uma letra maiúscula, uma
                 letra minúscula e um número.
@@ -354,7 +352,7 @@ export function SettingsPage() {
 
                 {pwdError && (
                   <div
-                    className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+                    className="border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
                     role="alert"
                   >
                     {pwdError}
@@ -362,7 +360,7 @@ export function SettingsPage() {
                 )}
                 {pwdSuccess && (
                   <div
-                    className="rounded-md bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-400"
+                    className="border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-400"
                     role="status"
                   >
                     Sua senha foi atualizada.
@@ -383,8 +381,8 @@ export function SettingsPage() {
           </Tabs.Content>
 
           <Tabs.Content value="appearance" className="space-y-6">
-            <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Tema</h2>
+            <section className="border-2 border-white/15 bg-card p-6">
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Tema</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Escolha como o Mathitis aparece para você.
               </p>
@@ -414,8 +412,8 @@ export function SettingsPage() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Acessibilidade</h2>
+            <section className="border-2 border-white/15 bg-card p-6">
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Acessibilidade</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Ajuste a interface ao seu conforto.
               </p>
@@ -443,8 +441,8 @@ export function SettingsPage() {
           </Tabs.Content>
 
           <Tabs.Content value="notifications" className="space-y-6">
-            <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Alertas</h2>
+            <section className="border-2 border-white/15 bg-card p-6">
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Alertas</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Controle como você é notificado sobre a atividade de apadrinhamento.
               </p>
@@ -467,8 +465,8 @@ export function SettingsPage() {
           </Tabs.Content>
 
           <Tabs.Content value="data" className="space-y-6">
-            <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Seu arquivo de dados</h2>
+            <section className="border-2 border-white/15 bg-card p-6">
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Seu arquivo de dados</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Baixe um arquivo JSON completo do seu perfil, tags, cards avançados, histórico de
                 solicitações e árvore de linhagem.
@@ -479,8 +477,8 @@ export function SettingsPage() {
               </Button>
             </section>
 
-            <section className="rounded-xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold text-foreground">Resumo da linhagem</h2>
+            <section className="border-2 border-white/15 bg-card p-6">
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Resumo da linhagem</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Sua árvore de família acadêmica é preservada mesmo se você desativar sua conta.
               </p>
@@ -498,9 +496,9 @@ export function SettingsPage() {
           </Tabs.Content>
 
           <Tabs.Content value="danger" className="space-y-6">
-            <section className="rounded-xl border border-destructive/30 bg-destructive/5 p-6">
+            <section className="border-2 border-destructive/40 bg-destructive/5 p-6">
               <h2 className="text-lg font-semibold text-destructive">Zona de Risco</h2>
-              <div className="mt-3 rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
+              <div className="mt-3 border border-white/15 bg-card p-4 text-sm text-muted-foreground">
                 Desativar sua conta remove suas informações pessoais, bio e cards de vitrine. Seus
                 nós ancestrais no Grafo de Linhagem de Apadrinhamento permanecerão preservados
                 como um ex-aluno anonimizado para manter intacta sua árvore de família acadêmica.
@@ -527,10 +525,10 @@ export function SettingsPage() {
           onClick={() => setAnonymizeOpen(false)}
         >
           <div
-            className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl"
+            className="w-full max-w-md border-2 border-white/15 bg-card p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-semibold text-foreground">Anonimizar conta?</h2>
+            <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Anonimizar conta?</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Isso desativará permanentemente sua conta, removerá suas informações pessoais e o
               preservará como um ex-aluno anonimizado no grafo de linhagem. Esta ação não pode ser
@@ -556,7 +554,7 @@ export function SettingsPage() {
 
               {anonymizeError && (
                 <div
-                  className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+                  className="border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
                   role="alert"
                 >
                   {anonymizeError}
@@ -605,7 +603,7 @@ function SettingsTab({
   return (
     <Tabs.Trigger
       value={value}
-      className="flex items-center gap-2 border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground"
+      className="flex items-center gap-2 border-b-2 border-transparent px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground data-[state=active]:border-[#c9f24c] data-[state=active]:text-foreground"
     >
       {icon}
       {label}
@@ -631,7 +629,7 @@ function ThemeOption({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`flex flex-col items-start gap-2 rounded-lg border p-4 text-left transition-colors ${
+      className={`flex flex-col items-start gap-2 border-2 p-4 text-left transition-colors ${
         active
           ? 'border-primary bg-primary/10'
           : 'border-border bg-background hover:border-input'
@@ -667,13 +665,13 @@ function ToggleRow({
         aria-checked={checked}
         aria-label={title}
         onClick={onChange}
-        className={`relative h-6 w-11 shrink-0 rounded-full border-2 transition-colors ${
-          checked ? 'bg-primary border-primary' : 'bg-muted border-border'
+        className={`relative h-6 w-11 shrink-0 border-2 transition-colors ${
+          checked ? 'border-primary bg-primary' : 'border-[#c9ced8]/40 bg-muted'
         }`}
       >
         <span
-          className={`absolute top-[2px] left-[2px] h-5 w-5 rounded-full border border-border/50 transition-transform ${
-            checked ? 'translate-x-5 bg-primary-foreground' : 'translate-x-0 bg-background'
+          className={`absolute left-1/2 top-1/2 h-4 w-4 -translate-y-1/2 transition-transform ${
+            checked ? 'translate-x-[6px] bg-primary-foreground' : '-translate-x-[14px] bg-background'
           }`}
         />
       </button>

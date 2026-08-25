@@ -19,25 +19,25 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <div className="flex items-center gap-6">
+      <header className="sticky top-0 z-40 border-b-2 border-[#c9ced8]/15 bg-background/95 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <NavLink
               to="/"
-              className="text-lg font-semibold tracking-tight text-foreground"
+              className="font-mono text-base font-bold uppercase tracking-[0.2em] text-foreground"
             >
               Mathitis
             </NavLink>
-            <nav className="flex items-center gap-4">
+            <nav className="flex flex-wrap items-center gap-x-4 gap-y-1">
               {NAV_ITEMS.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
                   end={item.end}
                   className={({ isActive }) =>
-                    `text-sm font-medium transition-colors ${
+                    `font-mono text-[11px] font-bold uppercase tracking-widest transition-colors ${
                       isActive
-                        ? 'text-foreground underline decoration-primary underline-offset-4'
+                        ? 'text-foreground underline decoration-[#ff4d14] decoration-2 underline-offset-4'
                         : 'text-muted-foreground hover:text-foreground'
                     }`
                   }
@@ -51,12 +51,14 @@ export function AppLayout() {
             <NotificationBell />
             <ThemeToggle />
             {user?.handle && (
-              <span className="text-sm text-muted-foreground">@{user.handle}</span>
+              <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+                @{user.handle}
+              </span>
             )}
             <button
               type="button"
               onClick={() => void logout()}
-              className="rounded-md px-2 py-1 text-sm font-medium text-muted-foreground hover:text-foreground"
+              className="font-mono text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground"
             >
               Sair
             </button>
@@ -67,13 +69,13 @@ export function AppLayout() {
         <Outlet />
       </main>
       <footer className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-muted-foreground sm:flex-row">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 font-mono text-[11px] uppercase tracking-widest text-muted-foreground sm:flex-row">
           <span>
-            <span className="font-semibold text-foreground">Mathitis</span>{' '}
-            <span aria-hidden>·</span> μαθητής <span aria-hidden>·</span> © {new Date().getFullYear()}{' '}
+            © {new Date().getFullYear()} <span className="font-bold text-foreground">Mathitis</span>
+            <span aria-hidden className="mx-2">·</span>
             Programa de Apadrinhamento Acadêmico
           </span>
-          <span className="flex items-center gap-4">
+          <span className="flex items-center gap-5">
             <Link to="/lineage" className="hover:text-foreground">
               Linhagem
             </Link>

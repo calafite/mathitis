@@ -12,8 +12,7 @@ export function PrivacyPage() {
       <header className="space-y-2">
         <h1 className="font-display text-4xl font-semibold">Política de Privacidade</h1>
         <p className="text-sm text-muted-foreground">
-          Última atualização: agosto de 2026 · Plataforma de apadrinhamento acadêmico do
-          departamento de matemática.
+          Última atualização: agosto de 2026 · Plataforma de apadrinhamento acadêmico..
         </p>
       </header>
 

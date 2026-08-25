@@ -9,7 +9,8 @@ test.describe('settings portal', () => {
     await page.goto('/settings');
     await expect(page.getByRole('heading', { name: 'Configurações' })).toBeVisible();
 
-    await page.selectOption('#semester', '4');
+    await page.getByRole('button', { name: 'Período atual' }).click();
+    await page.getByRole('option', { name: 'Período 4' }).click();
     await expect(page.getByText('Preferências salvas.')).toBeVisible({ timeout: 15_000 });
 
     await page.getByRole('tab', { name: /Aparência/ }).click();
@@ -18,7 +19,7 @@ test.describe('settings portal', () => {
 
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Configurações' })).toBeVisible();
-    await expect(page.locator('#semester')).toHaveValue('4');
+    await expect(page.getByRole('button', { name: 'Período atual' })).toHaveText(/Período 4/);
     await page.getByRole('tab', { name: /Aparência/ }).click();
     await expect(page.getByRole('button', { name: /Claro/ })).toHaveAttribute(
       'aria-pressed',
@@ -27,7 +28,8 @@ test.describe('settings portal', () => {
 
     // restore defaults
     await page.getByRole('tab', { name: /Conta e Segurança/ }).click();
-    await page.selectOption('#semester', '1');
+    await page.getByRole('button', { name: 'Período atual' }).click();
+    await page.getByRole('option', { name: 'Período 1', exact: true }).click();
     await page.getByRole('tab', { name: /Aparência/ }).click();
     await page.getByRole('button', { name: /Escuro/ }).click();
     await expect(page.getByText('Preferências salvas.')).toBeVisible({ timeout: 15_000 });
@@ -53,7 +55,7 @@ test.describe('settings portal', () => {
     await page.getByLabel(/Nome ou email/).fill('ada_math');
     await page.getByLabel(/Senha/).fill('FreshPassword456!');
     await page.getByRole('button', { name: 'Entrar' }).click();
-    await expect(page.getByRole('heading', { name: /Bem-vindo/ })).toBeVisible({
+    await expect(page.getByText(/Bem-vindo/)).toBeVisible({
       timeout: 15_000,
     });
 
@@ -123,7 +125,7 @@ test.describe('settings portal', () => {
     await page.getByLabel(/Digite sua senha para confirmar/).fill('StrongPassword123!');
     await page.locator('form').getByRole('button', { name: 'Anonimizar conta' }).click();
 
-    await expect(page.getByRole('heading', { name: 'Junte-se ao Apadrinhamento' })).toBeVisible({
+    await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible({
       timeout: 15_000,
     });
 

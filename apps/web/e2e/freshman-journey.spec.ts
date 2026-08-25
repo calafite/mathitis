@@ -6,7 +6,7 @@ test.describe('Freshman journey', () => {
     await login(page, 'alan_loops');
     await page.getByRole('link', { name: 'Descoberta de Padrinhos' }).first().click();
 
-    const seniorCard = page.locator('div.rounded-xl').filter({ hasText: 'Ada' }).first();
+    const seniorCard = page.locator('div[role="button"]').filter({ hasText: 'Ada' }).first();
     await expect(seniorCard).toBeVisible({ timeout: 15_000 });
 
     // Click the card to open the mentor profile modal (the whole card is clickable)
@@ -31,7 +31,7 @@ test.describe('Freshman journey', () => {
 
   test('customizes the profile via the studio', async ({ page }) => {
     await login(page, 'alan_loops');
-    await page.getByRole('link', { name: 'Estúdio de perfil' }).click();
+    await page.getByRole('navigation').getByRole('link', { name: 'Estúdio' }).click();
 
     const textarea = page.getByPlaceholder(/Conte sua história/);
     await expect(textarea).toBeVisible({ timeout: 15_000 });

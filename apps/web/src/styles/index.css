@@ -9,24 +9,24 @@
    Dark mode is the default baseline; .light class overrides provide
    clean switching without hardcoded duplication. */
 @theme {
-  --color-background: #0f0c13;
-  --color-foreground: #f2ede4;
-  --color-card: #191420;
-  --color-card-foreground: #f2ede4;
-  --color-popover: #1d1626;
-  --color-popover-foreground: #f2ede4;
+  --color-background: #000000;
+  --color-foreground: #e8e6e1;
+  --color-card: #0d0d0f;
+  --color-card-foreground: #e8e6e1;
+  --color-popover: #111113;
+  --color-popover-foreground: #e8e6e1;
   --color-primary: #c9f24c;
   --color-primary-foreground: #16130a;
-  --color-secondary: #221a2c;
-  --color-secondary-foreground: #f2ede4;
-  --color-muted: #201829;
-  --color-muted-foreground: #a093b3;
-  --color-accent: #2b2038;
-  --color-accent-foreground: #e7ddf5;
+  --color-secondary: #141417;
+  --color-secondary-foreground: #e8e6e1;
+  --color-muted: #131316;
+  --color-muted-foreground: #8f95a3;
+  --color-accent: #19191d;
+  --color-accent-foreground: #e8e6e1;
   --color-destructive: #ff5470;
   --color-destructive-foreground: #ffffff;
-  --color-border: #2e2537;
-  --color-input: #382d44;
+  --color-border: #232328;
+  --color-input: #2a2a30;
   --color-ring: #c9f24c;
   --color-lineage: #ff4d14;
   --color-lineage-foreground: #fff4ee;
@@ -62,6 +62,20 @@
   font-family: var(--font-sans);
   color-scheme: light dark;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Light auth cards: invert inputs inside the pale poster panels. */
+.auth-card-light input {
+  background-color: #ffffff;
+  color: #0b0b0e;
+  border-color: #000000;
+}
+.auth-card-light input::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+.auth-card-light input:focus-visible {
+  outline: 2px solid #c9f24c;
+  outline-offset: 0;
 }
 
 /* Display face for headings — academic lineage / diploma vibe. */

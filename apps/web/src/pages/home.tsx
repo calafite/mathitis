@@ -1,77 +1,99 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, ArrowUpRight, Clock, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { discoveryApi } from '@/lib/discovery-api';
 import { requestsApi } from '@/lib/requests-api';
-import { Button } from '@/components/ui/button';
-import { MentorProfileModal } from '@/components/profile/mentor-profile-modal';
 import { usePageMeta } from '@/lib/use-page-meta';
+import { MentorProfileModal } from '@/components/profile/mentor-profile-modal';
 
-type TreeNode = {
-  label: string;
-  sub?: string;
-  tone: 'lineage' | 'solid' | 'ghost';
-};
+/* Brutalist poster primitives ---------------------------------------- */
 
-/**
- * The signature element: a small genealogical tree rendered as SVG.
- * Mentor(s) above, you in the middle, future/present mentees below —
- * the permanent family structure that Mathitis is about.
- */
+const CARD_BG = '#d3d7de';
+const CARD_TEXT = '#0b0b0e';
+const VERMILLION = '#ff4d14';
+
+function PosterCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`rounded-none border-2 border-black p-5 ${className}`}
+      style={{
+        backgroundColor: CARD_BG,
+        color: CARD_TEXT,
+        boxShadow: '8px 8px 0 0 rgba(201, 206, 216, 0.14), 0 0 0 1px rgba(255,255,255,0.06)',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function MonoButton({
+  to,
+  children,
+  onClick,
+}: {
+  to?: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}) {
+  const cls =
+    'inline-block rounded-none border-2 border-black px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-transform hover:-translate-y-0.5 active:translate-y-0';
+  const style = {
+    backgroundColor: CARD_BG,
+    color: CARD_TEXT,
+    boxShadow: '4px 4px 0 0 #26262b, 0 0 0 1px rgba(255,255,255,0.08)',
+  };
+  if (to) {
+    return (
+      <Link to={to} className={cls} style={style}>
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <button type="button" onClick={onClick} className={cls} style={style}>
+      {children}
+    </button>
+  );
+}
+
+/* Signature lineage tree (monochrome, vermillion for "you") ----------- */
+
+type TreeNode = { label: string; sub?: string; tone: 'lineage' | 'solid' | 'ghost' };
+
 function LineageTree({ up, me, down }: { up: TreeNode[]; me: TreeNode; down: TreeNode[] }) {
-  const W = 340;
-  const H = 240;
+  const W = 360;
+  const H = 250;
   const nodeR = 22;
-
   const xs = (i: number, n: number) => (W / (n + 1)) * (i + 1);
 
   const node = (t: TreeNode, cx: number, cy: number, key: string) => {
-    const fill =
-      t.tone === 'lineage'
-        ? 'var(--color-lineage)'
-        : t.tone === 'solid'
-          ? 'var(--color-primary)'
-          : 'none';
-    const stroke =
-      t.tone === 'ghost' ? 'var(--color-border)' : 'var(--color-foreground)';
-    const textFill =
-      t.tone === 'ghost'
-        ? 'var(--color-muted-foreground)'
-        : t.tone === 'solid'
-          ? 'var(--color-primary-foreground)'
-          : 'var(--color-lineage-foreground)';
+    const isGhost = t.tone === 'ghost';
+    const isMe = t.tone === 'lineage';
     return (
       <g key={key}>
         <circle
           cx={cx}
           cy={cy}
           r={nodeR}
-          fill={fill}
-          stroke={stroke}
+          fill={isMe ? VERMILLION : isGhost ? 'none' : CARD_BG}
+          stroke={isMe ? VERMILLION : '#c9ced8'}
           strokeWidth={1.5}
-          strokeDasharray={t.tone === 'ghost' ? '4 3' : undefined}
+          strokeDasharray={isGhost ? '4 3' : undefined}
         />
         <text
           x={cx}
           y={cy + 4}
           textAnchor="middle"
           fontSize="13"
-          fontWeight="600"
-          fill={textFill}
-          style={{ fontFamily: 'var(--font-display)' }}
+          fontWeight="700"
+          fill={isMe ? '#ffffff' : isGhost ? '#6b7280' : CARD_TEXT}
         >
           {t.label}
         </text>
         {t.sub && (
-          <text
-            x={cx}
-            y={cy + nodeR + 14}
-            textAnchor="middle"
-            fontSize="9"
-            fill="var(--color-muted-foreground)"
-          >
+          <text x={cx} y={cy + nodeR + 14} textAnchor="middle" fontSize="9" fill="#8b93a1">
             {t.sub}
           </text>
         )}
@@ -84,16 +106,15 @@ function LineageTree({ up, me, down }: { up: TreeNode[]; me: TreeNode; down: Tre
       key={key}
       d={`M ${x1} ${y1} C ${x1} ${(y1 + y2) / 2}, ${x2} ${(y1 + y2) / 2}, ${x2} ${y2}`}
       fill="none"
-      stroke={dashed ? 'var(--color-border)' : 'var(--color-lineage)'}
+      stroke={dashed ? '#3a3f4b' : VERMILLION}
       strokeWidth={1.5}
       strokeDasharray={dashed ? '4 3' : undefined}
-      opacity={dashed ? 0.8 : 0.9}
     />
   );
 
   const upY = 52;
-  const meY = 120;
-  const downY = 192;
+  const meY = 125;
+  const downY = 200;
   const meX = W / 2;
 
   return (
@@ -129,23 +150,18 @@ function LineageTree({ up, me, down }: { up: TreeNode[]; me: TreeNode; down: Tre
 /** Empty-state illustration: a bare branch waiting for its first connection. */
 function EmptyBranch() {
   return (
-    <svg
-      viewBox="0 0 220 120"
-      className="h-auto w-44 shrink-0"
-      role="img"
-      aria-label="Galho vazio aguardando uma conexão"
-    >
+    <svg viewBox="0 0 220 120" className="h-auto w-40 shrink-0" role="img" aria-label="Galho vazio aguardando uma conexão">
       <path
         d="M 20 100 C 70 96, 90 80, 110 60 C 128 42, 150 34, 196 30"
         fill="none"
-        stroke="var(--color-lineage)"
+        stroke={VERMILLION}
         strokeWidth="2"
         strokeLinecap="round"
       />
       <path
         d="M 110 60 C 116 48, 118 40, 118 28"
         fill="none"
-        stroke="var(--color-border)"
+        stroke="#3a3f4b"
         strokeWidth="1.5"
         strokeDasharray="4 3"
         strokeLinecap="round"
@@ -153,13 +169,13 @@ function EmptyBranch() {
       <path
         d="M 150 34 C 158 28, 166 26, 178 26"
         fill="none"
-        stroke="var(--color-border)"
+        stroke="#3a3f4b"
         strokeWidth="1.5"
         strokeDasharray="4 3"
         strokeLinecap="round"
       />
-      <circle cx="20" cy="100" r="5" fill="var(--color-lineage)" />
-      <circle cx="196" cy="30" r="4" fill="none" stroke="var(--color-border)" strokeDasharray="3 2" />
+      <circle cx="20" cy="100" r="5" fill={VERMILLION} />
+      <circle cx="196" cy="30" r="4" fill="none" stroke="#6b7280" strokeDasharray="3 2" />
     </svg>
   );
 }
@@ -172,8 +188,8 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 export function HomePage() {
-  usePageMeta('Início', 'Plataforma de apadrinhamento acadêmico do departamento de matemática: encontre um padrinho, construa sua linhagem.');
   const { user, logout } = useAuth();
+  usePageMeta('Início', 'Portal de apadrinhamento acadêmico de Ciência da Computação: encontre um padrinho, construa sua linhagem.');
   const isFreshman = user?.role === 'freshman';
   const isSenior = user?.role === 'senior';
   const [profileModalHandle, setProfileModalHandle] = useState<string | null>(null);
@@ -199,354 +215,269 @@ export function HomePage() {
 
   const displayName = user?.socialName ?? user?.handle ?? '';
 
-  // Real lineage data for the signature tree — no abstract points.
   const treeUp: TreeNode[] = isFreshman
     ? activeMentorships.slice(0, 1).map((r) => ({
         label: (r.senior?.socialName ?? r.senior?.handle ?? '?').charAt(0).toUpperCase(),
         sub: `@${r.senior?.handle ?? ''}`,
-        tone: 'lineage' as const,
+        tone: 'lineage',
       }))
     : [];
-  const treeDown: TreeNode[] = isFreshman
-    ? [
-        { label: '?', tone: 'ghost' },
-        { label: '?', tone: 'ghost' },
-      ]
-    : activeMentorships.slice(0, 3).map((r) => ({
+  const treeDown: TreeNode[] = isSenior
+    ? activeMentorships.slice(0, 3).map((r) => ({
         label: (r.freshman?.socialName ?? r.freshman?.handle ?? '?').charAt(0).toUpperCase(),
         sub: `@${r.freshman?.handle ?? ''}`,
-        tone: 'solid' as const,
-      }));
-  if (isSenior && treeDown.length === 0) {
-    treeDown.push({ label: '?', tone: 'ghost' }, { label: '?', tone: 'ghost' });
-  }
+        tone: 'solid',
+      }))
+    : [
+        { label: '?', tone: 'ghost' },
+        { label: '?', tone: 'ghost' },
+      ];
 
   return (
-    <div className="mx-auto w-full max-w-6xl">
-      {/* --- Hero: greeting + signature lineage tree --- */}
-      <section className="relative overflow-hidden rounded-3xl border border-border bg-card p-8 sm:p-10">
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-1"
-          style={{ background: 'var(--color-lineage)' }}
-          aria-hidden
-        />
-        <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
-          <div className="max-w-xl space-y-4">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span
-                className="rounded-full px-3 py-1 text-xs font-semibold tracking-wide"
-                style={{
-                  background: 'color-mix(in srgb, var(--color-lineage) 12%, transparent)',
-                  color: 'var(--color-lineage)',
-                }}
-              >
-                Linhagem de apadrinhamento acadêmico
-              </span>
-              <span className="rounded-full border border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                {ROLE_LABEL[user?.role ?? ''] ?? user?.role} · Período {user?.semester}
-              </span>
-            </div>
+    <div className="relative">
+      {/* Blueprint grid backdrop */}
+      <div
+        className="pointer-events-none absolute inset-0 -mx-4 -my-8 opacity-[0.13]"
+        aria-hidden
+        style={{
+          backgroundImage:
+            'linear-gradient(#c9ced8 1px, transparent 1px), linear-gradient(90deg, #c9ced8 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+          maskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%)',
+        }}
+      />
 
-            <h1 className="font-display text-4xl font-semibold leading-tight sm:text-5xl">
-              Bem-vindo(a),{' '}
-              <span style={{ color: 'var(--color-lineage)' }}>{displayName}</span>
-            </h1>
-
-            <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-              {isFreshman
-                ? 'Todo matemático teve alguém que abriu o caminho. Encontre o seu veterano e comece o seu ramo na árvore do departamento.'
-                : 'Você já foi calouro um dia. Agora é a sua vez de abrir caminhos — cada pupilo carrega a sua marca para as próximas gerações.'}
+      <div className="relative">
+        {/* --- Hero --- */}
+        <section className="flex flex-col items-start justify-between gap-10 lg:flex-row lg:items-center">
+          <div className="max-w-2xl space-y-6">
+            <p className="font-mono text-xs font-bold uppercase tracking-[0.25em] text-[#c9ced8]">
+              Portal de apadrinhamento de Ciência da Computação
             </p>
-
-            {user?.role === 'administrator' && (
-              <Link
-                to="/admin"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-              >
-                <Shield className="h-4 w-4" />
-                Central administrativa
-              </Link>
-            )}
-            <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-[#8f95a3]">
+              {ROLE_LABEL[user?.role ?? ''] ?? user?.role} · Período {user?.semester}
+            </p>
+            <h1 className="font-sans text-5xl font-bold uppercase leading-[0.95] tracking-tight text-[#c9ced8] sm:text-6xl lg:text-7xl">
+              Conectando
+              <br />
+              gerações de
+              <br />
+              programadores
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {isFreshman
+                ? `Bem-vindo(a), ${displayName}. Todo programador teve alguém que abriu o caminho — encontre o seu padrinho e plante o seu ramo na árvore do curso.`
+                : `Bem-vindo(a), ${displayName}. Você já foi calouro um dia — agora é a sua vez de abrir caminhos para a próxima geração.`}
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <MonoButton to={isFreshman ? '/discovery' : '/requests'}>
+                {isFreshman ? 'Explorar mentores' : 'Revisar pedidos'}
+              </MonoButton>
+              <MonoButton to="/lineage">Ver linhagem</MonoButton>
+              {user?.role === 'administrator' && <MonoButton to="/admin">Administração</MonoButton>}
               <button
                 type="button"
                 onClick={logout}
-                className="text-xs text-muted-foreground hover:text-foreground"
+                className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
               >
                 Sair
               </button>
             </div>
           </div>
 
-          <div className="flex w-full justify-center md:w-auto">
+          <div className="flex w-full justify-center lg:w-auto">
             <LineageTree
               up={treeUp}
-              me={{
-                label: displayName.charAt(0).toUpperCase() || '?',
-                sub: 'você',
-                tone: 'lineage',
-              }}
+              me={{ label: displayName.charAt(0).toUpperCase() || '?', sub: 'você', tone: 'lineage' }}
               down={treeDown}
             />
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* --- Active connections: the thing that matters most gets real estate --- */}
-      <section className="mt-6 rounded-3xl border border-border bg-card p-6 sm:p-8">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-2xl font-semibold">
-            {isFreshman ? 'Seu padrinho' : 'Seus pupilos'}
-          </h2>
-          <Link
-            to="/requests"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-          >
-            Gerenciar <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-
-        <div className="mt-5">
-          {activeMentorships.length > 0 ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {activeMentorships.map((req) => {
-                const counterpart = isFreshman ? req.senior : req.freshman;
-                return (
-                  <div
-                    key={req.id}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-background p-4"
-                  >
-                    <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-display text-sm font-semibold"
-                      style={{ background: 'var(--color-lineage)', color: 'var(--color-lineage-foreground)' }}
-                    >
-                      {(counterpart?.socialName ?? counterpart?.handle ?? '?')
-                        .charAt(0)
-                        .toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-foreground">
-                        {counterpart?.socialName ?? counterpart?.handle}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        @{counterpart?.handle} · Período {counterpart?.semester}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-5 rounded-2xl border border-dashed border-border bg-background/50 p-8 text-center sm:flex-row sm:text-left">
-              <EmptyBranch />
-              <div className="space-y-3">
-                <p className="font-display text-lg font-medium">
-                  {isFreshman
-                    ? 'Sua árvore ainda não tem galhos.'
-                    : 'Nenhum ramo brotou ainda.'}
-                </p>
-                <p className="max-w-md text-sm text-muted-foreground">
-                  {isFreshman
-                    ? 'Um apadrinhamento é um vínculo para a vida acadêmica inteira. Escolha um padrinho e plante a primeira conexão.'
-                    : 'Quando você aceitar um calouro, ele se torna um ramo permanente da sua linhagem — e da do departamento.'}
-                </p>
-                <Link to={isFreshman ? '/discovery' : '/requests'}>
-                  <Button size="sm">
-                    {isFreshman ? 'Descobrir padrinhos' : 'Revisar pedidos recebidos'}
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* --- Launchpad --- */}
-      <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Link
-          to="/discovery"
-          className="group rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/60"
-        >
-          <h3 className="font-display text-lg font-medium">Descoberta de Padrinhos</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Encontre veteranos alinhados com os seus interesses.
-          </p>
-          <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary transition-transform group-hover:translate-x-1">
-            Explorar <ArrowRight className="h-3.5 w-3.5" />
-          </span>
-        </Link>
-
-        <Link
-          to="/requests"
-          className="group rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/60"
-        >
+        {/* --- Active connections --- */}
+        <PosterCard className="mt-12">
           <div className="flex items-center justify-between">
-            <h3 className="font-display text-lg font-medium">Pedidos</h3>
-            {pendingRequests.length > 0 && (
-              <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
-                {pendingRequests.length}
-              </span>
-            )}
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Cartas, respostas e admissões em um só lugar.
-          </p>
-          <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary transition-transform group-hover:translate-x-1">
-            Caixa de entrada <ArrowRight className="h-3.5 w-3.5" />
-          </span>
-        </Link>
-
-        <Link
-          to="/lineage"
-          className="group rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/60"
-        >
-          <h3 className="font-display text-lg font-medium">Linhagem</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            A genealogia completa do departamento, turma a turma.
-          </p>
-          <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary transition-transform group-hover:translate-x-1">
-            Ver a árvore <ArrowRight className="h-3.5 w-3.5" />
-          </span>
-        </Link>
-
-        <Link
-          to="/profile/studio"
-          className="group rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/60"
-        >
-          <h3 className="font-display text-lg font-medium">Estúdio de Perfil</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Conte a sua história com cartões, banners e temas.
-          </p>
-          <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary transition-transform group-hover:translate-x-1">
-            Personalizar <ArrowRight className="h-3.5 w-3.5" />
-          </span>
-        </Link>
-      </section>
-
-      {/* --- Recommendations (freshmen) --- */}
-      {isFreshman && (
-        <section className="mt-6 rounded-3xl border border-border bg-card p-6 sm:p-8">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl font-semibold">Padrinhos sugeridos para você</h2>
+            <h2 className="font-sans text-xl font-bold uppercase tracking-tight">
+              {isFreshman ? 'Seu padrinho' : 'Seus pupilos'}
+            </h2>
             <Link
-              to="/discovery"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+              to="/requests"
+              className="font-mono text-[11px] font-bold uppercase tracking-widest underline hover:no-underline"
             >
-              Ver catálogo <ArrowUpRight className="h-3.5 w-3.5" />
+              Gerenciar
             </Link>
           </div>
 
-          <div className="mt-5 divide-y divide-border">
-            {recommendationsQuery.isLoading && (
-              <p className="py-6 text-center text-sm text-muted-foreground">
-                Buscando compatibilidades no departamento…
-              </p>
-            )}
-            {recommendationsQuery.data?.slice(0, 3).map((senior) => (
-              <div
-                key={senior.userId}
-                className="flex flex-col gap-3 py-4 first:pt-2 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  {senior.avatarThumbnailUrl ? (
-                    <img
-                      src={senior.avatarThumbnailUrl}
-                      alt=""
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent font-display text-lg font-semibold text-accent-foreground">
-                      {(senior.socialName ?? senior.handle).charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setProfileModalHandle(senior.handle)}
-                        className="rounded font-semibold text-foreground hover:underline focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          <div className="mt-5">
+            {activeMentorships.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {activeMentorships.map((req) => {
+                  const counterpart = isFreshman ? req.senior : req.freshman;
+                  return (
+                    <div key={req.id} className="flex items-center gap-3 border-2 border-black bg-white/40 p-3">
+                      <div
+                        className="flex h-10 w-10 shrink-0 items-center justify-center font-sans text-sm font-bold text-white"
+                        style={{ backgroundColor: VERMILLION }}
                       >
-                        {senior.socialName ?? senior.handle}
-                      </button>
-                      <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                        {senior.score}% de compatibilidade
-                      </span>
+                        {(counterpart?.socialName ?? counterpart?.handle ?? '?').charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold">{counterpart?.socialName ?? counterpart?.handle}</p>
+                        <p className="text-xs opacity-70">
+                          @{counterpart?.handle} · Período {counterpart?.semester}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      @{senior.handle} · Período {senior.semester}
-                    </p>
-                    {senior.matchReasons && senior.matchReasons.length > 0 && (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        ✦ {senior.matchReasons[0]}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full sm:w-auto"
-                  onClick={() => setProfileModalHandle(senior.handle)}
-                >
-                  Ver perfil
-                </Button>
+                  );
+                })}
               </div>
-            ))}
-            {recommendationsQuery.data?.length === 0 && (
-              <p className="py-6 text-center text-sm text-muted-foreground">
-                Ainda não há sugestões. Explore o catálogo completo na Descoberta de Padrinhos!
-              </p>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* --- Activity + spirit --- */}
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <section className="rounded-3xl border border-border bg-card p-6 lg:col-span-2">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Atividade e pedidos
-          </h2>
-          <div className="mt-4 space-y-3">
-            {pendingRequests.slice(0, 3).map((req) => (
-              <div
-                key={req.id}
-                className="flex items-start gap-3 rounded-xl border border-border bg-background p-3"
-              >
-                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-foreground">
-                    {isFreshman ? `Para @${req.senior?.handle}` : `De @${req.freshman?.handle}`}
+            ) : (
+              <div className="flex flex-col items-center gap-5 border-2 border-dashed border-black/40 p-8 sm:flex-row">
+                <EmptyBranch />
+                <div className="space-y-3">
+                  <p className="font-sans text-lg font-bold uppercase">
+                    {isFreshman ? 'Sua árvore ainda não tem galhos' : 'Nenhum ramo brotou ainda'}
                   </p>
-                  <p className="line-clamp-1 text-[11px] text-muted-foreground">{req.message}</p>
+                  <p className="max-w-md text-sm opacity-80">
+                    {isFreshman
+                      ? 'Um apadrinhamento é um vínculo para a vida acadêmica inteira. Escolha um padrinho e plante a primeira conexão.'
+                      : 'Quando você aceitar um calouro, ele se torna um ramo permanente da sua linhagem — e da do departamento.'}
+                  </p>
+                  <MonoButton to={isFreshman ? '/discovery' : '/requests'}>
+                    {isFreshman ? 'Descobrir padrinhos' : 'Revisar pedidos recebidos'}
+                  </MonoButton>
                 </div>
-                <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-                  Pendente
-                </span>
               </div>
-            ))}
-            {pendingRequests.length === 0 && (
-              <p className="py-4 text-center text-xs text-muted-foreground">
-                Nenhum pedido em análise no momento.
-              </p>
             )}
           </div>
+        </PosterCard>
+
+        {/* --- Launchpad --- */}
+        <section className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <PosterCard className="flex flex-col">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center border-2 border-black">
+              <span className="text-2xl" aria-hidden>◈</span>
+            </div>
+            <h3 className="font-sans text-lg font-bold uppercase leading-tight">Descoberta de Padrinhos</h3>
+            <p className="mt-1 flex-1 text-xs opacity-80">
+              Encontre veteranos alinhados com os seus interesses e projetos.
+            </p>
+            <div className="mt-4">
+              <MonoButton to="/discovery">Explorar</MonoButton>
+            </div>
+          </PosterCard>
+
+          <PosterCard className="flex flex-col">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center border-2 border-black">
+              <span className="relative text-2xl" aria-hidden>
+                ✉
+                {pendingRequests.length > 0 && (
+                  <span
+                    className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center text-[10px] font-bold text-white"
+                    style={{ backgroundColor: VERMILLION }}
+                  >
+                    {pendingRequests.length}
+                  </span>
+                )}
+              </span>
+            </div>
+            <h3 className="font-sans text-lg font-bold uppercase leading-tight">Pedidos</h3>
+            <p className="mt-1 flex-1 text-xs opacity-80">
+              Cartas, respostas e admissões em um só lugar.
+            </p>
+            <div className="mt-4">
+              <MonoButton to="/requests">Caixa de entrada</MonoButton>
+            </div>
+          </PosterCard>
+
+          <PosterCard className="flex flex-col">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center border-2 border-black">
+              <span className="text-2xl" aria-hidden>⑃</span>
+            </div>
+            <h3 className="font-sans text-lg font-bold uppercase leading-tight">Linhagem</h3>
+            <p className="mt-1 flex-1 text-xs opacity-80">
+              A genealogia completa do departamento, turma a turma.
+            </p>
+            <div className="mt-4">
+              <MonoButton to="/lineage">Ver a árvore</MonoButton>
+            </div>
+          </PosterCard>
+
+          <PosterCard className="flex flex-col">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center border-2 border-black">
+              <span className="text-2xl" aria-hidden>✎</span>
+            </div>
+            <h3 className="font-sans text-lg font-bold uppercase leading-tight">Estúdio de Perfil</h3>
+            <p className="mt-1 flex-1 text-xs opacity-80">
+              Conte a sua história com cartões, banners e temas.
+            </p>
+            <div className="mt-4">
+              <MonoButton to="/profile/studio">Personalizar</MonoButton>
+            </div>
+          </PosterCard>
         </section>
 
-        <section className="rounded-3xl border border-border bg-card p-6">
-          <h3 className="font-display text-base font-semibold">O espírito do Mathitis</h3>
-          <p className="mt-2 text-xs leading-relaxed text-muted-foreground italic">
-            …
-          </p>
-          <Link
-            to="/lineage"
-            className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold hover:underline"
-            style={{ color: 'var(--color-lineage)' }}
-          >
-            Ver a genealogia acadêmica <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </section>
+        {/* --- Recommendations (freshmen) --- */}
+        {isFreshman && (
+          <PosterCard className="mt-8">
+            <div className="flex items-center justify-between">
+              <h2 className="font-sans text-xl font-bold uppercase tracking-tight">Padrinhos sugeridos</h2>
+              <Link
+                to="/discovery"
+                className="font-mono text-[11px] font-bold uppercase tracking-widest underline hover:no-underline"
+              >
+                Ver catálogo
+              </Link>
+            </div>
+
+            <div className="mt-5 divide-y-2 divide-black/20">
+              {recommendationsQuery.isLoading && (
+                <p className="py-6 text-center text-sm opacity-70">Buscando compatibilidades no departamento…</p>
+              )}
+              {recommendationsQuery.data?.slice(0, 3).map((senior) => (
+                <div key={senior.userId} className="flex flex-col gap-3 py-4 first:pt-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    {senior.avatarThumbnailUrl ? (
+                      <img src={senior.avatarThumbnailUrl} alt="" className="h-12 w-12 rounded-none object-cover" />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center border-2 border-black font-sans text-lg font-bold">
+                        {(senior.socialName ?? senior.handle).charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setProfileModalHandle(senior.handle)}
+                          className="font-bold underline hover:no-underline"
+                        >
+                          {senior.socialName ?? senior.handle}
+                        </button>
+                        <span className="border-2 border-black px-2 py-0.5 text-[11px] font-bold">
+                          {senior.score}%
+                        </span>
+                      </div>
+                      <p className="text-xs opacity-70">
+                        @{senior.handle} · Período {senior.semester}
+                      </p>
+                      {senior.matchReasons && senior.matchReasons.length > 0 && (
+                        <p className="mt-1 text-xs opacity-70">✦ {senior.matchReasons[0]}</p>
+                      )}
+                    </div>
+                  </div>
+                  <MonoButton onClick={() => setProfileModalHandle(senior.handle)}>Ver perfil</MonoButton>
+                </div>
+              ))}
+              {recommendationsQuery.data?.length === 0 && (
+                <p className="py-6 text-center text-sm opacity-70">
+                  Ainda não há sugestões. Explore o catálogo completo na Descoberta de Padrinhos!
+                </p>
+              )}
+            </div>
+          </PosterCard>
+        )}
+
       </div>
 
       <MentorProfileModal
@@ -557,3 +488,4 @@ export function HomePage() {
     </div>
   );
 }
+

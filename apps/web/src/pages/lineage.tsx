@@ -83,7 +83,7 @@ export function LineagePage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Linhagem de apadrinhamento</h1>
+        <h1 className="font-mono text-xl font-bold uppercase tracking-[0.15em] text-foreground">Linhagem de apadrinhamento</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {handle ? `Subgrafo com raiz em @${handle}` : 'A linhagem completa do departamento ao longo dos anos acadêmicos.'}
         </p>
@@ -95,7 +95,7 @@ export function LineagePage() {
       )}
 
       {nodes.length > 0 && (
-        <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-card p-4">
+        <div className="mt-6 overflow-x-auto border-2 border-white/15 bg-card p-4">
           <svg width={width} height={height} className="block">
             {edges.map((edge, index) => {
               const from = positions.get(edge.mentorId);

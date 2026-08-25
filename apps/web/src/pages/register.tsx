@@ -12,7 +12,7 @@ import { PasswordStrength } from '@/components/ui/password-strength';
 import { usePageMeta } from '@/lib/use-page-meta';
 
 export function RegisterPage() {
-  usePageMeta('Criar conta', 'Junte-se ao programa de apadrinhamento acadêmico do departamento de matemática.');
+  usePageMeta('Criar conta', 'Junte-se ao programa de apadrinhamento acadêmico.');
   const { register } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
@@ -54,12 +54,12 @@ export function RegisterPage() {
   if (submitted) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 text-center shadow-sm">
+        <div className="auth-card-light w-full max-w-md border-2 border-black bg-[#d3d7de] p-8 text-center text-[#0b0b0e]" style={{ boxShadow: '10px 10px 0 0 rgba(201, 206, 216, 0.18)' }}>
           <header className="mb-6 flex justify-end">
             <ThemeToggle />
           </header>
-          <h1 className="text-2xl font-semibold text-foreground">Verifique seu e-mail</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">Verifique seu e-mail</h1>
+          <p className="mt-2 text-sm opacity-80">
             Se o e-mail informado for válido, você receberá uma mensagem de confirmação
             em breve. Clique no link da mensagem para verificar sua conta. Lembre-se de checar o spam!
           </p>
@@ -72,19 +72,33 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
-        <header className="mb-6 flex justify-end">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-8">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.12]"
+        aria-hidden
+        style={{
+          backgroundImage:
+            'linear-gradient(#c9ced8 1px, transparent 1px), linear-gradient(90deg, #c9ced8 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+          maskImage: 'radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 100%)',
+        }}
+      />
+      <div
+        className="auth-card-light relative w-full max-w-md border-2 border-black bg-[#d3d7de] p-8 text-[#0b0b0e]"
+        style={{ boxShadow: '10px 10px 0 0 rgba(201, 206, 216, 0.18)' }}
+      >
+        <header className="-mb-2 flex items-start justify-end">
           <ThemeToggle />
         </header>
-        <h1 className="text-2xl font-semibold text-foreground">Crie sua conta</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Junte-se ao programa de apadrinhamento e conheça nossos veteranos.
+        <h1 className="mt-4 font-sans text-2xl font-bold uppercase leading-none tracking-tight">Crie sua conta</h1>
+        <p className="mt-2 text-sm opacity-80">
+          Junte-se ao programa de apadrinhamento de Ciência da Computação.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit} noValidate>
           <div>
-            <label htmlFor="handle" className="mb-1 block text-sm font-medium text-foreground">
+            <label htmlFor="handle" className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-widest">
               Nome de usuário
             </label>
             <Input
@@ -97,7 +111,7 @@ export function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
+            <label htmlFor="email" className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-widest">
               Email Acadêmico
             </label>
             <Input
@@ -111,7 +125,7 @@ export function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="semester" className="mb-1 block text-sm font-medium text-foreground">
+            <label htmlFor="semester" className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-widest">
               Período
             </label>
             <Input
@@ -125,7 +139,7 @@ export function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="socialName" className="mb-1 block text-sm font-medium text-foreground">
+            <label htmlFor="socialName" className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-widest">
               Nome Social (opcional)
             </label>
             <Input id="socialName" autoComplete="name" {...field('socialName')} />
@@ -133,7 +147,7 @@ export function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-foreground">
+            <label htmlFor="password" className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-widest">
               Senha
             </label>
             <Input
@@ -147,14 +161,19 @@ export function RegisterPage() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+            <div className="border-2 border-[#b3261e] bg-[#b3261e]/10 p-3 text-sm text-[#b3261e]" role="alert">
               {error}
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full border-2 border-black bg-black px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#c9f24c] hover:text-black disabled:opacity-50"
+            style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.35)' }}
+          >
             {isSubmitting ? 'Criando conta…' : 'Criar conta'}
-          </Button>
+          </button>
         </form>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">

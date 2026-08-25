@@ -56,18 +56,18 @@ function RequestRecovery() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
+      <div className="auth-card-light w-full max-w-md border-2 border-black bg-[#d3d7de] p-8 text-[#0b0b0e]" style={{ boxShadow: '10px 10px 0 0 rgba(201, 206, 216, 0.18)' }}>
         <header className="mb-6 flex justify-end">
           <ThemeToggle />
         </header>
-        <h1 className="text-2xl font-semibold text-foreground">Redefinir sua senha</h1>
+        <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">Redefinir sua senha</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Informe seu endereço de e-mail e enviaremos um link de redefinição se uma conta existir.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
+            <label htmlFor="email" className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-widest">
               E-mail
             </label>
             <Input id="email" type="email" autoComplete="email" {...register('email')} />
@@ -131,15 +131,15 @@ function ResetPassword({ token }: { token: string }) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
+      <div className="auth-card-light w-full max-w-md border-2 border-black bg-[#d3d7de] p-8 text-[#0b0b0e]" style={{ boxShadow: '10px 10px 0 0 rgba(201, 206, 216, 0.18)' }}>
         <header className="mb-6 flex justify-end">
           <ThemeToggle />
         </header>
-        <h1 className="text-2xl font-semibold text-foreground">Escolha uma nova senha</h1>
+        <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">Escolha uma nova senha</h1>
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
-            <label htmlFor="new-password" className="mb-1 block text-sm font-medium text-foreground">
+            <label htmlFor="new-password" className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-widest">
               Nova senha
             </label>
             <Input
