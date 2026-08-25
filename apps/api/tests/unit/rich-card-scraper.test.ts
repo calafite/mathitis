@@ -104,6 +104,27 @@ describe('createRichCardScraper', () => {
         scraper.scrape(`https://store.steampowered.com/app/${appId}/SomeGame/`),
       ).rejects.toMatchObject({ code: 'NSFW_CONTENT_REJECTED' });
     });
+
+    it('does not crash when Steam returns malformed descriptor/category shapes', async () => {
+      const malformed = {
+        success: true,
+        data: {
+          name: 'Hearts of Iron IV',
+          short_description: 'Victory is at your fingertips.',
+          header_image: 'https://cdn.cloudflare.steamstatic.com/header.jpg',
+          required_age: null,
+          content_descriptors: { ids: ['2'] },
+          categories: 'Single-player',
+        },
+      };
+      const scraper = createRichCardScraper({
+        fetchImpl: async () => jsonResponse({ [appId]: malformed }),
+      });
+
+      const card = await scraper.scrape(`https://store.steampowered.com/app/${appId}/HOI4/`);
+      expect(card.cardType).toBe('game');
+      expect(card.title).toBe('Hearts of Iron IV');
+    });
   });
 
   describe('GitHub provider', () => {
@@ -233,7 +254,7 @@ describe('createRichCardScraper', () => {
   });
 
   describe('timeout handling', () => {
-    it('aborts requests that exceed 3 seconds', async () => {
+    it('aborts requests that exceed the fetch timeout', async () => {
       vi.useFakeTimers();
       try {
         const slowFetch: FetchLike = (_url, init) =>
@@ -246,11 +267,25 @@ describe('createRichCardScraper', () => {
 
         const pending = scraper.scrape('https://203.0.113.10/slow-page');
         pending.catch(() => {});
-        await vi.advanceTimersByTimeAsync(3001);
+        await vi.advanceTimersByTimeAsync(10_001);
         await expect(pending).rejects.toMatchObject({ status: 422 });
       } finally {
         vi.useRealTimers();
       }
+    });
+  });
+
+  describe('unexpected provider failures', () => {
+    it('converts an extractor crash into a validation error instead of a 500', async () => {
+      const scraper = createRichCardScraper({
+        fetchImpl: async () => {
+          throw new TypeError('Unexpected token < in JSON');
+        },
+      });
+
+      await expect(
+        scraper.scrape('https://store.steampowered.com/app/570/Dota_2/'),
+      ).rejects.toMatchObject({ status: 422, code: 'VALIDATION_ERROR' });
     });
   });
 });

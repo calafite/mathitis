@@ -4,8 +4,30 @@ import type { ScrapedCardResponse } from '@mathitis/schemas';
 import { ValidationError } from '../errors.js';
 import { assertContentSafe } from './nsfw-filter.js';
 
-const FETCH_TIMEOUT_MS = 3_000;
+const FETCH_TIMEOUT_MS = 10_000;
 const USER_AGENT = 'MathitisCardBot/1.0 (+https://pasteldemiolos.xyz)';
+
+/** Coerces a possibly-malformed JSON field into a string array. */
+function asStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      if (typeof item === 'string') return item;
+      if (typeof item === 'object' && item !== null) {
+        const record = item as Record<string, unknown>;
+        if ('description' in record && record.description != null) return String(record.description);
+        if ('id' in record && record.id != null) return String(record.id);
+      }
+      return '';
+    })
+    .filter(Boolean);
+}
+
+/** Coerces a possibly-malformed JSON field into a numeric age rating. */
+function asAgeRating(value: unknown): number | null {
+  const n = Number(value ?? 0);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : null;
+}
 
 /** Hostnames that must never be scraped (container-internal services). */
 const FORBIDDEN_HOSTNAMES = new Set([
@@ -191,9 +213,9 @@ interface SteamAppDetails {
     name?: string;
     short_description?: string;
     header_image?: string;
-    required_age?: number | string;
-    content_descriptors?: Array<{ id?: string | number }>;
-    categories?: Array<{ description?: string }>;
+    required_age?: unknown;
+    content_descriptors?: unknown;
+    categories?: unknown;
   };
 }
 
@@ -215,15 +237,13 @@ async function scrapeSteam(
   if (!entry?.success || !game?.name) {
     throw new ValidationError('Não foi possível ler este jogo na Steam');
   }
-  const categories = (game.categories ?? [])
-    .map((c: { description?: string }) => c.description ?? '')
-    .filter(Boolean);
+  const categories = asStringArray(game.categories);
   assertContentSafe({
     title: game.name,
     description: game.short_description ?? null,
     tags: categories,
-    ageRating: Number(game.required_age ?? 0) || null,
-    steamDescriptors: (game.content_descriptors ?? []).map((d: { id?: string | number }) => String(d.id)),
+    ageRating: asAgeRating(game.required_age),
+    steamDescriptors: asStringArray(game.content_descriptors),
   });
   return {
     cardType: 'game',
@@ -391,23 +411,30 @@ export function createRichCardScraper(options?: {
     const url = await assertPublicUrl(rawUrl);
     const hostname = url.hostname.toLowerCase();
 
-    if (hostname === 'open.spotify.com' || hostname === 'spotify.com') {
-      return scrapeSpotify(url, fetchImpl);
+    try {
+      if (hostname === 'open.spotify.com' || hostname === 'spotify.com') {
+        return await scrapeSpotify(url, fetchImpl);
+      }
+      if (hostname === 'store.steampowered.com') {
+        return await scrapeSteam(url, fetchImpl);
+      }
+      if (hostname === 'github.com' || hostname === 'www.github.com') {
+        return await scrapeGitHub(url, fetchImpl);
+      }
+      if (hostname === 'letterboxd.com' || hostname === 'www.letterboxd.com') {
+        return await scrapeLetterboxd(url, fetchImpl);
+      }
+      if (hostname === 'openlibrary.org' || hostname === 'www.openlibrary.org') {
+        return await scrapeBooks(url, fetchImpl);
+      }
+      // YouTube/Vimeo/SoundCloud are intentionally NOT auto-unfurled.
+      return await scrapeGeneric(url, fetchImpl);
+    } catch (error) {
+      // Provider payloads are untrusted: never let an unexpected shape or
+      // network hiccup surface as an unhandled 500.
+      if (error instanceof ValidationError) throw error;
+      throw new ValidationError('Não foi possível ler o conteúdo deste link');
     }
-    if (hostname === 'store.steampowered.com') {
-      return scrapeSteam(url, fetchImpl);
-    }
-    if (hostname === 'github.com' || hostname === 'www.github.com') {
-      return scrapeGitHub(url, fetchImpl);
-    }
-    if (hostname === 'letterboxd.com' || hostname === 'www.letterboxd.com') {
-      return scrapeLetterboxd(url, fetchImpl);
-    }
-    if (hostname === 'openlibrary.org') {
-      return scrapeBooks(url, fetchImpl);
-    }
-    // YouTube/Vimeo/SoundCloud are intentionally NOT auto-unfurled.
-    return scrapeGeneric(url, fetchImpl);
   }
 
   return { scrape };
