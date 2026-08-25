@@ -11,6 +11,12 @@ export interface MediaUploadProps {
 const AVATAR_LIMIT_MB = 2;
 const BANNER_LIMIT_MB = 5;
 
+/** Must mirror IMAGE_LIMITS in apps/api/src/services/image-service.ts. */
+const RESOLUTION_HINT = {
+  avatar: 'Recomendado: 512 × 512 px (quadrado)',
+  banner: 'Recomendado: 1600 × 400 px (4:1)',
+} as const;
+
 /**
  * File picker that always routes through the crop dialog: avatars are
  * cropped square (rendered circular), banners to a wide 3:1 framing.
@@ -74,6 +80,9 @@ export function MediaUpload({ kind, url, uploading, onUpload }: MediaUploadProps
           {uploading ? 'Enviando…' : `Enviar ${isAvatar ? 'avatar' : 'banner'}`}
         </button>
         <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+          {RESOLUTION_HINT[kind]}
+        </p>
+        <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground/70">
           JPEG, PNG ou WebP · máx. {maxMb}MB
         </p>
       </div>
@@ -81,9 +90,9 @@ export function MediaUpload({ kind, url, uploading, onUpload }: MediaUploadProps
       <ImageCropModal
         open={pendingFile !== null}
         file={pendingFile}
-        aspect={isAvatar ? 1 : 3}
+        aspect={isAvatar ? 1 : 4}
         circular={isAvatar}
-        title={isAvatar ? 'Recortar avatar' : 'Recortar banner'}
+        title={isAvatar ? 'Recortar avatar · 512 × 512' : 'Recortar banner · 1600 × 400'}
         onCancel={() => setPendingFile(null)}
         onConfirm={(cropped) => {
           setPendingFile(null);

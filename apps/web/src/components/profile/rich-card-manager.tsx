@@ -88,7 +88,7 @@ function MetadataFields({
     return (
       <div>
         <label className="mb-1 block text-xs font-medium text-muted-foreground">Artista (opcional)</label>
-        <Input value={form.metadata['artistName'] ?? ''} onChange={(e) => setMeta('artistName', e.target.value)} placeholder="Radiohead" />
+        <Input value={form.metadata['artistName'] ?? ''} onChange={(e) => setMeta('artistName', e.target.value)} placeholder="Mutantes" />
       </div>
     );
   }

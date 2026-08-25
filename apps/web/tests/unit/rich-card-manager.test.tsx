@@ -62,8 +62,8 @@ describe('RichCardManager', () => {
     renderManager();
 
     await user.click(await screen.findByRole('button', { name: 'Adicionar cartão' }));
-    await user.type(screen.getByPlaceholderText('Título do cartão'), 'Karma Police');
-    await user.type(screen.getByPlaceholderText('Radiohead'), 'Radiohead');
+    await user.type(screen.getByPlaceholderText('Título do cartão'), 'Panis et Circenses');
+    await user.type(screen.getByPlaceholderText('Mutantes'), 'Mutantes');
     await user.click(screen.getByRole('button', { name: 'Salvar cartão' }));
 
     await waitFor(() => {

@@ -54,11 +54,16 @@ export function ImageCropModal({
       onCancel();
       return;
     }
+    // Crop values are percentages of the DISPLAYED image; convert to natural
+    // pixels so the exported file matches exactly what the user framed,
+    // regardless of how the preview was scaled to fit the dialog.
     const canvas = document.createElement('canvas');
-    const scaleX = img.naturalWidth / img.width;
-    const scaleY = img.naturalHeight / img.height;
-    canvas.width = Math.floor(crop.width * scaleX);
-    canvas.height = Math.floor(crop.height * scaleY);
+    const sx = crop.x / 100;
+    const sy = crop.y / 100;
+    const sw = crop.width / 100;
+    const sh = crop.height / 100;
+    canvas.width = Math.max(1, Math.floor(sw * img.naturalWidth));
+    canvas.height = Math.max(1, Math.floor(sh * img.naturalHeight));
     const ctx = canvas.getContext('2d');
     if (!ctx) {
       onCancel();
@@ -66,10 +71,10 @@ export function ImageCropModal({
     }
     ctx.drawImage(
       img,
-      crop.x * scaleX,
-      crop.y * scaleY,
-      crop.width * scaleX,
-      crop.height * scaleY,
+      sx * img.naturalWidth,
+      sy * img.naturalHeight,
+      sw * img.naturalWidth,
+      sh * img.naturalHeight,
       0,
       0,
       canvas.width,
