@@ -39,6 +39,7 @@ interface Harness {
   };
   tokenRepository: {
     createToken: ReturnType<typeof vi.fn>;
+    findById: ReturnType<typeof vi.fn>;
     findActiveByType: ReturnType<typeof vi.fn>;
     consume: ReturnType<typeof vi.fn>;
     findActiveByUserAndType: ReturnType<typeof vi.fn>;
@@ -67,10 +68,11 @@ function createHarness(): Harness {
   };
 
   const tokenRepository = {
-    createToken: vi.fn(),
+    createToken: vi.fn().mockResolvedValue({ id: 'token-id-123' }),
     findActiveByType: vi.fn(),
     findActiveByUserAndType: vi.fn(),
     findAllByType: vi.fn(),
+    findById: vi.fn(),
     consume: vi.fn(),
   };
 
@@ -209,10 +211,10 @@ describe('AuthService.recover', () => {
 describe('AuthService.resetPassword', () => {
   it('rejects an invalid token', async () => {
     const h = createHarness();
-    h.tokenRepository.findActiveByType.mockResolvedValue([]);
+    h.tokenRepository.findById.mockResolvedValue(null);
 
     await expect(
-      h.service.resetPassword('a'.repeat(64), 'NewStrongPassword123!'),
+      h.service.resetPassword(`${'a'.repeat(36)}.${'b'.repeat(64)}`, 'NewStrongPassword123!'),
     ).rejects.toMatchObject({ status: 400, code: 'TOKEN_INVALID' });
   });
 });
@@ -220,9 +222,9 @@ describe('AuthService.resetPassword', () => {
 describe('AuthService.verifyEmail', () => {
   it('rejects an invalid verification token', async () => {
     const h = createHarness();
-    h.tokenRepository.findAllByType.mockResolvedValue([]);
+    h.tokenRepository.findById.mockResolvedValue(null);
 
-    await expect(h.service.verifyEmail('a'.repeat(64))).rejects.toMatchObject({
+    await expect(h.service.verifyEmail(`${'a'.repeat(36)}.${'b'.repeat(64)}`)).rejects.toMatchObject({
       status: 400,
       code: 'TOKEN_INVALID',
     });

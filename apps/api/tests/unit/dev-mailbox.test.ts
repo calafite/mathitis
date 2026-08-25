@@ -6,7 +6,7 @@ import {
   recordDevEmail,
 } from '../../src/lib/dev-mailbox.js';
 
-const VERIFY_PATTERN = /https?:\/\/\S*\/verify-email\?token=[a-f0-9]+/;
+const VERIFY_PATTERN = /https?:\/\/\S*\/verify-email\?token=[a-f0-9-]+\.[a-f0-9]+/;
 
 describe('dev-mailbox', () => {
   beforeEach(() => {
@@ -41,16 +41,16 @@ describe('dev-mailbox', () => {
     recordDevEmail({
       to: 'user@cs.uni.edu',
       subject: 'Verify',
-      text: 'Welcome!\nhttp://localhost:5173/verify-email?token=abc123',
+      text: 'Welcome!\nhttp://localhost:5173/verify-email?token=12345678-1234-1234-1234-123456789abc.abc123',
     });
     recordDevEmail({
       to: 'user@cs.uni.edu',
       subject: 'Verify',
-      text: 'Welcome!\nhttp://localhost:5173/verify-email?token=def456',
+      text: 'Welcome!\nhttp://localhost:5173/verify-email?token=87654321-4321-4321-4321-cba987654321.def456',
     });
 
     expect(latestDevLink({ to: 'user@cs.uni.edu', pattern: VERIFY_PATTERN })).toBe(
-      'http://localhost:5173/verify-email?token=def456',
+      'http://localhost:5173/verify-email?token=87654321-4321-4321-4321-cba987654321.def456',
     );
     expect(latestDevLink({ to: 'nobody@cs.uni.edu', pattern: VERIFY_PATTERN })).toBeNull();
   });

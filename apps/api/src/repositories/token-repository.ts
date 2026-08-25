@@ -7,6 +7,7 @@ export interface TokenRepository {
     tokenHash: string,
     expiresAt: Date,
   ): Promise<UserToken>;
+  findById(id: string): Promise<UserToken | null>;
   findActiveByType(type: TokenType): Promise<UserToken[]>;
   findActiveByUserAndType(userId: string, type: TokenType): Promise<UserToken[]>;
   findAllByType(type: TokenType): Promise<UserToken[]>;
@@ -18,6 +19,10 @@ export function createTokenRepository(prisma: PrismaClient): TokenRepository {
     return prisma.userToken.create({
       data: { userId, type, tokenHash, expiresAt },
     });
+  }
+
+  async function findById(id: string) {
+    return prisma.userToken.findUnique({ where: { id } });
   }
 
   async function findActiveByType(type: TokenType) {
@@ -58,5 +63,5 @@ export function createTokenRepository(prisma: PrismaClient): TokenRepository {
     return result.count > 0;
   }
 
-  return { createToken, findActiveByType, findActiveByUserAndType, findAllByType, consume };
+  return { createToken, findById, findActiveByType, findActiveByUserAndType, findAllByType, consume };
 }

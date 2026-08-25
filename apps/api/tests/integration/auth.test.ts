@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createHash } from 'node:crypto';
 import { startTestEnvironment, stopTestEnvironment, type TestContext } from './test-environment.js';
 
 describe('Auth API', () => {
@@ -61,17 +60,16 @@ describe('Auth API', () => {
 
   /** Creates a password_reset token the same way the auth service does. */
   async function mintResetToken(userId: string): Promise<string> {
-    const { createHash, randomBytes } = await import('node:crypto');
+    const { randomBytes } = await import('node:crypto');
     const argon2 = await import('argon2');
-    const plainToken = randomBytes(32).toString('hex');
-    const digest = createHash('sha256').update(plainToken).digest();
-    const tokenHash = await argon2.default.hash(digest, {
+    const plainSecret = randomBytes(32).toString('hex');
+    const tokenHash = await argon2.default.hash(plainSecret, {
       type: 2,
       memoryCost: 65536,
       timeCost: 3,
       parallelism: 4,
     });
-    await ctx.prisma.userToken.create({
+    const token = await ctx.prisma.userToken.create({
       data: {
         userId,
         tokenHash,
@@ -79,7 +77,7 @@ describe('Auth API', () => {
         expiresAt: new Date(Date.now() + 60 * 60 * 1000),
       },
     });
-    return plainToken;
+    return `${token.id}.${plainSecret}`;
   }
 
   const genericBody = {
@@ -228,12 +226,11 @@ describe('Auth API', () => {
   async function issueKnownToken(
     userId: string,
     type: 'email_verification' | 'password_reset',
-    plainToken: string,
+    plainSecret: string,
     expiresAt: Date = new Date(Date.now() + 24 * 60 * 60 * 1000),
   ) {
     const argon2 = await import('argon2');
-    const digest = createHash('sha256').update(plainToken).digest();
-    const tokenHash = await argon2.default.hash(digest, {
+    const tokenHash = await argon2.default.hash(plainSecret, {
       type: 2,
       memoryCost: 65536,
       timeCost: 3,
@@ -278,26 +275,31 @@ describe('Auth API', () => {
         status: 'pending_verification',
       },
     });
-    const plain = 'cafebabe'.repeat(4);
-    await issueKnownToken(user.id, 'email_verification', plain);
+    const plainSecret = 'cafebabe'.repeat(4);
+    const token = await issueKnownToken(user.id, 'email_verification', plainSecret);
+    const compositeToken = `${token.id}.${plainSecret}`;
 
-    const res = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${plain}` });
+    const res = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${compositeToken}` });
     expect(res.statusCode).toBe(200);
 
     const after = await ctx.prisma.user.findUnique({ where: { id: user.id } });
     expect(after!.status).toBe('active');
-    const token = await ctx.prisma.userToken.findFirst({
+    const storedToken = await ctx.prisma.userToken.findFirst({
       where: { userId: user.id, type: 'email_verification' },
     });
-    expect(token!.consumedAt).not.toBeNull();
+    expect(storedToken!.consumedAt).not.toBeNull();
   });
 
   it('treats a re-verified (already consumed) token as an idempotent success', async () => {
-    const plain = 'cafebabe'.repeat(4);
-    const again = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${plain}` });
-    expect(again.statusCode).toBe(200);
     const user = await ctx.prisma.user.findUnique({ where: { email: 'tokenverify@cs.uni.edu' } });
-    expect(user!.status).toBe('active');
+    const token = await ctx.prisma.userToken.findFirst({
+      where: { userId: user!.id, type: 'email_verification' },
+    });
+    const compositeToken = `${token!.id}.${'cafebabe'.repeat(4)}`;
+    const again = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${compositeToken}` });
+    expect(again.statusCode).toBe(200);
+    const userAfter = await ctx.prisma.user.findUnique({ where: { email: 'tokenverify@cs.uni.edu' } });
+    expect(userAfter!.status).toBe('active');
   });
 
   it('rejects an expired verification token', async () => {
@@ -311,10 +313,11 @@ describe('Auth API', () => {
         status: 'pending_verification',
       },
     });
-    const plain = 'deadbeef'.repeat(4);
-    await issueKnownToken(user.id, 'email_verification', plain, new Date(Date.now() - 1000));
+    const plainSecret = 'deadbeef'.repeat(4);
+    const token = await issueKnownToken(user.id, 'email_verification', plainSecret, new Date(Date.now() - 1000));
+    const compositeToken = `${token.id}.${plainSecret}`;
 
-    const res = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${plain}` });
+    const res = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${compositeToken}` });
     expect(res.statusCode).toBe(400);
     expect(res.json().error.code).toBe('TOKEN_INVALID');
   });
@@ -322,7 +325,7 @@ describe('Auth API', () => {
   it('rejects a forged token that does not match the stored hash', async () => {
     const res = await ctx.app.inject({
       method: 'GET',
-      url: `/api/auth/verify-email/${'0badc0de'.repeat(4)}`,
+      url: `/api/auth/verify-email/${'00000000-0000-0000-0000-000000000000'}.${'0badc0de'.repeat(4)}`,
     });
     expect(res.statusCode).toBe(400);
     expect(res.json().error.code).toBe('TOKEN_INVALID');

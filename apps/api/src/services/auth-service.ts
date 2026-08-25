@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import argon2 from 'argon2';
 import type { UserRepository, UserWithProfile } from '../repositories/user-repository.js';
 import type { TokenRepository } from '../repositories/token-repository.js';
@@ -14,6 +14,8 @@ const ARGON2_OPTIONS = {
 } as const;
 
 const TOKEN_TTL_HOURS = 24;
+
+const COMPOSITE_TOKEN_SEPARATOR = '.';
 
 export interface Mailer {
   sendVerificationEmail(to: string, token: string): Promise<void>;
@@ -47,10 +49,6 @@ export interface AuthService {
   verifyEmail(token: string): Promise<void>;
 }
 
-function sha256(input: string): Buffer {
-  return createHash('sha256').update(input).digest();
-}
-
 export function createAuthService(deps: AuthServiceDeps): AuthService {
   const { userRepository, tokenRepository, systemConfigRepository, mailer, loginGuard, onLockout } = deps;
 
@@ -67,31 +65,34 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
   }
 
   async function issueToken(userId: string, type: 'email_verification' | 'password_reset') {
-    const plainToken = randomBytes(32).toString('hex');
-    const tokenDigest = sha256(plainToken);
-    const tokenHash = await argon2.hash(tokenDigest, ARGON2_OPTIONS);
+    const plainSecret = randomBytes(32).toString('hex');
+    const tokenHash = await argon2.hash(plainSecret, ARGON2_OPTIONS);
     const expiresAt = new Date(Date.now() + TOKEN_TTL_HOURS * 60 * 60 * 1000);
-    await tokenRepository.createToken(userId, type, tokenHash, expiresAt);
-    return plainToken;
+    const token = await tokenRepository.createToken(userId, type, tokenHash, expiresAt);
+    return `${token.id}${COMPOSITE_TOKEN_SEPARATOR}${plainSecret}`;
   }
 
   async function verifyPlainToken(
-    plainToken: string,
+    compositeToken: string,
     type: 'email_verification' | 'password_reset',
   ): Promise<{ userId: string; tokenId: string } | null> {
-    const inputDigest = sha256(plainToken);
-    const candidates = await tokenRepository.findActiveByType(type);
-    if (candidates.length === 0) return null;
+    const parts = compositeToken.split(COMPOSITE_TOKEN_SEPARATOR);
+    if (parts.length !== 2) return null;
+    const tokenId = parts[0]!;
+    const plainSecret = parts[1]!;
 
-    for (const candidate of candidates) {
-      try {
-        const matches = await argon2.verify(candidate.tokenHash, inputDigest);
-        if (matches) {
-          return { userId: candidate.userId, tokenId: candidate.id };
-        }
-      } catch {
-        // hash format mismatch — ignore and continue
+    const candidate = await tokenRepository.findById(tokenId);
+    if (!candidate || candidate.type !== type) return null;
+    if (candidate.consumedAt !== null) return null;
+    if (candidate.expiresAt <= new Date()) return null;
+
+    try {
+      const matches = await argon2.verify(candidate.tokenHash, plainSecret);
+      if (matches) {
+        return { userId: candidate.userId, tokenId: candidate.id };
       }
+    } catch {
+      // hash format mismatch
     }
     return null;
   }
@@ -213,38 +214,38 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
   }
 
   async function verifyEmail(token: string): Promise<void> {
-    const inputDigest = sha256(token);
-    const candidates = await tokenRepository.findAllByType('email_verification');
-    let match: { userId: string; id: string; consumedAt: Date | null; expiresAt: Date } | null =
-      null;
-    for (const candidate of candidates) {
-      try {
-        if (await argon2.verify(candidate.tokenHash, inputDigest)) {
-          match = candidate;
-          break;
-        }
-      } catch {
-        // hash format mismatch — ignore and continue
+    const parts = token.split(COMPOSITE_TOKEN_SEPARATOR);
+    if (parts.length !== 2) {
+      throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
+    }
+    const tokenId = parts[0]!;
+    const plainSecret = parts[1]!;
+
+    const candidate = await tokenRepository.findById(tokenId);
+    if (!candidate || candidate.type !== 'email_verification') {
+      throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
+    }
+    if (candidate.consumedAt !== null) {
+      return;
+    }
+    if (candidate.expiresAt <= new Date()) {
+      throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
+    }
+
+    try {
+      const matches = await argon2.verify(candidate.tokenHash, plainSecret);
+      if (!matches) {
+        throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
       }
-    }
-    if (!match) {
+    } catch {
       throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
     }
-    if (match.consumedAt) {
-      // Already used. Verification only ever consumes this token after
-      // activation, so this is an idempotent success (link re-clicked or
-      // double-fired in dev StrictMode).
-      return;
-    }
-    if (match.expiresAt <= new Date()) {
-      throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
-    }
-    const consumed = await tokenRepository.consume(match.id);
+
+    const consumed = await tokenRepository.consume(candidate.id);
     if (!consumed) {
-      // Lost a race — another request consumed it, which means activation is done.
       return;
     }
-    await userRepository.activate(match.userId);
+    await userRepository.activate(candidate.userId);
   }
 
   return {
