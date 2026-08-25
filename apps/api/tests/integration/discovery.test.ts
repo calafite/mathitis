@@ -225,6 +225,26 @@ describe('Discovery, Requests & Lineage API', () => {
     ).toEqual([...tagNames].sort());
   });
 
+  it('lists only tags used by discoverable seniors when activeOnly=true', async () => {
+    const res = await ctx.app.inject({ method: 'GET', url: '/api/tags?activeOnly=true' });
+    expect(res.statusCode).toBe(200);
+    const names = res.json().tags.map((tag: { name: string }) => tag.name).sort();
+    // algebra/analysis/geometry are all used by visible seniors...
+    expect(names).toEqual(['algebra', 'analysis', 'geometry']);
+
+    // Now remove the only visible-senior usage of geometry (seniorB) and
+    // confirm the filter no longer offers it. freshman tags must not count.
+    await ctx.prisma.profileTag.deleteMany({
+      where: { tagId: tagIds.geometry, profile: { user: { role: 'senior' } } },
+    });
+
+    const after = await ctx.app.inject({ method: 'GET', url: '/api/tags?activeOnly=true' });
+    expect(after.json().tags.map((t: { name: string }) => t.name).sort()).toEqual([
+      'algebra',
+      'analysis',
+    ]);
+  });
+
   // -- Discovery catalog ---------------------------------------------------
 
   it('requires authentication for the discovery catalog', async () => {

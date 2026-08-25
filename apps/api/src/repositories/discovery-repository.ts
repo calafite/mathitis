@@ -33,7 +33,7 @@ export interface DiscoverableFilters {
 export interface DiscoveryRepository {
   listDiscoverableSeniors(filters: DiscoverableFilters): Promise<SeniorRow[]>;
   countDiscoverableSeniors(filters: Omit<DiscoverableFilters, 'limit' | 'offset'>): Promise<number>;
-  listTags(): Promise<Tag[]>;
+  listTags(options?: { activeOnly?: boolean }): Promise<Tag[]>;
 }
 
 const seniorSelect = {
@@ -113,8 +113,24 @@ export function createDiscoveryRepository(prisma: PrismaClient): DiscoveryReposi
     return prisma.profile.count({ where: buildWhere(filters) });
   }
 
-  async function listTags() {
-    return prisma.tag.findMany({ orderBy: [{ category: 'asc' }, { name: 'asc' }] });
+  async function listTags(options?: { activeOnly?: boolean }) {
+    if (!options?.activeOnly) {
+      return prisma.tag.findMany({ orderBy: [{ category: 'asc' }, { name: 'asc' }] });
+    }
+    // Only tags currently attached to at least one visible senior profile.
+    const rows = await prisma.profileTag.findMany({
+      where: {
+        profile: {
+          isDiscoverable: true,
+          user: { role: 'senior', deletedAt: null },
+        },
+      },
+      include: { tag: true },
+      distinct: ['tagId'],
+    });
+    return rows
+      .map((row) => row.tag)
+      .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
   }
 
   return { listDiscoverableSeniors, countDiscoverableSeniors, listTags };

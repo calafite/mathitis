@@ -68,6 +68,7 @@ function toProfileResponse(profile: ProfileWithRelations) {
       name: profileTag.tag.name,
       category: profileTag.tag.category,
       color: profileTag.tag.color,
+      icon: profileTag.tag.icon,
     })),
     richCards: profile.richCards,
   };

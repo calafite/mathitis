@@ -165,6 +165,23 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                 <MarkdownPreview markdown={profile.biographyMarkdown} />
               </section>
 
+              {/* Tag badges */}
+              {profile.tags.length > 0 && (
+                <div className="border-b border-foreground/50 px-4 py-2">
+                  <div className="flex flex-wrap gap-1">
+                    {profile.tags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="border border-foreground px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-foreground"
+                      >
+                        {tag.icon ? `${tag.icon} ` : ''}
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Links */}
               {linkFields.length > 0 && (
                 <section className="border-b border-foreground/50 px-4 pb-3">

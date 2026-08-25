@@ -3,6 +3,14 @@ import type { RichCard, ThemePalette } from '@mathitis/schemas';
 import { MarkdownPreview } from '@/components/markdown/markdown-preview';
 import { CardRail, CardRailItem } from './rich-card-shared';
 
+export interface ProfileDraftTag {
+  id: string;
+  name: string;
+  category: string;
+  color: string;
+  icon?: string | null;
+}
+
 export interface ProfileDraft {
   socialName: string;
   pronouns: string;
@@ -19,6 +27,7 @@ export interface ProfileDraft {
   maxMentees: number;
   isAcceptingRequests: boolean;
   isDiscoverable: boolean;
+  tags: ProfileDraftTag[];
 }
 
 export interface ProfilePreviewProps {
@@ -117,6 +126,23 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
       {draft.tagline ? (
         <div className="border-b border-foreground/50 px-4 py-2">
           <p className="font-mono text-xs italic uppercase text-foreground">{draft.tagline}</p>
+        </div>
+      ) : null}
+
+      {/* Tag badges */}
+      {draft.tags.length > 0 ? (
+        <div className="border-b border-foreground/50 px-4 py-2">
+          <div className="flex flex-wrap gap-1">
+            {draft.tags.map((tag) => (
+              <span
+                key={tag.id}
+                className="border border-foreground px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-foreground"
+              >
+                {tag.icon ? `${tag.icon} ` : ''}
+                {tag.name}
+              </span>
+            ))}
+          </div>
         </div>
       ) : null}
 

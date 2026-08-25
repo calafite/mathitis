@@ -33,8 +33,9 @@ export const discoveryApi = {
     return apiFetch<RecommendationsResponse>(`/recommendations${qs}`);
   },
 
-  async listTags(): Promise<TagsResponse> {
-    return apiFetch<TagsResponse>('/tags');
+  async listTags(activeOnly = false): Promise<TagsResponse> {
+    const suffix = activeOnly ? '?activeOnly=true' : '';
+    return apiFetch<TagsResponse>(`/tags${suffix}`);
   },
 
   async bump(handle: string, replaceHandle?: string): Promise<BumpResponse> {

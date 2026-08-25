@@ -4,24 +4,24 @@ import argon2 from 'argon2';
 const prisma = new PrismaClient();
 
 const DEFAULT_TAGS = [
-  { name: 'algebra', category: 'course', color: '#6366f1', icon: 'x' },
-  { name: 'calculus', category: 'course', color: '#6366f1', icon: 'sigma' },
-  { name: 'linear-algebra', category: 'course', color: '#8b5cf6', icon: 'matrix' },
-  { name: 'geometry', category: 'course', color: '#8b5cf6', icon: 'triangle' },
-  { name: 'statistics', category: 'course', color: '#06b6d4', icon: 'chart' },
-  { name: 'number-theory', category: 'course', color: '#0ea5e9', icon: 'hash' },
-  { name: 'python', category: 'tech-stack', color: '#3b82f6', icon: 'code' },
-  { name: 'typescript', category: 'tech-stack', color: '#3b82f6', icon: 'code' },
-  { name: 'julia', category: 'tech-stack', color: '#22c55e', icon: 'code' },
-  { name: 'r', category: 'tech-stack', color: '#22c55e', icon: 'code' },
-  { name: 'competitive-programming', category: 'interest', color: '#f59e0b', icon: 'trophy' },
-  { name: 'machine-learning', category: 'interest', color: '#ec4899', icon: 'brain' },
-  { name: 'data-visualisation', category: 'interest', color: '#f43f5e', icon: 'bar-chart' },
-  { name: 'pure-mathematics', category: 'interest', color: '#a855f7', icon: 'formula' },
-  { name: 'olympiad', category: 'interest', color: '#f59e0b', icon: 'medal' },
-  { name: 'latex', category: 'tech-stack', color: '#64748b', icon: 'document' },
-  { name: 'matlab', category: 'tech-stack', color: '#64748b', icon: 'code' },
-  { name: 'group-theory', category: 'course', color: '#6366f1', icon: 'group' },
+  { name: 'algebra', category: 'course', color: '#6366f1', icon: '🧮' },
+  { name: 'calculus', category: 'course', color: '#6366f1', icon: '∫' },
+  { name: 'linear-algebra', category: 'course', color: '#8b5cf6', icon: '📐' },
+  { name: 'geometry', category: 'course', color: '#8b5cf6', icon: '📏' },
+  { name: 'statistics', category: 'course', color: '#06b6d4', icon: '📊' },
+  { name: 'number-theory', category: 'course', color: '#0ea5e9', icon: '#️⃣' },
+  { name: 'python', category: 'tech-stack', color: '#3b82f6', icon: '🐍' },
+  { name: 'typescript', category: 'tech-stack', color: '#3b82f6', icon: '🔷' },
+  { name: 'julia', category: 'tech-stack', color: '#22c55e', icon: '⬤' },
+  { name: 'r', category: 'tech-stack', color: '#22c55e', icon: '📈' },
+  { name: 'competitive-programming', category: 'interest', color: '#f59e0b', icon: '🏆' },
+  { name: 'machine-learning', category: 'interest', color: '#ec4899', icon: '🧠' },
+  { name: 'data-visualisation', category: 'interest', color: '#f43f5e', icon: '📉' },
+  { name: 'pure-mathematics', category: 'interest', color: '#a855f7', icon: '∑' },
+  { name: 'olympiad', category: 'interest', color: '#f59e0b', icon: '🥇' },
+  { name: 'latex', category: 'tech-stack', color: '#64748b', icon: '📜' },
+  { name: 'matlab', category: 'tech-stack', color: '#64748b', icon: '🔢' },
+  { name: 'group-theory', category: 'course', color: '#6366f1', icon: '🔗' },
 ];
 
 const DEFAULT_CONFIG: Record<string, unknown> = {
@@ -92,7 +92,7 @@ async function seed() {
   for (const tag of DEFAULT_TAGS) {
     await prisma.tag.upsert({
       where: { name: tag.name },
-      update: {},
+      update: { icon: tag.icon },
       create: tag,
     });
   }

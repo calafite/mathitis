@@ -181,7 +181,7 @@ export function DiscoveryPage() {
 
   const tagsQuery = useQuery({
     queryKey: ['tags'],
-    queryFn: () => discoveryApi.listTags(),
+    queryFn: () => discoveryApi.listTags(true),
   });
 
   const seniorsQuery = useQuery({
@@ -309,7 +309,7 @@ export function DiscoveryPage() {
           <div className="mb-1.5 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Interesses
           </div>
-          <div className="max-h-44 space-y-2 overflow-y-auto pr-1">
+          <div className="space-y-2">
             {groupedTags.map(([category, tags]) => (
               <div key={category}>
                 <div className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground/70">
@@ -331,6 +331,7 @@ export function DiscoveryPage() {
                           color: active ? '#000000' : 'inherit',
                         }}
                       >
+                        {tag.icon ? `${tag.icon} ` : ''}
                         {tag.name}
                       </button>
                     );

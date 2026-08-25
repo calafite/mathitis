@@ -119,6 +119,7 @@ export const profileSchema = z.object({
         name: z.string(),
         category: z.string(),
         color: z.string(),
+        icon: z.string().nullable().default(null),
       }),
     )
     .default([]),
@@ -138,6 +139,7 @@ export const updateProfileBodySchema = z.object({
   maxMentees: z.number().int().min(1).max(10).optional(),
   isDiscoverable: z.boolean().optional(),
   isAcceptingRequests: z.boolean().optional(),
+  tagIds: z.array(z.string().uuid()).max(15, 'Selecione no máximo 15 interesses').optional(),
 });
 export type UpdateProfileBody = z.infer<typeof updateProfileBodySchema>;
 

@@ -44,7 +44,7 @@ export interface DiscoveryService {
     freshmanUserId: string,
     filters: Omit<SeniorFilters, 'offset'>,
   ): Promise<Array<ScoredSenior<SeniorSummaryResult>>>;
-  listTags(): Promise<Tag[]>;
+  listTags(options?: { activeOnly?: boolean }): Promise<Tag[]>;
 }
 
 async function mergeCounts(
@@ -122,8 +122,8 @@ export function createDiscoveryService(
     return createRecommendationEngine().rank(freshmanTags, seniors);
   }
 
-  async function listTags() {
-    return discoveryRepository.listTags();
+  async function listTags(options?: { activeOnly?: boolean }) {
+    return discoveryRepository.listTags(options);
   }
 
   return { listSeniors, recommend, listTags };

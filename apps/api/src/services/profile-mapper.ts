@@ -31,6 +31,7 @@ export function toProfileSchema(profile: ProfileWithRelations): Profile {
       name: tag.name,
       category: tag.category,
       color: tag.color,
+      icon: tag.icon,
     })),
     richCards: profile.richCards.map((card) => ({
       id: card.id,

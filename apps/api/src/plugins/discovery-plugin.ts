@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
+import { z } from 'zod';
 import type { PrismaClient } from '@prisma/client';
 import type {
   BumpBody,
@@ -188,13 +189,20 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
         },
       );
 
-      discoveryRoutes.get(
+      discoveryRoutes.get<{ Querystring: { activeOnly?: string | boolean } }>(
         '/tags',
         {
-          schema: { response: { 200: tagsResponseSchema } },
+          schema: {
+            querystring: z.object({
+              activeOnly: z.preprocess((value) => value === 'true' || value === true, z.boolean()).default(false),
+            }),
+            response: { 200: tagsResponseSchema },
+          },
         },
-        async (_request, reply) => {
-          const tags = await discoveryService.listTags();
+        async (request, reply) => {
+          const raw = request.query as { activeOnly?: string | boolean };
+          const activeOnly = raw?.activeOnly === 'true' || raw?.activeOnly === true;
+          const tags = await discoveryService.listTags({ activeOnly });
           return reply.send({ tags });
         },
       );

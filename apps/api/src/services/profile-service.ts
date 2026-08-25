@@ -73,7 +73,11 @@ export function createProfileService(
   }
 
   async function updateProfile(userId: string, input: UpdateProfileBody) {
-    await profileRepository.update(userId, input);
+    const { tagIds, ...profileFields } = input;
+    await profileRepository.update(userId, profileFields);
+    if (tagIds !== undefined) {
+      await profileRepository.setTags(userId, tagIds);
+    }
     await recomputeEffortScore(userId);
     const updated = await profileRepository.findByUserId(userId);
     if (!updated) {
