@@ -41,6 +41,8 @@ import { createMentorshipRepository } from '../repositories/mentorship-repositor
 import { createSystemConfigRepository } from '../repositories/system-config-repository.js';
 import { createDiscoveryService } from '../services/discovery-service.js';
 import { createBumpService } from '../services/bump-service.js';
+import type { Redis } from 'ioredis';
+import { invalidateLineageCache } from '../lib/lineage-cache.js';
 import { createRequestService } from '../services/request-service.js';
 import { createNotificationRepository } from '../repositories/notification-repository.js';
 import { createNotificationService } from '../services/notification-service.js';
@@ -90,6 +92,8 @@ export interface DiscoveryPluginOptions {
   idempotencyStore: IdempotencyStore;
   emailQueue: Queue;
   logger: LoggerLike;
+  /** Enables lineage graph caching + invalidation when provided. */
+  redis?: Redis;
 }
 
 export async function registerDiscoveryPlugin(app: FastifyInstance, options: DiscoveryPluginOptions) {
@@ -118,6 +122,11 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
     systemConfigRepository,
   );
   const bumpService = createBumpService(bumpRepository, userRepository);
+  const lineageInvalidator =
+    options.redis !== undefined
+      ? (handles?: string[]) => invalidateLineageCache(options.redis!, handles)
+      : undefined;
+
   const requestService = createRequestService({
     prisma,
     requestRepository,
@@ -127,8 +136,9 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
     systemConfigRepository,
     idempotencyStore: options.idempotencyStore,
     notificationService,
+    onMentorshipCreated: () => lineageInvalidator?.() ?? Promise.resolve(),
   });
-  const lineageService = createLineageService(mentorshipRepository);
+  const lineageService = createLineageService(mentorshipRepository, options.redis);
 
   const requireAuth = createRequireAuth(options.session);
   const requireFreshman = createRequireRole(options.session, ['freshman']);

@@ -42,8 +42,16 @@ export function createAdminService(deps: {
   systemConfigRepository: SystemConfigRepository;
   auditLogRepository: AuditLogRepository;
   requestService: RequestService;
+  /** Invoked after anonymization with the affected handle (lineage cache). */
+  onUserAnonymized?: (handle: string) => Promise<void>;
 }): AdminService {
-  const { adminRepository, systemConfigRepository, auditLogRepository, requestService } = deps;
+  const {
+    adminRepository,
+    systemConfigRepository,
+    auditLogRepository,
+    requestService,
+    onUserAnonymized,
+  } = deps;
 
   async function readConfig(): Promise<SystemConfig> {
     const stored = await systemConfigRepository.list();
@@ -133,6 +141,9 @@ export function createAdminService(deps: {
       },
       ipAddress: ipAddress ?? undefined,
     });
+    // The graph now contains the anonymized handle (user_<uuid>) — refresh.
+    await onUserAnonymized?.(existing.handle);
+    await onUserAnonymized?.(user.handle);
     return { user, lineagePreserved: true };
   }
 

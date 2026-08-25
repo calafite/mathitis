@@ -39,6 +39,8 @@ import { createUserRepository } from '../repositories/user-repository.js';
 import { createProfileRepository } from '../repositories/profile-repository.js';
 import { createRequestRepository } from '../repositories/request-repository.js';
 import { createMentorshipRepository } from '../repositories/mentorship-repository.js';
+import type { Redis } from 'ioredis';
+import { invalidateLineageCache } from '../lib/lineage-cache.js';
 import { createAdminService } from '../services/admin-service.js';
 import { createRequestService } from '../services/request-service.js';
 import { createNotificationRepository } from '../repositories/notification-repository.js';
@@ -54,10 +56,12 @@ export interface AdminPluginOptions {
   emailQueue: Queue;
   logger: LoggerLike;
   sessionEpoch?: SessionEpochStore;
+  /** Enables lineage cache invalidation on anonymization when provided. */
+  redis?: Redis;
 }
 
 export async function registerAdminPlugin(app: FastifyInstance, options: AdminPluginOptions) {
-  const { prisma, sessionEpoch } = options;
+  const { prisma, sessionEpoch, redis } = options;
 
   const adminRepository = createAdminRepository(prisma);
   const auditLogRepository = createAuditLogRepository(prisma);
@@ -90,6 +94,9 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
     systemConfigRepository,
     auditLogRepository,
     requestService,
+    onUserAnonymized: async (handle) => {
+      if (redis) await invalidateLineageCache(redis, [handle]);
+    },
   });
 
   const requireAdmin = createRequireRole(options.session, ['administrator']);

@@ -63,6 +63,8 @@ export function createRequestService(deps: {
   systemConfigRepository: SystemConfigRepository;
   idempotencyStore: IdempotencyStore;
   notificationService?: NotificationService;
+  /** Invoked after a mentorship row is created (lineage cache invalidation). */
+  onMentorshipCreated?: () => Promise<void>;
 }): RequestService {
   const {
     prisma,
@@ -73,6 +75,7 @@ export function createRequestService(deps: {
     systemConfigRepository,
     idempotencyStore,
     notificationService,
+    onMentorshipCreated,
   } = deps;
 
   async function requireRequest(id: string, tx?: Prisma.TransactionClient): Promise<RequestRow> {
@@ -259,7 +262,9 @@ export function createRequestService(deps: {
           }
 
           const updated = await requireRequest(requestId, tx);
-          return attachFreshmanProfile(updated);
+          const result = await attachFreshmanProfile(updated);
+          await onMentorshipCreated?.();
+          return result;
         });
       },
     );
@@ -355,7 +360,9 @@ export function createRequestService(deps: {
         body: `A administração aprovou seu pedido de apadrinhamento com ${request.senior.handle}`,
         payload: { requestId },
       });
-      return attachFreshmanProfile(updated);
+      const result = await attachFreshmanProfile(updated);
+      await onMentorshipCreated?.();
+      return result;
     });
   }
 

@@ -285,6 +285,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     idempotencyStore,
     emailQueue: queue,
     logger: app.log,
+    redis,
   });
 
   await app.register(registerAdminPlugin, {
@@ -294,6 +295,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     emailQueue: queue,
     logger: app.log,
     sessionEpoch,
+    redis,
   });
 
   await app.register(registerDevPlugin, {
