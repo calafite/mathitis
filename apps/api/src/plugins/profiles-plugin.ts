@@ -21,6 +21,9 @@ import {
   updateProfileBodySchema,
   updateRichCardBodySchema,
   uploadImageResponseSchema,
+  scrapedCardResponseSchema,
+  scrapeCardQuerySchema,
+  type ScrapeCardQuery,
 } from '@mathitis/schemas';
 import type { ProfileRepository, ProfileWithRelations } from '../repositories/profile-repository.js';
 import { createProfileRepository } from '../repositories/profile-repository.js';
@@ -30,6 +33,7 @@ import type { ObjectStorage } from '../storage/storage-service.js';
 import type { SessionManager } from './session.js';
 import { getSessionCookie } from './session.js';
 import { createRequireAuth } from './auth-guard.js';
+import { createRichCardScraper } from '../services/rich-card-scraper.js';
 import { createProfileService, type ProfileService } from '../services/profile-service.js';
 import { createRichCardService, type RichCardService } from '../services/rich-card-service.js';
 import { ValidationError } from '../errors.js';
@@ -83,6 +87,8 @@ export interface ProfilesPluginOptions {
   storage: ObjectStorage;
   uploadDir: string;
   publicBaseUrl: string;
+  /** Injectable fetch for tests (scraper never touches the real network in CI). */
+  scrapeFetch?: typeof fetch;
 }
 
 export async function registerProfilesPlugin(app: FastifyInstance, options: ProfilesPluginOptions) {
@@ -210,6 +216,24 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
         '/me/banner',
         { preHandler: requireAuth, schema: { response: { 200: uploadImageResponseSchema } } },
         (request, reply) => handleImageUpload(request, reply, 'banner'),
+      );
+
+      const cardScraper = createRichCardScraper({ fetchImpl: options.scrapeFetch });
+
+      profilesRoutes.get<{ Querystring: ScrapeCardQuery }>(
+        '/me/cards/scrape',
+        {
+          preHandler: requireAuth,
+          config: { rateLimit: { max: 15, timeWindow: '1 minute' } },
+          schema: {
+            querystring: scrapeCardQuerySchema,
+            response: { 200: scrapedCardResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          const card = await cardScraper.scrape(request.query.url);
+          return reply.send(card);
+        },
       );
 
       profilesRoutes.get(

@@ -76,6 +76,8 @@ export interface BuildAppOptions {
   redis?: Redis;
   queue?: Queue;
   mailer?: Parameters<typeof registerAuthPlugin>[1]['mailer'];
+  /** Injectable fetch for the rich-card scraper (tests mock the network). */
+  scrapeFetch?: typeof fetch;
 }
 
 export async function buildApp(options: BuildAppOptions): Promise<FastifyInstance> {
@@ -274,6 +276,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     storage,
     uploadDir: resolve(env.UPLOAD_DIR),
     publicBaseUrl: env.PUBLIC_BASE_URL,
+    scrapeFetch: options.scrapeFetch,
   });
 
   await app.register(registerDiscoveryPlugin, {
