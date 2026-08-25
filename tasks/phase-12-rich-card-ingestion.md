@@ -125,9 +125,9 @@ Streamline the creation of Rich Media Cards in the Profile Studio by implementin
 ---
 
 ## Verification Checklist
-- [ ] Run `pnpm lint` and `pnpm typecheck` across all workspaces without errors.
-- [ ] Run `pnpm test:unit` and `pnpm test:integration` ensuring all tests pass.
-- [ ] Verify that YouTube, Vimeo, and SoundCloud links are NOT accepted as special video embeds.
-- [ ] Verify that Steam games flagged with adult descriptors are rejected with `NSFW_CONTENT_REJECTED`.
-- [ ] Verify that embed URLs derived from Spotify pass `validateCardEmbedUrl` security checks.
-- [ ] Verify that manual card creation remains fully functional.
+- [x] Run `pnpm lint` and `pnpm typecheck` across all workspaces without errors.
+- [x] Run `pnpm test:unit` and `pnpm test:integration` ensuring all tests pass.
+- [x] Verify that YouTube, Vimeo, and SoundCloud links are NOT accepted as special video embeds.
+- [x] Verify that Steam games flagged with adult descriptors are rejected with `NSFW_CONTENT_REJECTED`.
+- [x] Verify that embed URLs derived from Spotify pass `validateCardEmbedUrl` security checks.
+- [x] Verify that manual card creation remains fully functional.
