@@ -534,6 +534,50 @@ describe('Discovery, Requests & Lineage API', () => {
     expect(lineage.json().edges.length).toBeGreaterThanOrEqual(1);
   });
 
+  it('invalidates the lineage cache when a mentorship is created', async () => {
+    // Warm the cache: the first lineage fetch populates lineage:full.
+    await ctx.app.inject({ method: 'GET', url: '/api/lineage' });
+    const warmed = await ctx.redis.get('lineage:full');
+    expect(warmed).toBeTruthy();
+
+    // Submit a new request and accept it — the cache must be invalidated.
+    const freshC: TestUser = {
+      handle: `fresh_cache_${Date.now()}`,
+      email: `fresh_cache_${Date.now()}@cs.uni.edu`,
+      password: 'Pass12345!',
+      role: 'freshman',
+      semester: 2,
+    };
+    await createUser(freshC, {});
+    const freshCookie = await login(freshC.handle, freshC.password);
+    const submitted = await ctx.app.inject({
+      method: 'POST',
+      url: '/api/requests',
+      headers: { cookie: freshCookie, 'x-idempotency-key': idemKey('cache1') },
+      payload: { seniorHandle: seniorD.handle, message: 'Cache invalidation check' },
+    });
+    expect(submitted.statusCode, `Body: ${submitted.body}`).toBe(200);
+
+    const seniorCookie = await login(seniorD.handle, seniorD.password);
+    const requestId = (submitted.json().request as { id: string }).id;
+    const accepted = await ctx.app.inject({
+      method: 'POST',
+      url: `/api/requests/${requestId}/accept`,
+      headers: { cookie: seniorCookie, 'x-idempotency-key': idemKey('cache2') },
+    });
+    expect(accepted.statusCode, `Body: ${accepted.body}`).toBe(200);
+
+    const fullKey = await ctx.redis.get('lineage:full');
+    expect(fullKey).toBeNull();
+
+    // The next fetch rebuilds the cache including the new mentorship.
+    const rebuilt = await ctx.app.inject({ method: 'GET', url: '/api/lineage' });
+    expect(rebuilt.statusCode).toBe(200);
+    const rebuiltHandles = (rebuilt.json().nodes as Array<{ handle: string }>).map((n) => n.handle);
+    expect(rebuiltHandles).toContain(freshC.handle);
+    expect(await ctx.redis.get('lineage:full')).toBeTruthy();
+  });
+
   it('auto-cancels pending requests once capacity is saturated', async () => {
     // senior_c has maxMentees 1. freshman_a (bumped?) -> no; use freshman_b.
     const freshB = await login(freshmanB.handle, freshmanB.password);

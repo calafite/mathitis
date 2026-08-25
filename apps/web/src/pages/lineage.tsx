@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import type { LineageEdge, LineageNode } from '@mathitis/schemas';
@@ -46,6 +46,9 @@ function computeLayout(nodes: LineageNode[], edges: LineageEdge[]): Map<string, 
 
 const ROOT_YEAR_MARKER = 'Raiz';
 const YEAR_COLORS = ['#6366f1', '#0891b2', '#059669', '#d97706', '#dc2626', '#7c3aed'];
+const HEAVY_RENDER_NODE_LIMIT = 500;
+const FULL_HISTORY_WARNING =
+  'Aviso: Carregar a linhagem completa de todos os anos pode causar lentidão em dispositivos mais antigos.';
 
 function yearForRank(edges: LineageEdge[], rank: number, positions: Map<string, Position>): string {
   const years = edges
@@ -66,19 +69,64 @@ export function LineagePage() {
     queryFn: () => (handle ? lineageApi.forHandle(handle) : lineageApi.all()),
   });
 
+  const academicYears = useMemo(
+    () => [...(lineageQuery.data?.academicYears ?? [])].sort(),
+    [lineageQuery.data],
+  );
+  const showYearFilter = academicYears.length > 2;
+  const defaultYears = useMemo(() => academicYears.slice(-2), [academicYears]);
+
+  // null = default (two most recent years); 'all' = full history; otherwise a single year.
+  const [yearSelection, setYearSelection] = useState<string[] | 'all' | null>(null);
+
+  const selectYear = (year: string) => {
+    setYearSelection((prev) =>
+      prev !== 'all' && prev?.length === 1 && prev[0] === year ? null : [year],
+    );
+  };
+
+  const loadFullHistory = () => setYearSelection('all');
+
+  const isYearActive = (year: string) => {
+    if (yearSelection === 'all') return false;
+    const selected = yearSelection ?? defaultYears;
+    return selected.includes(year);
+  };
+  const isFullHistoryActive = yearSelection === 'all';
+
   const { nodes, edges, positions, ranks } = useMemo(() => {
     const data = lineageQuery.data;
     if (!data) return { nodes: [], edges: [], positions: new Map<string, Position>(), ranks: 0 };
-    const positions = computeLayout(data.nodes, data.edges);
-    const ranks = data.nodes.reduce(
-      (max, node) => Math.max(max, Math.round((positions.get(node.id)?.y ?? 60 - 60) / 150)),
+    const allPositions = computeLayout(data.nodes, data.edges);
+
+    let visibleEdges = data.edges;
+    if (yearSelection !== 'all') {
+      const years = new Set(yearSelection ?? defaultYears);
+      visibleEdges = data.edges.filter((edge) => years.has(edge.academicYear));
+    }
+
+    const visibleIds = new Set<string>();
+    for (const edge of visibleEdges) {
+      visibleIds.add(edge.mentorId);
+      visibleIds.add(edge.menteeId);
+    }
+    const visibleNodes = data.nodes.filter((node) => visibleIds.has(node.id));
+
+    const positions = new Map<string, Position>();
+    for (const node of visibleNodes) {
+      const pos = allPositions.get(node.id);
+      if (pos) positions.set(node.id, pos);
+    }
+    const ranks = visibleNodes.reduce(
+      (max, node) => Math.max(max, Math.round(((positions.get(node.id)?.y ?? 60) - 60) / 150)),
       0,
     );
-    return { nodes: data.nodes, edges: data.edges, positions, ranks };
-  }, [lineageQuery.data]);
+    return { nodes: visibleNodes, edges: visibleEdges, positions, ranks };
+  }, [lineageQuery.data, yearSelection, defaultYears]);
 
   const width = 100 + Math.max(nodes.length, 1) * 180;
   const height = 120 + (ranks + 1) * 150;
+  const heavyRender = nodes.length > HEAVY_RENDER_NODE_LIMIT;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -89,14 +137,74 @@ export function LineagePage() {
         </p>
       </header>
 
+      {showYearFilter && (
+        <div
+          role="group"
+          aria-label="Filtro de Ano Acadêmico"
+          className="mb-6 border-2 border-[#c9ced8]/40 p-3"
+        >
+          <div className="mb-1.5 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            Filtro de Ano Acadêmico
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {academicYears.map((year) => {
+              const active = isYearActive(year);
+              return (
+                <button
+                  key={year}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => selectYear(year)}
+                  className="border-2 px-2 py-1 font-mono text-[11px] font-bold uppercase tracking-widest transition-colors"
+                  style={{
+                    borderColor: active ? '#c9f24c' : 'rgba(201,206,216,0.4)',
+                    backgroundColor: active ? '#c9f24c' : 'transparent',
+                    color: active ? '#000000' : undefined,
+                  }}
+                >
+                  {year}
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              aria-pressed={isFullHistoryActive}
+              onClick={loadFullHistory}
+              className="border-2 px-2 py-1 font-mono text-[11px] font-bold uppercase tracking-widest transition-colors"
+              style={{
+                borderColor: isFullHistoryActive ? '#c9f24c' : 'rgba(201,206,216,0.4)',
+                backgroundColor: isFullHistoryActive ? '#c9f24c' : 'transparent',
+                color: isFullHistoryActive ? '#000000' : undefined,
+              }}
+            >
+              Carregar Histórico Completo
+            </button>
+          </div>
+          {isFullHistoryActive && (
+            <p role="note" className="mt-2 text-xs text-muted-foreground">
+              {FULL_HISTORY_WARNING}
+            </p>
+          )}
+        </div>
+      )}
+
       {lineageQuery.isLoading && <p className="mt-4 text-muted-foreground">Carregando…</p>}
       {!lineageQuery.isLoading && nodes.length === 0 && (
         <p className="mt-4 text-muted-foreground">Nenhum apadrinhamento registrado ainda.</p>
       )}
 
       {nodes.length > 0 && (
-        <div className="mt-6 overflow-x-auto border-2 border-white/15 bg-card p-4">
-          <svg width={width} height={height} className="block">
+        <div
+          className={`mt-6 overflow-x-auto border-2 border-white/15 bg-card p-4${
+            heavyRender ? ' [&_*]:transition-none [&_*]:animate-none' : ''
+          }`}
+        >
+          <svg
+            width={width}
+            height={height}
+            className="block"
+            style={heavyRender ? { transition: 'none', animation: 'none' } : undefined}
+          >
             {edges.map((edge, index) => {
               const from = positions.get(edge.mentorId);
               const to = positions.get(edge.menteeId);
