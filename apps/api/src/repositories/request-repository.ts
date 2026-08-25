@@ -80,8 +80,8 @@ export interface RequestRepository {
     extra?: { rejectionReason?: string | null; reviewedByAdminId?: string },
     tx?: Prisma.TransactionClient,
   ): Promise<void>;
-  countActiveByFreshman(freshmanId: string): Promise<number>;
-  countActiveBySenior(seniorId: string): Promise<number>;
+  countActiveByFreshman(freshmanId: string, tx?: Prisma.TransactionClient): Promise<number>;
+  countActiveBySenior(seniorId: string, tx?: Prisma.TransactionClient): Promise<number>;
   lockSeniorProfile(
     seniorId: string,
     tx: Prisma.TransactionClient,
@@ -132,14 +132,16 @@ export function createRequestRepository(prisma: PrismaClient): RequestRepository
     });
   }
 
-  async function countActiveByFreshman(freshmanId: string) {
-    return prisma.mentorshipRequest.count({
+  async function countActiveByFreshman(freshmanId: string, tx?: Prisma.TransactionClient) {
+    const db = tx ?? prisma;
+    return db.mentorshipRequest.count({
       where: { freshmanId, status: { in: ['pending', 'pending_admin_approval', 'accepted'] } },
     });
   }
 
-  async function countActiveBySenior(seniorId: string) {
-    return prisma.mentorshipRequest.count({
+  async function countActiveBySenior(seniorId: string, tx?: Prisma.TransactionClient) {
+    const db = tx ?? prisma;
+    return db.mentorshipRequest.count({
       where: { seniorId, status: { in: ['pending', 'pending_admin_approval', 'accepted'] } },
     });
   }

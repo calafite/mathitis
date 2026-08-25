@@ -103,7 +103,7 @@ export function createRequestService(deps: {
   ) {
     return withIdempotency(
       idempotencyStore,
-      buildIdempotencyKey('request-submit', idempotencyKey),
+      buildIdempotencyKey(`request-submit-${freshmanId}`, idempotencyKey),
       IDEMPOTENCY_TTL_SECONDS,
       async () => {
         const senior = await userRepository.findByHandle(input.seniorHandle);
@@ -119,41 +119,49 @@ export function createRequestService(deps: {
           throw new ValidationError('Este veterano não está aceitando pedidos');
         }
 
-        const maxRequests = await systemConfigRepository.getNumber(
-          'MAX_FRESHMAN_REQUESTS',
-          DEFAULT_MAX_FRESHMAN_REQUESTS,
-        );
-        const activeCount = await requestRepository.countActiveByFreshman(freshmanId);
-        if (activeCount >= maxRequests) {
-          throw new ConflictError(
-            `Request limit reached: you can have at most ${maxRequests} active applications`,
-            'REQUEST_LIMIT_REACHED',
-          );
-        }
+        return prisma.$transaction(async (tx) => {
+          // Pessimistic lock on the freshman's user row to serialize concurrent submissions
+          await tx.$queryRaw`SELECT id FROM users WHERE id = ${freshmanId}::uuid FOR UPDATE`;
 
-        try {
-          const created = await requestRepository.create({
-            freshmanId,
-            seniorId: senior.id,
-            message: input.message,
-          });
-          notificationService?.dispatch({
-            userId: senior.id,
-            type: 'request_received',
-            title: 'Novo pedido de apadrinhamento',
-            body: `${created.freshman.handle} quer ser apadrinhado(a) por você`,
-            payload: { requestId: created.id, freshmanId, seniorId: senior.id },
-          });
-          return await attachFreshmanProfile(created);
-        } catch (error) {
-          if (isUniqueViolation(error)) {
+          const maxRequests = await systemConfigRepository.getNumber(
+            'MAX_FRESHMAN_REQUESTS',
+            DEFAULT_MAX_FRESHMAN_REQUESTS,
+          );
+          const activeCount = await requestRepository.countActiveByFreshman(freshmanId, tx);
+          if (activeCount >= maxRequests) {
             throw new ConflictError(
-              'You already have an active request with this senior',
-              'DUPLICATE_REQUEST',
+              `Request limit reached: you can have at most ${maxRequests} active applications`,
+              'REQUEST_LIMIT_REACHED',
             );
           }
-          throw error;
-        }
+
+          try {
+            const created = await requestRepository.create(
+              {
+                freshmanId,
+                seniorId: senior.id,
+                message: input.message,
+              },
+              tx,
+            );
+            notificationService?.dispatch({
+              userId: senior.id,
+              type: 'request_received',
+              title: 'Novo pedido de apadrinhamento',
+              body: `${created.freshman.handle} quer ser apadrinhado(a) por você`,
+              payload: { requestId: created.id, freshmanId, seniorId: senior.id },
+            });
+            return await attachFreshmanProfile(created);
+          } catch (error) {
+            if (isUniqueViolation(error)) {
+              throw new ConflictError(
+                'You already have an active request with this senior',
+                'DUPLICATE_REQUEST',
+              );
+            }
+            throw error;
+          }
+        });
       },
     );
   }

@@ -750,6 +750,7 @@ describe('Discovery, Requests & Lineage API', () => {
 
   it('stores idempotency results in Redis under a 24-hour TTL', async () => {
     const { freshman: freshB } = await createReapplyPair();
+    const pair = await ctx.prisma.user.findUnique({ where: { handle: 'reapply_fresh' } });
     const key = idemKey('ttl');
     const payload = { seniorHandle: 'reapply_senior', message: 'TTL check' };
     const res = await ctx.app.inject({
@@ -760,7 +761,7 @@ describe('Discovery, Requests & Lineage API', () => {
     });
     expect(res.statusCode, `Body: ${res.body}`).toBe(200);
 
-    const redisKey = `idem:request-submit:${key}`;
+    const redisKey = `idem:request-submit-${pair!.id}:${key}`;
     const cached = await ctx.redis.get(redisKey);
     expect(cached).toBeTruthy();
     const ttl = await ctx.redis.ttl(redisKey);
