@@ -267,12 +267,12 @@ export function HomePage() {
             </h1>
             <p className="text-sm text-muted-foreground">
               {isFreshman
-                ? `Bem-vindo(a), ${displayName}. Todo programador teve alguém que abriu o caminho — encontre o seu padrinho e plante o seu ramo na árvore do curso.`
-                : `Bem-vindo(a), ${displayName}. Você já foi calouro um dia — agora é a sua vez de abrir caminhos para a próxima geração.`}
+                ? `Bem-vindo(a), ${displayName}. Todos nós já estivemos no marco zero...`
+                : `Bem-vindo(a), ${displayName}. Seus dias de riso já passaram; desista, asídesiples.`}
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <MonoButton to={isFreshman ? '/discovery' : '/requests'}>
-                {isFreshman ? 'Explorar mentores' : 'Revisar pedidos'}
+                {isFreshman ? 'Explorar padrinhos' : 'Revisar pedidos'}
               </MonoButton>
               <MonoButton to="/lineage">Ver linhagem</MonoButton>
               {user?.role === 'administrator' && <MonoButton to="/admin">Administração</MonoButton>}
@@ -299,7 +299,7 @@ export function HomePage() {
         <PosterCard className="mt-12">
           <div className="flex items-center justify-between">
             <h2 className="font-sans text-xl font-bold uppercase tracking-tight">
-              {isFreshman ? 'Seu padrinho' : 'Seus pupilos'}
+              {isFreshman ? 'Seu padrinho' : 'Seus ferinhas'}
             </h2>
             <Link
               to="/requests"
@@ -341,8 +341,8 @@ export function HomePage() {
                   </p>
                   <p className="max-w-md text-sm opacity-80">
                     {isFreshman
-                      ? 'Um apadrinhamento é um vínculo para a vida acadêmica inteira. Escolha um padrinho e plante a primeira conexão.'
-                      : 'Quando você aceitar um calouro, ele se torna um ramo permanente da sua linhagem — e da do departamento.'}
+                      ? 'Um apadrinhamento é uma amizade terrívelmente longa. Escolha um padrinho e não pense mais sobre isso.'
+                      : 'Quando você aceita um ferinha, ele(a) não pode ser devolvido(a).'}
                   </p>
                   <MonoButton to={isFreshman ? '/discovery' : '/requests'}>
                     {isFreshman ? 'Descobrir padrinhos' : 'Revisar pedidos recebidos'}
@@ -397,7 +397,7 @@ export function HomePage() {
             </div>
             <h3 className="font-sans text-lg font-bold uppercase leading-tight">Linhagem</h3>
             <p className="mt-1 flex-1 text-xs opacity-80">
-              A genealogia completa do departamento, turma a turma.
+              A genealogia completa do CI, turma a turma.
             </p>
             <div className="mt-4">
               <MonoButton to="/lineage">Ver a árvore</MonoButton>
@@ -433,7 +433,7 @@ export function HomePage() {
 
             <div className="mt-5 divide-y-2 divide-black/20">
               {recommendationsQuery.isLoading && (
-                <p className="py-6 text-center text-sm opacity-70">Buscando compatibilidades no departamento…</p>
+                <p className="py-6 text-center text-sm opacity-70">Buscando compatibilidades no CI…</p>
               )}
               {recommendationsQuery.data?.slice(0, 3).map((senior) => (
                 <div key={senior.userId} className="flex flex-col gap-3 py-4 first:pt-2 sm:flex-row sm:items-center sm:justify-between">
@@ -488,4 +488,3 @@ export function HomePage() {
     </div>
   );
 }
-

@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { Button } from '@/components/ui/button';
+import { useRef, useState } from 'react';
+import { ImageCropModal } from '@/components/profile/image-crop-modal';
 
 export interface MediaUploadProps {
   kind: 'avatar' | 'banner';
@@ -11,8 +11,13 @@ export interface MediaUploadProps {
 const AVATAR_LIMIT_MB = 2;
 const BANNER_LIMIT_MB = 5;
 
+/**
+ * File picker that always routes through the crop dialog: avatars are
+ * cropped square (rendered circular), banners to a wide 3:1 framing.
+ */
 export function MediaUpload({ kind, url, uploading, onUpload }: MediaUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const isAvatar = kind === 'avatar';
   const maxMb = isAvatar ? AVATAR_LIMIT_MB : BANNER_LIMIT_MB;
 
@@ -23,7 +28,7 @@ export function MediaUpload({ kind, url, uploading, onUpload }: MediaUploadProps
       alert(`O ${isAvatar ? 'avatar' : 'banner'} deve ter menos de ${maxMb}MB`);
       return;
     }
-    onUpload(file);
+    setPendingFile(file);
     event.target.value = '';
   }
 
@@ -37,22 +42,20 @@ export function MediaUpload({ kind, url, uploading, onUpload }: MediaUploadProps
             className="h-16 w-16 rounded-full object-cover ring-2 ring-border"
           />
         ) : (
-          <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center ring-2 ring-border">
-            <span className="text-muted-foreground text-lg font-display">?</span>
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted ring-2 ring-border">
+            <span className="font-display text-lg text-muted-foreground">?</span>
           </div>
         )
+      ) : url ? (
+        <img
+          src={url}
+          alt="Pré-visualização do banner"
+          className="h-16 w-32 rounded-none object-cover ring-2 ring-border"
+        />
       ) : (
-        url ? (
-          <img
-            src={url}
-            alt="Pré-visualização do banner"
-            className="h-16 w-32 rounded-md object-cover ring-2 ring-border"
-          />
-        ) : (
-          <div className="h-16 w-32 rounded-md bg-muted flex items-center justify-center ring-2 ring-border">
-            <span className="text-muted-foreground text-sm font-medium">Sem banner</span>
-          </div>
-        )
+        <div className="flex h-16 w-32 items-center justify-center rounded-none bg-muted ring-2 ring-border">
+          <span className="text-sm font-medium text-muted-foreground">Sem banner</span>
+        </div>
       )}
       <div className="flex flex-col gap-1">
         <input
@@ -62,19 +65,31 @@ export function MediaUpload({ kind, url, uploading, onUpload }: MediaUploadProps
           className="hidden"
           onChange={handleFile}
         />
-        <Button
+        <button
           type="button"
-          variant="outline"
-          size="sm"
           disabled={uploading}
           onClick={() => inputRef.current?.click()}
+          className="w-fit border-2 border-[#c9ced8]/40 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-foreground transition-colors hover:border-[#c9f24c] hover:text-[#c9f24c] disabled:opacity-50"
         >
           {uploading ? 'Enviando…' : `Enviar ${isAvatar ? 'avatar' : 'banner'}`}
-        </Button>
-        <p className="text-xs text-muted-foreground">
+        </button>
+        <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
           JPEG, PNG ou WebP · máx. {maxMb}MB
         </p>
       </div>
+
+      <ImageCropModal
+        open={pendingFile !== null}
+        file={pendingFile}
+        aspect={isAvatar ? 1 : 3}
+        circular={isAvatar}
+        title={isAvatar ? 'Recortar avatar' : 'Recortar banner'}
+        onCancel={() => setPendingFile(null)}
+        onConfirm={(cropped) => {
+          setPendingFile(null);
+          onUpload(cropped);
+        }}
+      />
     </div>
   );
 }

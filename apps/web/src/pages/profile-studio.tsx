@@ -167,14 +167,14 @@ export function ProfileStudioPage() {
                 <Input value={draft.socialName} onChange={(e) => set({ socialName: e.target.value })} placeholder="Como você quer ser conhecido" />
               </Field>
               <Field label="Pronomes">
-                <Input value={draft.pronouns} onChange={(e) => set({ pronouns: e.target.value })} placeholder="she/her" />
+                <Input value={draft.pronouns} onChange={(e) => set({ pronouns: e.target.value })} placeholder="ela/dela" />
               </Field>
             </div>
               <Field label="Frase de destaque">
                 <Input value={draft.tagline} onChange={(e) => set({ tagline: e.target.value })} placeholder="Uma frase curta" />
             </Field>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Máx. de pupilos">
+              <Field label="Máx. de ferinhas">
                 <Input
                   type="number"
                   min={1}
@@ -191,7 +191,7 @@ export function ProfileStudioPage() {
                     draft.isAcceptingRequests ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'border-input bg-muted text-muted-foreground'
                   }`}
                 >
-                  {draft.isAcceptingRequests ? 'Aceitando pupilos' : 'Capacidade cheia'}
+                  {draft.isAcceptingRequests ? 'Aceitando ferinhas' : 'Capacidade cheia'}
                 </button>
               </Field>
             </div>
@@ -212,7 +212,7 @@ export function ProfileStudioPage() {
           </section>
 
           <section className="space-y-4 border-2 border-white/15 bg-card p-5">
-            <SectionTitle>Contato (opcional — exibido publicamente se adicionado)</SectionTitle>
+            <SectionTitle>Contato (opcional, exibido publicamente se adicionado)</SectionTitle>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="E-mail de contato">
                 <Input value={draft.contactEmail} onChange={(e) => set({ contactEmail: e.target.value })} placeholder="me@example.com" />

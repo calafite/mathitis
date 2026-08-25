@@ -84,7 +84,7 @@ function MentorCard({
         <div className="grid grid-cols-3 gap-2">
           <Stat label="Período" value={`${String(senior.semester).padStart(2, '0')}/12`} />
           <Stat label="Esforço" value={String(senior.effortScore)} />
-          <Stat label="Pupilos" value={`${senior.activeMenteeCount}/${senior.maxMentees}`} />
+          <Stat label="Ferinhas" value={`${senior.activeMenteeCount}/${senior.maxMentees}`} />
         </div>
 
         {score !== undefined && (

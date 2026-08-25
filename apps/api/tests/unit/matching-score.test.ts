@@ -212,7 +212,7 @@ describe('buildMatchReasons', () => {
       bumpCount: 0,
       isAcceptingRequests: true,
     });
-    expect(reasons).toContain('Aceitando novos pupilos');
+    expect(reasons).toContain('Aceitando novos ferinhas');
   });
 
   it('combines reasons across signals in stable order', () => {
@@ -229,7 +229,7 @@ describe('buildMatchReasons', () => {
       'Perfil rico e muito detalhado',
       'Perfil popular entre estudantes',
       'Frequentemente impulsionado por calouros',
-      'Aceitando novos pupilos',
+      'Aceitando novos ferinhas',
     ]);
   });
 });

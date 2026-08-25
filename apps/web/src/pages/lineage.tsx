@@ -58,7 +58,7 @@ function yearForRank(edges: LineageEdge[], rank: number, positions: Map<string, 
 }
 
 export function LineagePage() {
-  usePageMeta('Linhagem', 'A árvore genealógica de mentorias do departamento, turma a turma.');
+  usePageMeta('Linhagem', 'A árvore genealógica de mentorias do CI, turma a turma.');
   const { handle } = useParams<{ handle?: string }>();
 
   const lineageQuery = useQuery({
@@ -85,7 +85,7 @@ export function LineagePage() {
       <header className="mb-6">
         <h1 className="font-mono text-xl font-bold uppercase tracking-[0.15em] text-foreground">Linhagem de apadrinhamento</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {handle ? `Subgrafo com raiz em @${handle}` : 'A linhagem completa do departamento ao longo dos anos acadêmicos.'}
+          {handle ? `Subgrafo com raiz em @${handle}` : 'A linhagem completa do CI ao longo dos anos acadêmicos.'}
         </p>
       </header>
 

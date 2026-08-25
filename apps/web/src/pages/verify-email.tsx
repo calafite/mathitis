@@ -56,7 +56,7 @@ export function VerifyEmailPage() {
           <>
             <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">E-mail verificado</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Sua conta está ativa. Entre para começar a explorar mentores.
+              Sua conta está ativa. Entre para começar a explorar padrinhos.
             </p>
             <Link to="/login">
               <Button className="mt-6">Voltar para o login</Button>

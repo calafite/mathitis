@@ -297,7 +297,7 @@ export function RichCardManager() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {cards.length} cartão{cards.length === 1 ? '' : 's'} — arraste para reordenar
+          {cards.length} cartão{cards.length === 1 ? '' : 's'}; arraste para reordenar
         </p>
         <Button type="button" size="sm" onClick={() => setEditing('new')}>
           Adicionar cartão

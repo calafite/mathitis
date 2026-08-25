@@ -309,7 +309,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                             className="inline-block h-2 w-2"
                             style={{ backgroundColor: profile.isAcceptingRequests ? '#22c55e' : '#6b7280' }}
                           />
-                          {profile.isAcceptingRequests ? 'Aceitando pupilos' : 'Capacidade cheia'}
+                          {profile.isAcceptingRequests ? 'Aceitando ferinhas' : 'Capacidade cheia'}
                         </>
                       }
                     />

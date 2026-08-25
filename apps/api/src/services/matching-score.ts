@@ -96,7 +96,7 @@ export function buildMatchReasons(input: MatchReasonInput): string[] {
   }
 
   if (input.isAcceptingRequests) {
-    reasons.push('Aceitando novos pupilos');
+    reasons.push('Aceitando novos ferinhas');
   }
 
   return reasons;

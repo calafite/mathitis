@@ -54,7 +54,7 @@ describe('createRecommendationEngine', () => {
       '1 interesse em comum: Algebra',
       'Perfil rico e muito detalhado',
       'Frequentemente impulsionado por calouros',
-      'Aceitando novos pupilos',
+      'Aceitando novos ferinhas',
     ]);
   });
 

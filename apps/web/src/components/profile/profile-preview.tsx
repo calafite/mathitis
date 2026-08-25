@@ -183,7 +183,7 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
             className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-white"
             style={{ background: draft.isAcceptingRequests ? '#16a34a' : '#64748b' }}
           >
-            {draft.isAcceptingRequests ? 'Aceitando pupilos' : 'Capacidade cheia'}
+            {draft.isAcceptingRequests ? 'Aceitando ferinhas' : 'Capacidade cheia'}
           </span>
         </div>
 
@@ -220,7 +220,7 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
         )}
 
         <div className="mt-5 flex items-center justify-between text-[10px] text-muted-foreground">
-          <span>Até {draft.maxMentees} pupilos</span>
+          <span>Até {draft.maxMentees} ferinhas</span>
           <span>Pontuação de esforço {effortScore}</span>
         </div>
       </div>

@@ -32,7 +32,7 @@ export function PrivacyPage() {
         <p>
           Os dados são usados exclusivamente para operar a plataforma: exibir perfis na{' '}
           <em>Descoberta de Padrinhos</em>, calcular recomendações de compatibilidade, gerenciar
-          pedidos de apadrinhamento e preservar a árvore de linhagem do departamento. Não
+          pedidos de apadrinhamento e preservar a árvore de linhagem do CI. Não
           vendemos nem compartilhamos dados pessoais com terceiros.
         </p>
       </section>
