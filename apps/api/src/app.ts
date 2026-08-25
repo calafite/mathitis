@@ -89,6 +89,9 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     logger: createLoggerOptions(env.LOG_LEVEL),
     disableRequestLogging: true,
     trustProxy: true,
+    // Composite selector.validator tokens are ~101 chars; the default cap of
+    // 100 would reject verification links with FST_ERR_MAX_PARAM_LENGTH.
+    maxParamLength: 500,
   });
 
   initSentry({ dsn: env.SENTRY_DSN, environment: env.NODE_ENV });
@@ -332,6 +335,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     session,
     redis,
     queue,
+    sessionEpoch,
   });
 
   await app.register(registerNotificationsPlugin, {

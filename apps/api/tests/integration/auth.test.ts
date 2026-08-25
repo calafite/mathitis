@@ -321,7 +321,9 @@ describe('Auth API', () => {
         status: 'pending_verification',
       },
     });
-    const plainSecret = 'cafebabe'.repeat(4);
+    // Full-length secret (64 hex chars) to mirror production composite tokens
+    // and guard against Fastify's maxParamLength regression.
+    const plainSecret = 'cafebabe'.repeat(8);
     const token = await issueKnownToken(user.id, 'email_verification', plainSecret);
     const compositeToken = `${token.id}.${plainSecret}`;
 
@@ -341,7 +343,7 @@ describe('Auth API', () => {
     const token = await ctx.prisma.userToken.findFirst({
       where: { userId: user!.id, type: 'email_verification' },
     });
-    const compositeToken = `${token!.id}.${'cafebabe'.repeat(4)}`;
+    const compositeToken = `${token!.id}.${'cafebabe'.repeat(8)}`;
     const again = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${compositeToken}` });
     expect(again.statusCode).toBe(200);
     const userAfter = await ctx.prisma.user.findUnique({ where: { email: 'tokenverify@cs.uni.edu' } });
