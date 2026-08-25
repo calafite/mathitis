@@ -34,7 +34,7 @@ export class ForbiddenError extends DomainError {
 }
 
 export class ValidationError extends DomainError {
-  constructor(message: string) {
-    super('VALIDATION_ERROR', 422, message);
+  constructor(message: string, code = 'VALIDATION_ERROR') {
+    super(code, 422, message);
   }
 }

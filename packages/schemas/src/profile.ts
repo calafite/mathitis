@@ -186,3 +186,20 @@ export const profileHandleParamsSchema = z.object({
     .regex(/^[a-z0-9_]+$/, 'Nome de usuário inválido'),
 });
 export type ProfileHandleParams = z.infer<typeof profileHandleParamsSchema>;
+export const scrapeCardQuerySchema = z.object({
+  url: z.string().url('Informe uma URL válida').max(512),
+});
+export type ScrapeCardQuery = z.infer<typeof scrapeCardQuerySchema>;
+
+export const scrapedCardResponseSchema = z.object({
+  cardType: richCardTypeSchema,
+  title: z.string().min(1).max(150),
+  subtitle: z.string().max(150).nullable().optional(),
+  description: z.string().max(5000).nullable().optional(),
+  imageUrl: z.string().url().max(512).nullable().optional(),
+  externalUrl: z.string().url().max(512).nullable().optional(),
+  embedUrl: z.string().url().max(512).nullable().optional(),
+  accentColor: hexColorSchema.default('#6366f1'),
+  metadata: z.record(z.unknown()).default({}),
+});
+export type ScrapedCardResponse = z.infer<typeof scrapedCardResponseSchema>;
