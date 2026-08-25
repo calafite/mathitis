@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RichCardManager } from '@/components/profile/rich-card-manager';
 import { profileApi } from '@/lib/profile-api';
+import { ApiError } from '@/lib/api';
 
 vi.mock('@/lib/profile-api', () => ({
   profileApi: {
@@ -12,6 +13,7 @@ vi.mock('@/lib/profile-api', () => ({
     updateCard: vi.fn(),
     deleteCard: vi.fn(),
     reorderCards: vi.fn(),
+    scrapeCard: vi.fn(),
   },
 }));
 
@@ -70,8 +72,8 @@ describe('RichCardManager', () => {
       expect(mockedApi.createCard).toHaveBeenCalledWith(
         expect.objectContaining({
           cardType: 'song',
-          title: 'Karma Police',
-          metadata: { artistName: 'Radiohead' },
+          title: 'Panis et Circenses',
+          metadata: { artistName: 'Mutantes' },
         }),
       );
     });
@@ -120,5 +122,53 @@ describe('RichCardManager', () => {
     await waitFor(() => {
       expect(mockedApi.createCard).toHaveBeenCalledWith(expect.objectContaining({ metadata: {} }));
     });
+  });
+
+  it('autocompletes the form from a scraped link', async () => {
+    const user = userEvent.setup();
+    mockedApi.scrapeCard.mockResolvedValue({
+      cardType: 'song',
+      title: 'Ainda Luz',
+      subtitle: 'Terno Rei',
+      description: null,
+      imageUrl: null,
+      externalUrl: 'https://open.spotify.com/track/xyz',
+      embedUrl: 'https://open.spotify.com/embed/track/xyz',
+      accentColor: '#1db954',
+      metadata: { spotifyUri: 'spotify:track:xyz' },
+    } as never);
+    renderManager();
+
+    await user.click(await screen.findByRole('button', { name: 'Adicionar cartão' }));
+    await user.type(
+      screen.getByPlaceholderText('Cole um link do Spotify, Steam, GitHub, Letterboxd ou Livro...'),
+      'https://open.spotify.com/track/xyz',
+    );
+    await user.click(screen.getByRole('button', { name: 'Autocompletar' }));
+
+    expect(mockedApi.scrapeCard.mock.calls[0]?.[0]).toBe('https://open.spotify.com/track/xyz');
+    expect(await screen.findByText('✓ Spotify detectado')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Ainda Luz')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('#1db954')).toBeInTheDocument();
+  });
+
+  it('shows an error banner when the scrape request fails', async () => {
+    const user = userEvent.setup();
+    mockedApi.scrapeCard.mockRejectedValue(
+      new ApiError(422, 'NSFW_CONTENT_REJECTED', 'O link fornecido contém conteúdo adulto'),
+    );
+    renderManager();
+
+    await user.click(await screen.findByRole('button', { name: 'Adicionar cartão' }));
+    await user.type(
+      screen.getByPlaceholderText('Cole um link do Spotify, Steam, GitHub, Letterboxd ou Livro...'),
+      'https://example.com/bad',
+    );
+    await user.click(screen.getByRole('button', { name: 'Autocompletar' }));
+
+    expect(
+      await screen.findByRole('alert'),
+    ).toHaveTextContent('O link fornecido contém conteúdo adulto');
+    expect(screen.queryByText('✓ Spotify detectado')).not.toBeInTheDocument();
   });
 });

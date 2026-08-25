@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CreateRichCardBody, RichCard, RichCardType } from '@mathitis/schemas';
+import { Loader2 } from 'lucide-react';
+import type { CreateRichCardBody, RichCard, RichCardType, ScrapedCardResponse } from '@mathitis/schemas';
+import { ApiError } from '@/lib/api';
 import { profileApi } from '@/lib/profile-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,6 +58,39 @@ function cardToForm(card: RichCard): CardFormState {
     ),
   };
 }
+
+function scrapedToForm(scraped: ScrapedCardResponse): CardFormState {
+  const meta = (scraped.metadata ?? {}) as Record<string, unknown>;
+  return {
+    cardType: scraped.cardType,
+    title: scraped.title,
+    subtitle: scraped.subtitle ?? '',
+    description: scraped.description ?? '',
+    embedUrl: scraped.embedUrl ?? '',
+    externalUrl: scraped.externalUrl ?? '',
+    imageUrl: scraped.imageUrl ?? '',
+    accentColor: scraped.accentColor,
+    metadata: Object.fromEntries(
+      Object.entries(meta).map(([key, value]) => [key, String(value ?? '')]),
+    ),
+  };
+}
+
+function providerFromUrl(url: string): string {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '');
+    if (host.endsWith('spotify.com')) return 'Spotify';
+    if (host.endsWith('steampowered.com')) return 'Steam';
+    if (host === 'github.com' || host.endsWith('.github.com')) return 'GitHub';
+    if (host.endsWith('letterboxd.com')) return 'Letterboxd';
+    if (host.endsWith('openlibrary.org')) return 'OpenLibrary';
+    return 'Link';
+  } catch {
+    return 'Link';
+  }
+}
+
+const SCRAPE_FALLBACK_ERROR = 'Este link contém conteúdo impróprio ou não pôde ser lido';
 
 function buildPayload(form: CardFormState): CreateRichCardBody {
   return {
@@ -137,6 +172,24 @@ function CardForm({
   onCancel: () => void;
 }) {
   const [form, setForm] = useState<CardFormState>(initial);
+  const [scrapeUrl, setScrapeUrl] = useState('');
+  const [detectedProvider, setDetectedProvider] = useState<string | null>(null);
+  const [scrapeError, setScrapeError] = useState<string | null>(null);
+
+  const scrapeMutation = useMutation({
+    mutationFn: profileApi.scrapeCard,
+    onSuccess: (scraped, url) => {
+      setForm(scrapedToForm(scraped));
+      setDetectedProvider(providerFromUrl(url));
+      setScrapeError(null);
+    },
+    onError: (error: unknown) => {
+      setDetectedProvider(null);
+      setScrapeError(
+        error instanceof ApiError && error.message ? error.message : SCRAPE_FALLBACK_ERROR,
+      );
+    },
+  });
 
   function submit() {
     const payload = buildPayload(form);
@@ -151,6 +204,41 @@ function CardForm({
 
   return (
     <div className="rounded-lg border border-border bg-muted p-4">
+      <div className="mb-4 border-2 border-white/15 p-3">
+        <label className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Preenchimento Automático via Link
+        </label>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            value={scrapeUrl}
+            onChange={(e) => setScrapeUrl(e.target.value)}
+            placeholder="Cole um link do Spotify, Steam, GitHub, Letterboxd ou Livro..."
+            disabled={scrapeMutation.isPending}
+          />
+          <button
+            type="button"
+            onClick={() => scrapeMutation.mutate(scrapeUrl.trim())}
+            disabled={scrapeMutation.isPending || scrapeUrl.trim().length === 0}
+            className="flex shrink-0 items-center justify-center gap-2 border-2 border-[#c9f24c] bg-[#c9f24c] px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-black transition-colors hover:bg-transparent hover:text-[#c9f24c] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {scrapeMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> : null}
+            Autocompletar
+          </button>
+        </div>
+        {detectedProvider ? (
+          <p
+            role="status"
+            className="mt-2 inline-block border-2 border-[#c9f24c] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-[#c9f24c]"
+          >
+            ✓ {detectedProvider} detectado
+          </p>
+        ) : null}
+        {scrapeError ? (
+          <p role="alert" className="mt-2 border-l-2 border-red-500 pl-3 text-xs text-red-400">
+            {scrapeError}
+          </p>
+        ) : null}
+      </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground">Tipo</label>

@@ -5,6 +5,7 @@ import type {
   ReorderRichCardsBody,
   RichCardResponse,
   RichCardsResponse,
+  ScrapedCardResponse,
   UpdateProfileBody,
   UpdateRichCardBody,
   UploadImageResponse,
@@ -61,6 +62,12 @@ export const profileApi = {
       method: 'PUT',
       body: JSON.stringify({ order } satisfies ReorderRichCardsBody),
     });
+  },
+
+  scrapeCard(url: string) {
+    return apiFetch<ScrapedCardResponse>(
+      `/profiles/me/cards/scrape?url=${encodeURIComponent(url)}`,
+    );
   },
 };
 
