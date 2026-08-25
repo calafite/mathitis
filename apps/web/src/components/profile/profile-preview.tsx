@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { RichCard, ThemePalette } from '@mathitis/schemas';
 import { MarkdownPreview } from '@/components/markdown/markdown-preview';
+import { CardRail, CardRailItem } from './rich-card-shared';
 
 export interface ProfileDraft {
   socialName: string;
@@ -27,128 +28,6 @@ export interface ProfilePreviewProps {
   bannerPreset?: string | null;
   cards: RichCard[];
   effortScore: number;
-}
-
-const CARD_META: Record<string, { label: string; icon: string }> = {
-  song: { label: 'Música', icon: '♪' },
-  game: { label: 'Jogo', icon: '▣' },
-  film: { label: 'Filme', icon: '▶' },
-  book: { label: 'Livro', icon: '📖' },
-  project: { label: 'Projeto', icon: '⚙' },
-  custom: { label: 'Cartão', icon: '✦' },
-};
-
-const CARD_LINK_LABELS: Record<string, string> = {
-  song: 'Ouvir',
-  game: 'Página na loja',
-  film: 'Ver no Letterboxd',
-  book: 'Ver na OpenLibrary',
-  project: 'Código aberto',
-  custom: 'Abrir link',
-};
-
-function cardLinkLabel(cardType: string): string {
-  return CARD_LINK_LABELS[cardType] ?? 'Abrir link';
-}
-
-function CardEmbed({ card }: { card: RichCard }) {
-  if (!card.embedUrl) return null;
-  return (
-    <iframe
-      src={card.embedUrl}
-      title={card.title}
-      loading="lazy"
-      sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox"
-      className="mt-2 w-full rounded-none border-0"
-      style={{ height: 152 }}
-    />
-  );
-}
-
-function CardLink({ card }: { card: RichCard }) {
-  if (!card.externalUrl) return null;
-  return (
-    <a
-      href={card.externalUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="mt-2 inline-block font-mono text-[10px] font-bold uppercase tracking-widest underline underline-offset-4 hover:bg-foreground hover:text-background"
-    >
-      {cardLinkLabel(card.cardType)} ↗
-    </a>
-  );
-}
-
-function CardContent({ card }: { card: RichCard }) {
-  const meta = card.metadata as Record<string, unknown> | null;
-  const artistName = meta?.artistName;
-  if (card.cardType === 'song' && typeof artistName === 'string' && artistName) {
-    return <p className="font-mono text-[10px] uppercase tracking-widest">{artistName}</p>;
-  }
-  const steamAppId = meta?.steamAppId;
-  if (card.cardType === 'game' && typeof steamAppId === 'string') {
-    return <p className="font-mono text-[10px] uppercase tracking-widest">Steam · {steamAppId}</p>;
-  }
-  if (card.cardType === 'film') {
-    const rating = meta?.rating;
-    if (typeof rating === 'number') {
-      return (
-        <p className="font-mono text-[10px] uppercase tracking-widest">
-          ★ {rating.toFixed(1)}/10
-        </p>
-      );
-    }
-  }
-  if (card.cardType === 'project' && Array.isArray(meta?.techStack)) {
-    const stack = (meta.techStack as unknown[]).slice(0, 4);
-    return (
-      <div className="mt-2 flex flex-wrap gap-1">
-        {stack.map((item) => (
-          <span
-            key={String(item)}
-            className="border border-foreground px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase"
-          >
-            {String(item)}
-          </span>
-        ))}
-      </div>
-    );
-  }
-  return null;
-}
-
-function RichCardView({ card }: { card: RichCard }) {
-  const meta = CARD_META[card.cardType] ?? { label: 'Cartão', icon: '✦' };
-  return (
-    <article className="flex flex-col rounded-none border border-foreground bg-card p-3">
-      {card.imageUrl ? (
-        <img
-          src={card.imageUrl}
-          alt=""
-          loading="lazy"
-          className="-mx-3 -mt-3 mb-2 h-32 w-[calc(100%+1.5rem)] object-cover border-b border-foreground"
-        />
-      ) : null}
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="text-sm font-bold leading-tight text-foreground">{card.title}</h3>
-        <span
-          className="shrink-0 border border-foreground px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest"
-          aria-label={meta.label}
-        >
-          {meta.icon} {meta.label}
-        </span>
-      </div>
-      {card.subtitle ? (
-        <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          {card.subtitle}
-        </p>
-      ) : null}
-      {card.description ? <p className="mt-1 text-xs text-foreground">{card.description}</p> : null}
-      <CardContent card={card} />
-      <CardEmbed card={card} />
-      <CardLink card={card} />
-    </article>
-  );
 }
 
 function SectionHeader({ children }: { children: string }) {
@@ -274,11 +153,11 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
         {cards.length > 0 ? (
           <>
             <SectionHeader>Coleção</SectionHeader>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <CardRail>
               {cards.map((card) => (
-                <RichCardView key={card.id} card={card} />
+                <CardRailItem key={card.id} card={card} />
               ))}
-            </div>
+            </CardRail>
           </>
         ) : null}
       </div>

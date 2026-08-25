@@ -61,4 +61,43 @@ describe('enrichCardMetadata', () => {
     expect(meta.techStack).toEqual(['python', 'numpy']);
     expect(() => enrichCardMetadata('project', { techStack: 'python' })).toThrow(ValidationError);
   });
+
+  it('coerces string numbers in film metadata (form inputs submit strings)', () => {
+    const meta = enrichCardMetadata(
+      'film',
+      { rating: '8.5', year: '1975', director: 'Stanley Kubrick' },
+    );
+    expect(meta.rating).toBe(8.5);
+    expect(meta.year).toBe(1975);
+    expect(meta.director).toBe('Stanley Kubrick');
+  });
+
+  it('parses a Barry Lyndon entry with numeric primitives and string years alike', () => {
+    const fromStrings = enrichCardMetadata(
+      'film',
+      { rating: '8.1', year: '1975' },
+      undefined,
+      'https://letterboxd.com/film/barry-lyndon/',
+    );
+    expect(fromStrings.year).toBe(1975);
+    expect(fromStrings.rating).toBe(8.1);
+
+    const fromNumbers = enrichCardMetadata('film', { rating: 4.5, year: 1975 });
+    expect(fromNumbers.rating).toBe(4.5);
+    expect(fromNumbers.year).toBe(1975);
+  });
+
+  it('treats blank form fields as absent instead of coercing to zero', () => {
+    const meta = enrichCardMetadata('film', { rating: '', year: '' });
+    expect(meta.rating).toBeUndefined();
+    expect(meta.year).toBeUndefined();
+
+    const game = enrichCardMetadata('game', { hoursPlayed: '' }) as { hoursPlayed?: number };
+    expect(game.hoursPlayed).toBeUndefined();
+  });
+
+  it('still rejects out-of-range values after coercion', () => {
+    expect(() => enrichCardMetadata('film', { rating: '11' })).toThrow(ValidationError);
+    expect(() => enrichCardMetadata('film', { year: '1800' })).toThrow(ValidationError);
+  });
 });

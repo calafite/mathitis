@@ -229,6 +229,40 @@ describe('Profiles API', () => {
     expect(res.statusCode).toBe(422);
   });
 
+  it('persists bio, social links and tagline across separate patches', async () => {
+    const patch = await ctx.app.inject({
+      method: 'PATCH',
+      url: '/api/profiles/me',
+      headers: { cookie: seniorCookie },
+      payload: {
+        biographyMarkdown: '## Sobre mim\n\nGosto de teoria dos números.',
+        tagline: 'Provando teoremas desde 2019',
+        socialLinks: {
+          github: 'https://github.com/ada',
+          discord: 'ada#0001',
+          linkedin: 'https://linkedin.com/in/ada',
+          website: 'https://ada.dev',
+        },
+      },
+    });
+    expect(patch.statusCode, patch.body).toBe(200);
+
+    // Refetch from the database (not the response) to verify persistence.
+    const fetched = await ctx.app.inject({
+      method: 'GET',
+      url: '/api/profiles/me',
+      headers: { cookie: seniorCookie },
+    });
+    expect(fetched.statusCode).toBe(200);
+    const profile = fetched.json().profile;
+    expect(profile.biographyMarkdown).toContain('teoria dos números');
+    expect(profile.tagline).toBe('Provando teoremas desde 2019');
+    expect(profile.socialLinks.github).toBe('https://github.com/ada');
+    expect(profile.socialLinks.discord).toBe('ada#0001');
+    expect(profile.socialLinks.linkedin).toBe('https://linkedin.com/in/ada');
+    expect(profile.socialLinks.website).toBe('https://ada.dev');
+  });
+
   it('uploads an avatar through the server-side pipeline', async () => {
     const png = await sharp({
       create: { width: 64, height: 64, channels: 3, background: { r: 10, g: 20, b: 30 } },
@@ -303,6 +337,36 @@ describe('Profiles API', () => {
         },
       });
       expect(res.statusCode).toBe(422);
+    });
+
+    it('creates a film card with numeric string metadata (Barry Lyndon case)', async () => {
+      const res = await ctx.app.inject({
+        method: 'POST',
+        url: '/api/profiles/me/cards',
+        headers: { cookie: seniorCookie },
+        payload: {
+          cardType: 'film',
+          title: 'Barry Lyndon',
+          subtitle: 'Stanley Kubrick',
+          imageUrl: 'https://a.ltrbxd.com/resized/film-poster/barry-lyndon.jpg',
+          externalUrl: 'https://letterboxd.com/film/barry-lyndon/',
+          metadata: { rating: '8.1', year: '1975', director: 'Stanley Kubrick' },
+        },
+      });
+
+      expect(res.statusCode, res.body).toBe(200);
+      const card = res.json().card;
+      expect(card.cardType).toBe('film');
+      expect(card.metadata.rating).toBe(8.1);
+      expect(card.metadata.year).toBe(1975);
+
+      // Clean up so count-dependent tests below see a pristine card list.
+      const cleanup = await ctx.app.inject({
+        method: 'DELETE',
+        url: `/api/profiles/me/cards/${card.id}`,
+        headers: { cookie: seniorCookie },
+      });
+      expect(cleanup.statusCode).toBe(204);
     });
 
     it('lists the profile cards in display order', async () => {

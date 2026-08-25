@@ -90,6 +90,7 @@ export function ProfileStudioPage() {
 
   const [draft, setDraft] = useState<ProfileDraft | null>(null);
   const [dirty, setDirty] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
 
   useEffect(() => {
     if (profileQuery.data && !draft) {
@@ -97,10 +98,26 @@ export function ProfileStudioPage() {
     }
   }, [profileQuery.data, draft]);
 
+  const profile = profileQuery.data;
+
+  const set = (patch: Partial<ProfileDraft>) => {
+    setDraft((prev) => (prev ? { ...prev, ...patch } : prev));
+    setDirty(true);
+  };
+
+  const resetDraft = () => {
+    if (profileQuery.data) {
+      setDraft(toDraft(profileQuery.data));
+    }
+    setDirty(false);
+  };
+
   const saveMutation = useMutation({
     mutationFn: (body: UpdateProfileBody) => profileApi.updateMe(body),
     onSuccess: () => {
       setDirty(false);
+      setJustSaved(true);
+      window.setTimeout(() => setJustSaved(false), 4000);
       void queryClient.invalidateQueries({ queryKey: ['profile', 'me'] });
     },
   });
@@ -134,12 +151,6 @@ export function ProfileStudioPage() {
           : 'Falha ao enviar o banner. Tente novamente.',
       ),
   });
-
-  const profile = profileQuery.data;
-  const set = (patch: Partial<ProfileDraft>) => {
-    setDraft((prev) => (prev ? { ...prev, ...patch } : prev));
-    setDirty(true);
-  };
 
   if (!profile || !draft) {
     return <p className="px-4 py-10 text-center text-muted-foreground">Carregando seu perfil…</p>;
@@ -283,6 +294,43 @@ export function ProfileStudioPage() {
           />
         </div>
       </main>
+
+      {/* Floating save bar */}
+      {dirty && (
+        <div
+          className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-black bg-[#d3d7de] px-4 py-3 text-[#0b0b0e]"
+          style={{ boxShadow: '0 -6px 18px rgba(0,0,0,0.35)' }}
+          role="status"
+        >
+          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 sm:flex-row">
+            <p className="font-mono text-xs font-bold uppercase tracking-widest">
+              Você tem alterações não salvas no seu perfil
+            </p>
+            <div className="flex items-center gap-2">
+              {justSaved ? (
+                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+                  Perfil salvo ✓
+                </span>
+              ) : null}
+              <button
+                type="button"
+                onClick={resetDraft}
+                className="border-2 border-black bg-transparent px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest hover:bg-black/10"
+              >
+                Descartar
+              </button>
+              <button
+                type="button"
+                disabled={saveMutation.isPending}
+                onClick={() => saveMutation.mutate(toUpdateBody(draft))}
+                className="flex items-center gap-2 border-2 border-black bg-black px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#c9f24c] hover:text-black disabled:opacity-50"
+              >
+                {saveMutation.isPending ? 'Salvando…' : 'Salvar alterações'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

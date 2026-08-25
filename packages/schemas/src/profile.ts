@@ -33,25 +33,37 @@ const bannerPresetOptionalSchema = bannerPresetSchema.optional();
 export const richCardTypeSchema = z.enum(['song', 'game', 'film', 'book', 'project', 'custom']);
 export type RichCardType = z.infer<typeof richCardTypeSchema>;
 
+/**
+ * Form inputs submit numeric values as strings (or empty strings when the
+ * field was left blank). Coerce string numbers into real numbers while
+ * letting blank inputs fall through as undefined instead of coercing to 0.
+ */
+function numericInput<Output>(schema: z.ZodType<Output, z.ZodTypeDef, unknown>) {
+  return z.preprocess((value) => {
+    if (value === '' || value === null || value === undefined) return undefined;
+    return value;
+  }, schema);
+}
+
 export const songMetadataSchema = z.object({
   spotifyUri: z.string().min(1).max(255).optional(),
   trackName: z.string().max(255).optional(),
   artistName: z.string().max(255).optional(),
   albumName: z.string().max(255).optional(),
-  durationMs: z.number().int().positive().optional(),
+  durationMs: numericInput(z.coerce.number().int().positive().optional()),
 });
 export type SongMetadata = z.infer<typeof songMetadataSchema>;
 
 export const gameMetadataSchema = z.object({
   steamAppId: z.string().regex(/^\d{1,8}$/, 'O Steam App ID deve ser numérico').optional(),
   platform: z.string().max(60).optional(),
-  hoursPlayed: z.number().int().nonnegative().optional(),
+  hoursPlayed: numericInput(z.coerce.number().int().nonnegative().optional()),
 });
 export type GameMetadata = z.infer<typeof gameMetadataSchema>;
 
 export const filmMetadataSchema = z.object({
-  rating: z.number().min(0).max(10).optional(),
-  year: z.number().int().min(1888).max(2100).optional(),
+  rating: numericInput(z.coerce.number().min(0).max(10).optional()),
+  year: numericInput(z.coerce.number().int().min(1888).max(2100).optional()),
   director: z.string().max(120).optional(),
   genres: z.array(z.string().max(60)).max(10).optional(),
 });

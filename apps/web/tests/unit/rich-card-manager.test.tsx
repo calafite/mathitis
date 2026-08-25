@@ -124,6 +124,30 @@ describe('RichCardManager', () => {
     });
   });
 
+  it('creates a film card with decimal rating and release year as strings', async () => {
+    const user = userEvent.setup();
+    mockedApi.createCard.mockResolvedValue({ card: songCard } as never);
+    renderManager();
+
+    await user.click(await screen.findByRole('button', { name: 'Adicionar cartão' }));
+    await user.selectOptions(screen.getByRole('combobox'), 'film');
+    await user.type(screen.getByPlaceholderText('Título do cartão'), 'Barry Lyndon');
+    await user.type(screen.getByPlaceholderText('8.5'), '8.1');
+    await user.type(screen.getByPlaceholderText('2024'), '1975');
+
+    await user.click(screen.getByRole('button', { name: 'Salvar cartão' }));
+
+    await waitFor(() => {
+      expect(mockedApi.createCard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cardType: 'film',
+          title: 'Barry Lyndon',
+          metadata: { rating: '8.1', year: '1975' },
+        }),
+      );
+    });
+  });
+
   it('autocompletes the form from a scraped link', async () => {
     const user = userEvent.setup();
     mockedApi.scrapeCard.mockResolvedValue({

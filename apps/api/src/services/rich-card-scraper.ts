@@ -115,13 +115,21 @@ export async function assertPublicUrl(rawUrl: string): Promise<URL> {
 
 export type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
 
-async function fetchWithTimeout(url: string, fetchImpl: FetchLike): Promise<string> {
+/** Some providers (e.g. Letterboxd) reject non-browser user agents outright. */
+const BROWSER_USER_AGENT =
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+
+async function fetchWithTimeout(
+  url: string,
+  fetchImpl: FetchLike,
+  extraHeaders?: Record<string, string>,
+): Promise<string> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
     const res = await fetchImpl(url, {
       signal: controller.signal,
-      headers: { 'user-agent': USER_AGENT, accept: 'text/html,application/json' },
+      headers: { 'user-agent': USER_AGENT, accept: 'text/html,application/json', ...extraHeaders },
       redirect: 'follow',
     });
     if (!res.ok) {
@@ -289,7 +297,11 @@ async function scrapeLetterboxd(
   url: URL,
   fetchImpl: FetchLike,
 ): Promise<ScrapedCardResponse> {
-  const html = await fetchWithTimeout(url.toString(), fetchImpl);
+  // Letterboxd sits behind a bot filter: only a browser-like UA gets the page.
+  const html = await fetchWithTimeout(url.toString(), fetchImpl, {
+    'user-agent': BROWSER_USER_AGENT,
+    'accept-language': 'en-US,en;q=0.9',
+  });
   const ogTitle = extractMeta(html, 'og:title');
   if (!ogTitle) {
     throw new ValidationError('Não foi possível ler este filme no Letterboxd');
@@ -298,16 +310,20 @@ async function scrapeLetterboxd(
   const title = yearMatch ? (yearMatch[1] as string) : (ogTitle as string);
   const year = yearMatch ? Number(yearMatch[2]) : undefined;
   const poster = extractMeta(html, 'og:image');
-  // Letterboxd exposes the director list right before the "Director" heading.
-  const directorMatch = html.match(/Directed by<\/h3>[\s\S]*?<a[^>]*>([^<]+)<\/a>/i);
+  // Director is exposed in twitter:data1 on film pages; fall back to the
+  // "Directed by" credits block in the page body.
+  const director =
+    extractMeta(html, 'twitter:data1') ??
+    (html.match(/Directed by<\/h3>[\s\S]*?<a[^>]*>([^<]+)<\/a>/i)?.[1] ?? null);
   const description = extractMeta(html, 'og:description');
   assertContentSafe({ title, description });
   const metadata: Record<string, unknown> = {};
   if (year && year >= 1888 && year <= 2100) metadata.year = year;
+  if (director) metadata.director = truncate(director.trim(), 120);
   return {
     cardType: 'film',
     title: truncate(title, 150),
-    subtitle: directorMatch ? truncate((directorMatch[1] as string).trim(), 150) : null,
+    subtitle: director ? truncate(director.trim(), 150) : null,
     description: description ? truncate(description, 5000) : null,
     imageUrl: poster,
     externalUrl: url.toString(),
