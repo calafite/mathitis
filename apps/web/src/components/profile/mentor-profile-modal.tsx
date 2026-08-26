@@ -1,4 +1,4 @@
-import { type CSSProperties, useEffect, useState } from 'react';
+import { type CSSProperties, useCallback, useEffect, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -79,13 +79,22 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
       }
     : undefined;
 
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
   const socialLinks = profile?.socialLinks as Record<string, string | undefined> | null;
-  const linkFields: Array<{ label: string; href: string }> = [];
+  const linkFields: Array<{ label: string; href?: string; copyValue?: string }> = [];
   if (socialLinks?.github) linkFields.push({ label: 'GitHub', href: socialLinks.github });
   if (socialLinks?.linkedin) linkFields.push({ label: 'LinkedIn', href: socialLinks.linkedin });
-  if (socialLinks?.discord) linkFields.push({ label: 'Discord', href: socialLinks.discord });
+  if (socialLinks?.discord) linkFields.push({ label: 'Discord', copyValue: socialLinks.discord });
   if (socialLinks?.website) linkFields.push({ label: 'Site', href: socialLinks.website });
-  if (profile?.contactEmail) linkFields.push({ label: 'Email', href: `mailto:${profile.contactEmail}` });
+  if (profile?.contactEmail) linkFields.push({ label: 'Email', copyValue: profile.contactEmail });
+
+  const handleCopy = useCallback((label: string, value: string) => {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopiedField(label);
+      setTimeout(() => setCopiedField(null), 1200);
+    });
+  }, []);
 
   const richCards = profile?.richCards ?? [];
 
@@ -189,17 +198,28 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                     Contato
                   </h3>
                   <div className="flex flex-wrap gap-x-3 gap-y-1">
-                    {linkFields.map((field) => (
-                      <a
-                        key={field.label}
-                        href={field.href}
-                        target={field.href.startsWith('mailto:') ? undefined : '_blank'}
-                        rel="noopener noreferrer"
-                        className="font-mono text-[10px] font-bold uppercase tracking-widest text-foreground underline underline-offset-4 hover:bg-foreground hover:text-background"
-                      >
-                        {field.label}
-                      </a>
-                    ))}
+                    {linkFields.map((field) =>
+                      field.href ? (
+                        <a
+                          key={field.label}
+                          href={field.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-[10px] font-bold uppercase tracking-widest text-foreground underline underline-offset-4 hover:bg-foreground hover:text-background"
+                        >
+                          {field.label}
+                        </a>
+                      ) : (
+                        <button
+                          key={field.label}
+                          type="button"
+                          onClick={() => handleCopy(field.label, field.copyValue!)}
+                          className="font-mono text-[10px] font-bold uppercase tracking-widest text-foreground underline underline-offset-4 hover:bg-foreground hover:text-background"
+                        >
+                          {copiedField === field.label ? 'Copiado!' : field.label}
+                        </button>
+                      ),
+                    )}
                   </div>
                 </section>
               )}

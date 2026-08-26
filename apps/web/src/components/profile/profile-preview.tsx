@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { useState, useCallback, type CSSProperties } from 'react';
 import type { RichCard, ThemePalette } from '@mathitis/schemas';
 import { MarkdownPreview } from '@/components/markdown/markdown-preview';
 import { RichCardView } from './rich-card-view';
@@ -55,12 +55,21 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
     '--profile-badge': theme.badgeColor,
   } as CSSProperties;
 
-  const linkFields: Array<{ label: string; href: string }> = [];
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const linkFields: Array<{ label: string; href?: string; copyValue?: string }> = [];
   if (draft.socialLinks.github) linkFields.push({ label: 'GitHub', href: draft.socialLinks.github });
   if (draft.socialLinks.linkedin) linkFields.push({ label: 'LinkedIn', href: draft.socialLinks.linkedin });
-  if (draft.socialLinks.discord) linkFields.push({ label: 'Discord', href: draft.socialLinks.discord });
+  if (draft.socialLinks.discord) linkFields.push({ label: 'Discord', copyValue: draft.socialLinks.discord });
   if (draft.socialLinks.website) linkFields.push({ label: 'Site', href: draft.socialLinks.website });
-  if (draft.contactEmail) linkFields.push({ label: 'Email', href: `mailto:${draft.contactEmail}` });
+  if (draft.contactEmail) linkFields.push({ label: 'Email', copyValue: draft.contactEmail });
+
+  const handleCopy = useCallback((label: string, value: string) => {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopiedField(label);
+      setTimeout(() => setCopiedField(null), 1200);
+    });
+  }, []);
 
   return (
     <div className="rounded-none border-2 border-foreground" style={cssVars}>
@@ -159,17 +168,28 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
         <div className="border-b border-foreground/50 px-4 pb-3">
           <SectionHeader>Contato</SectionHeader>
           <div className="flex flex-wrap gap-x-3 gap-y-1">
-            {linkFields.map((field) => (
-              <a
-                key={field.label}
-                href={field.href}
-                target={field.href.startsWith('mailto:') ? undefined : '_blank'}
-                rel="noopener noreferrer"
-                className="font-mono text-[10px] font-bold uppercase tracking-widest text-foreground underline underline-offset-4 hover:bg-foreground hover:text-background"
-              >
-                {field.label}
-              </a>
-            ))}
+            {linkFields.map((field) =>
+              field.href ? (
+                <a
+                  key={field.label}
+                  href={field.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-[10px] font-bold uppercase tracking-widest text-foreground underline underline-offset-4 hover:bg-foreground hover:text-background"
+                >
+                  {field.label}
+                </a>
+              ) : (
+                <button
+                  key={field.label}
+                  type="button"
+                  onClick={() => handleCopy(field.label, field.copyValue!)}
+                  className="font-mono text-[10px] font-bold uppercase tracking-widest text-foreground underline underline-offset-4 hover:bg-foreground hover:text-background"
+                >
+                  {copiedField === field.label ? 'Copiado!' : field.label}
+                </button>
+              ),
+            )}
           </div>
         </div>
       ) : null}
