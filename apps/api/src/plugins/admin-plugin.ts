@@ -146,7 +146,10 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
           },
         },
         async (request, reply) => {
-          const { users, total } = await adminService.listUsers(request.query);
+          // request.query is the raw string map; re-parse so limit/offset
+          // arrive at Prisma as numbers, not strings.
+          const filters = adminUsersQuerySchema.parse(request.query);
+          const { users, total } = await adminService.listUsers(filters);
           return reply.send({ users, total });
         },
       );
