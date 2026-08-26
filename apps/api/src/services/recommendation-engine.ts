@@ -4,6 +4,7 @@ import { buildMatchReasons, calculateMatchScore } from './matching-score.js';
 export interface RankableTag {
   id: string;
   name: string;
+  embedding?: number[] | null;
 }
 
 /**
@@ -36,6 +37,16 @@ export interface RecommendationEngine {
   ): Array<ScoredSenior<T>>;
 }
 
+function buildEmbeddingMap(tags: RankableTag[]): Map<string, number[]> {
+  const map = new Map<string, number[]>();
+  for (const tag of tags) {
+    if (tag.embedding && tag.embedding.length > 0) {
+      map.set(tag.id, tag.embedding);
+    }
+  }
+  return map;
+}
+
 /**
  * The algorithmic matching engine: computes the weighted compatibility score
  * (see architecture §8.5) and the human-readable reasons behind it.
@@ -45,14 +56,20 @@ export function createRecommendationEngine(): RecommendationEngine {
     freshmanTags: RankableTag[],
     seniors: T[],
   ): Array<ScoredSenior<T>> {
+    const freshmanEmbeddings = buildEmbeddingMap(freshmanTags);
+
     return seniors
       .map((senior) => {
+        const seniorEmbeddings = buildEmbeddingMap(senior.tags);
+
         const score = calculateMatchScore({
           freshmanTagIds: freshmanTags.map((tag) => tag.id),
           seniorTagIds: senior.tags.map((tag) => tag.id),
           effortScore: senior.effortScore,
           profileViews: senior.profileViews,
           bumpCount: senior.bumpCount,
+          freshmanEmbeddings,
+          seniorEmbeddings,
         });
         const matchReasons = buildMatchReasons({
           freshmanTags,
@@ -61,6 +78,8 @@ export function createRecommendationEngine(): RecommendationEngine {
           profileViews: senior.profileViews,
           bumpCount: senior.bumpCount,
           isAcceptingRequests: senior.isAcceptingRequests,
+          freshmanEmbeddings,
+          seniorEmbeddings,
         });
         return { ...senior, score, matchReasons };
       })

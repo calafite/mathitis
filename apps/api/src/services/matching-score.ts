@@ -1,3 +1,5 @@
+import { dotProduct } from '../lib/embeddings.js';
+
 export interface MatchInput {
   /** The set of tag ids on the freshman's profile. */
   freshmanTagIds: string[];
@@ -9,6 +11,9 @@ export interface MatchInput {
   profileViews: number;
   /** Number of bumps the senior has received. */
   bumpCount: number;
+  /** L2-normalized embeddings keyed by tag id (optional for backward compat). */
+  freshmanEmbeddings?: Map<string, number[]>;
+  seniorEmbeddings?: Map<string, number[]>;
 }
 
 export const WEIGHTS = {
@@ -35,9 +40,12 @@ export const REASON_THRESHOLDS = {
   bumpsNoticed: 1,
   /** bumpCount at which a senior is "frequently bumped" */
   bumpsFrequent: 2,
+  /** dot-product threshold for "similar interests" reason */
+  semanticSimilar: 0.75,
 } as const;
 
 const SHARED_TAGS_CAP = 3;
+const SEMANTIC_PAIRS_CAP = 3;
 
 export interface MatchReasonInput {
   /** Tag entries on the freshman profile (id + name). */
@@ -52,6 +60,72 @@ export interface MatchReasonInput {
   bumpCount: number;
   /** Whether the senior is currently accepting mentorship requests. */
   isAcceptingRequests?: boolean;
+  /** Embeddings keyed by tag id (optional). */
+  freshmanEmbeddings?: Map<string, number[]>;
+  seniorEmbeddings?: Map<string, number[]>;
+}
+
+/**
+ * Computes the soft semantic similarity between two sets of tag embeddings.
+ * For each freshman tag, finds the most similar senior tag and averages those
+ * best-match similarities. Returns a 0-100 score.
+ */
+export function calculateSemanticTagScore(
+  freshmanEmbeddings: Map<string, number[]>,
+  seniorEmbeddings: Map<string, number[]>,
+): number {
+  if (freshmanEmbeddings.size === 0 || seniorEmbeddings.size === 0) return 0;
+
+  const seniorVecs = [...seniorEmbeddings.values()];
+  let totalSim = 0;
+
+  for (const fVec of freshmanEmbeddings.values()) {
+    let maxSim = 0;
+    for (const sVec of seniorVecs) {
+      const sim = dotProduct(fVec, sVec);
+      if (sim > maxSim) maxSim = sim;
+    }
+    totalSim += Math.max(0, maxSim);
+  }
+
+  return Math.min(100, Math.round((totalSim / freshmanEmbeddings.size) * 100));
+}
+
+/**
+ * Finds pairs of freshman/senior tags (distinct names) whose embeddings have
+ * high cosine similarity (≥ threshold), returning up to SEMANTIC_PAIRS_CAP
+ * pairs for the match reasons.
+ */
+export function findSemanticPairs(
+  freshmanTags: Array<{ id: string; name: string }>,
+  seniorTags: Array<{ id: string; name: string }>,
+  freshmanEmbeddings: Map<string, number[]>,
+  seniorEmbeddings: Map<string, number[]>,
+  threshold: number = REASON_THRESHOLDS.semanticSimilar,
+): Array<{ freshmanTag: string; seniorTag: string }> {
+  const pairs: Array<{ freshmanTag: string; seniorTag: string; sim: number }> = [];
+  const sharedIds = new Set(
+    freshmanTags.filter((t) => seniorTags.some((s) => s.id === t.id)).map((t) => t.id),
+  );
+
+  for (const fTag of freshmanTags) {
+    const fVec = freshmanEmbeddings.get(fTag.id);
+    if (!fVec) continue;
+    for (const sTag of seniorTags) {
+      if (sharedIds.has(fTag.id) && fTag.id === sTag.id) continue;
+      const sVec = seniorEmbeddings.get(sTag.id);
+      if (!sVec) continue;
+      const sim = dotProduct(fVec, sVec);
+      if (sim >= threshold) {
+        pairs.push({ freshmanTag: fTag.name, seniorTag: sTag.name, sim });
+      }
+    }
+  }
+
+  return pairs
+    .sort((a, b) => b.sim - a.sim)
+    .slice(0, SEMANTIC_PAIRS_CAP)
+    .map(({ freshmanTag, seniorTag }) => ({ freshmanTag, seniorTag }));
 }
 
 /**
@@ -75,6 +149,19 @@ export function buildMatchReasons(input: MatchReasonInput): string[] {
         ? `1 interesse em comum: ${shown[0]}`
         : `${shared.length} interesses em comum: ${shown.join(', ')}${suffix}`,
     );
+  }
+
+  // Semantic similarity reasons for distinct tag pairs.
+  if (input.freshmanEmbeddings && input.seniorEmbeddings) {
+    const semanticPairs = findSemanticPairs(
+      input.freshmanTags,
+      input.seniorTags,
+      input.freshmanEmbeddings,
+      input.seniorEmbeddings,
+    );
+    for (const pair of semanticPairs) {
+      reasons.push(`Interesses afins: ${pair.freshmanTag} ~ ${pair.seniorTag}`);
+    }
   }
 
   if (input.effortScore >= REASON_THRESHOLDS.effortRich) {
@@ -105,27 +192,34 @@ export function buildMatchReasons(input: MatchReasonInput): string[] {
 /**
  * Pure weighted compatibility score used by the recommendation engine.
  *
- *   Match = 0.40*TagOverlap + 0.30*Effort + 0.10*Views + 0.20*Bumps
+ *   Match = 0.40*TagScore + 0.30*Effort + 0.10*Views + 0.20*Bumps
  *
- * - Tag overlap is the Jaccard index between the freshman and senior tags (0-100).
+ * TagScore = max(JaccardOverlap, SemanticTagScore).
+ * When no embeddings are available, falls back to pure Jaccard.
+ *
  * - Views are log10-normalised so popular profiles saturate slowly.
  * - Bumps are capped at the 4 active-bump limit.
  */
 export function calculateMatchScore(input: MatchInput): number {
-  const overlap =
+  const jaccard =
     input.freshmanTagIds.length === 0 || input.seniorTagIds.length === 0
       ? 0
       : intersectionSize(input.freshmanTagIds, input.seniorTagIds) /
         Math.max(unionSize(input.freshmanTagIds, input.seniorTagIds), 1);
 
-  const tagOverlap = 100 * overlap;
+  let tagScore = 100 * jaccard;
+
+  if (input.freshmanEmbeddings && input.seniorEmbeddings) {
+    const semantic = calculateSemanticTagScore(input.freshmanEmbeddings, input.seniorEmbeddings);
+    tagScore = Math.max(tagScore, semantic);
+  }
 
   const viewsScore = Math.min(100, (Math.log10(input.profileViews + 1) / 3) * 100);
 
   const bumpsScore = Math.min(100, input.bumpCount * 25);
 
   const total =
-    WEIGHTS.tagOverlap * tagOverlap +
+    WEIGHTS.tagOverlap * tagScore +
     WEIGHTS.effort * Math.min(100, Math.max(0, input.effortScore)) +
     WEIGHTS.views * viewsScore +
     WEIGHTS.bumps * bumpsScore;
