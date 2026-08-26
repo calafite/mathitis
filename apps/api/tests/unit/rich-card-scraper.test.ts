@@ -35,7 +35,7 @@ describe('createRichCardScraper', () => {
       expect(card.cardType).toBe('song');
       expect(card.title).toBe('Everlong');
       expect(card.imageUrl).toBe('https://i.scdn.co/image/ab67616d0000b273');
-      expect(card.embedUrl).toBe('https://open.spotify.com/embed/track/4uLU6hMCjMI75M1A2tKUQC');
+      expect(card).not.toHaveProperty('embedUrl');
       expect(card.metadata.spotifyUri).toBe('spotify:track:4uLU6hMCjMI75M1A2tKUQC');
       expect(card.accentColor).toBe('#1db954');
     });
