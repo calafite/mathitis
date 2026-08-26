@@ -67,12 +67,12 @@ describe('createProfileService.updateProfile tag sync', () => {
     await service.updateProfile('user-1', body);
 
     expect(repository.update).toHaveBeenCalledWith('user-1', { tagline: 'Grafos e gentileza' });
-    expect(repository.setTags).toHaveBeenCalledWith('user-1', ['tag-a', 'tag-b', 'tag-c']);
+    expect(repository.setTags).toHaveBeenCalledWith('user-1', ['tag-a', 'tag-b', 'tag-c'], undefined);
   });
 
   it('clears all tags when an empty array is provided', async () => {
     await service.updateProfile('user-1', { tagIds: [] });
-    expect(repository.setTags).toHaveBeenCalledWith('user-1', []);
+    expect(repository.setTags).toHaveBeenCalledWith('user-1', [], undefined);
   });
 
   it('does not touch tags when tagIds are omitted', async () => {

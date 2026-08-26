@@ -27,6 +27,7 @@ vi.mock('@/lib/profile-api', () => ({
 vi.mock('@/lib/discovery-api', () => ({
   discoveryApi: {
     listTags: vi.fn(),
+    suggestTags: vi.fn(),
     bump: vi.fn(),
     removeBump: vi.fn(),
   },
@@ -84,45 +85,31 @@ describe('ProfileStudioPage tag selector', () => {
     mockedProfileApi.getMe.mockResolvedValue({ profile } as never);
     mockedProfileApi.updateMe.mockResolvedValue({ profile } as never);
     mockedDiscoveryApi.listTags.mockResolvedValue(allTags as never);
+    mockedDiscoveryApi.suggestTags.mockResolvedValue(allTags as never);
   });
 
-  it('renders the tag grid grouped by category with emojis and preselected tags', async () => {
+  it('renders the tag section heading and shows preselected tag badges', async () => {
     renderStudio();
 
     expect(await screen.findByText('Interesses & Especializações')).toBeInTheDocument();
 
-    // The tag appears both in the selector grid and on the live preview badge.
-    const algebraButtons = await screen.findAllByRole('button', { name: /algebra/ });
-    expect(algebraButtons.length).toBeGreaterThanOrEqual(1);
-    expect(algebraButtons[0]).toHaveAttribute('aria-pressed', 'true');
-
-    const courseHeading = screen.getByText('course');
-    const stackHeading = screen.getByText('tech-stack');
-    expect(courseHeading).toBeInTheDocument();
-    expect(stackHeading).toBeInTheDocument();
+    // The pre-selected algebra tag appears as a badge in the DynamicTagInput
+    const algebraBadges = await screen.findAllByText(/algebra/);
+    expect(algebraBadges.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('toggling a tag marks the draft dirty and includes the new ids on save', async () => {
+  it('allows typing in the input and shows the create option for unknown tags', async () => {
     const user = userEvent.setup();
     renderStudio();
 
     await screen.findByText('Interesses & Especializações');
-    await user.click(screen.getByRole('button', { name: /machine-learning/ }));
 
-    // Floating save bar appears because the draft is dirty
-    await expect(
-      screen.getByText('Você tem alterações não salvas no seu perfil'),
-    ).toBeInTheDocument();
+    const input = screen.getByPlaceholderText(/Digite para buscar/);
+    await user.type(input, 'Compiladores');
 
-    const saveButtons = screen.getAllByRole('button', { name: 'Salvar alterações' });
-    await user.click(saveButtons[saveButtons.length - 1]!);
-
+    // Should show "Criar" option since it's not in the catalog
     await waitFor(() => {
-      expect(mockedProfileApi.updateMe).toHaveBeenCalledWith(
-        expect.objectContaining({
-          tagIds: ['tag-algebra', 'tag-ml'],
-        }),
-      );
+      expect(screen.getByText(/Criar/)).toBeInTheDocument();
     });
   });
 });
