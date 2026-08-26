@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { RichCard, ThemePalette } from '@mathitis/schemas';
 import { MarkdownPreview } from '@/components/markdown/markdown-preview';
-import { CardRail, CardRailItem } from './rich-card-shared';
+import { RichCardView } from './rich-card-view';
 
 export interface ProfileDraftTag {
   id: string;
@@ -179,11 +179,11 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
         {cards.length > 0 ? (
           <>
             <SectionHeader>Coleção</SectionHeader>
-            <CardRail>
+            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-1">
               {cards.map((card) => (
-                <CardRailItem key={card.id} card={card} />
+                <RichCardView key={card.id} card={card} />
               ))}
-            </CardRail>
+            </div>
           </>
         ) : null}
       </div>

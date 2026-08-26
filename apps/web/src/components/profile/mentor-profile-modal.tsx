@@ -7,7 +7,7 @@ import { profileApi } from '@/lib/profile-api';
 import { discoveryApi } from '@/lib/discovery-api';
 import { requestsApi, buildIdempotencyKey } from '@/lib/requests-api';
 import { MarkdownPreview } from '@/components/markdown/markdown-preview';
-import { CardRail, CardRailItem } from './rich-card-shared';
+import { RichCardView } from './rich-card-view';
 
 interface MentorProfileModalProps {
   open: boolean;
@@ -215,11 +215,11 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                       {richCards.length} {richCards.length === 1 ? 'cartão' : 'cartões'}
                     </span>
                   </div>
-                  <CardRail>
+                  <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-1">
                     {richCards.map((card) => (
-                      <CardRailItem key={card.id} card={card} />
+                      <RichCardView key={card.id} card={card} />
                     ))}
-                  </CardRail>
+                  </div>
                 </section>
               )}
 
