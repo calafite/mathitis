@@ -106,9 +106,15 @@ function CardContent({ card }: { card: RichCard }) {
 
 export function RichCardView({ card }: { card: RichCard }) {
   const meta = CARD_META[card.cardType] ?? { label: 'Cartão', icon: '✦' };
+  const isSpotifySong = card.cardType === 'song' && card.embedUrl?.includes('open.spotify.com');
   return (
-    <article className="flex h-full flex-col rounded-none border border-foreground p-3">
-      {card.imageUrl ? (
+    <article
+      className="flex h-full flex-col border border-foreground p-3"
+      style={{
+        clipPath: 'polygon(0 8px, 8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px))',
+      }}
+    >
+      {card.imageUrl && !isSpotifySong ? (
         <img
           src={card.imageUrl}
           alt=""
@@ -178,7 +184,7 @@ export function CardRail({ children }: { children: ReactNode }) {
       <div
         ref={railRef}
         data-testid="card-rail"
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-track]:bg-transparent"
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:h-1 [&::-webkit-scrollbar-thumb]:bg-foreground/30 [&::-webkit-scrollbar-thumb]:hover:bg-foreground/50 [&::-webkit-scrollbar-track]:bg-transparent"
       >
         {children}
       </div>
