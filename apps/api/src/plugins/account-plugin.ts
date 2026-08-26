@@ -150,7 +150,10 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
       const userId = request.sessionUser!.sub;
 
       const data: Record<string, unknown> = {};
-      if (semester !== undefined) data.semester = semester;
+      if (semester !== undefined) {
+        data.semester = semester;
+        data.role = semester >= 2 ? 'senior' : 'freshman';
+      }
       if (preferences !== undefined) {
         const existing = (await prisma.user.findUnique({ where: { id: userId }, select: { preferences: true } }))?.preferences as Record<string, unknown> | null;
         data.preferences = { ...(existing ?? {}), ...preferences };

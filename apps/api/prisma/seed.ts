@@ -64,7 +64,7 @@ const TEST_USERS: Array<{
   {
     handle: 'alan_loops',
     email: 'alan@cs.uni.edu',
-    role: 'freshman',
+    role: 'senior',
     semester: 2,
     password: 'TestPassword123!',
     socialName: 'Alan',

@@ -122,7 +122,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       email: input.email.toLowerCase(),
       passwordHash,
       semester: input.semester,
-      role: 'freshman',
+      role: input.semester >= 2 ? 'senior' : 'freshman',
       socialName: input.socialName,
     });
 
