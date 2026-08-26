@@ -11,7 +11,7 @@ export const themePaletteSchema = z.object({
   primaryColor: hexColorSchema.default('#6366f1'),
   accentColor: hexColorSchema.default('#ec4899'),
   badgeColor: hexColorSchema.default('#3b82f6'),
-  cardStyle: cardStyleSchema.default('glassmorphic'),
+  cardStyle: cardStyleSchema.default('glassmorphic').optional(),
 });
 export type ThemePalette = z.infer<typeof themePaletteSchema>;
 
@@ -140,6 +140,7 @@ export const updateProfileBodySchema = z.object({
   isDiscoverable: z.boolean().optional(),
   isAcceptingRequests: z.boolean().optional(),
   tagIds: z.array(z.string().uuid()).max(15, 'Selecione no máximo 15 interesses').optional(),
+  tagNames: z.array(z.string().min(1).max(60)).max(15, 'Selecione no máximo 15 interesses').optional(),
 });
 export type UpdateProfileBody = z.infer<typeof updateProfileBodySchema>;
 

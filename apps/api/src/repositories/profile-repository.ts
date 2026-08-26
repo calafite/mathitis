@@ -17,7 +17,7 @@ export interface ProfileRepository {
   findByUserId(userId: string): Promise<ProfileWithRelations | null>;
   update(userId: string, data: Prisma.ProfileUncheckedUpdateInput): Promise<void>;
   /** Overwrites the profile's tag set with the given tag ids (validated). */
-  setTags(userId: string, tagIds: string[]): Promise<void>;
+  setTags(userId: string, tagIds: string[], tagNames?: string[]): Promise<void>;
   incrementViews(userId: string): Promise<void>;
   setEffortScore(userId: string, score: number): Promise<void>;
   setAvatar(userId: string, url: string, thumbnailUrl: string): Promise<void>;
@@ -49,21 +49,40 @@ export function createProfileRepository(prisma: PrismaClient): ProfileRepository
     await prisma.profile.update({ where: { userId }, data });
   }
 
-  async function setTags(userId: string, tagIds: string[]) {
+  async function setTags(userId: string, tagIds: string[], tagNames?: string[]) {
     const uniqueIds = [...new Set(tagIds)];
+    const uniqueNames = [...new Set(tagNames ?? [])];
     await prisma.$transaction(async (tx) => {
+      // Resolve tag names: find existing or create with embedding.
+      const resolvedIds = [...uniqueIds];
+      for (const name of uniqueNames) {
+        const existing = await tx.tag.findFirst({ where: { name }, select: { id: true } });
+        if (existing) {
+          resolvedIds.push(existing.id);
+        } else {
+          const { generateEmbedding } = await import('../lib/embeddings.js');
+          const embedding = await generateEmbedding(name);
+          const tag = await tx.tag.create({
+            data: { name, category: 'custom', color: '#c9f24c' },
+            select: { id: true },
+          });
+          await tx.$executeRaw`UPDATE tags SET embedding = ${embedding}::float[] WHERE id = ${tag.id}::uuid`;
+          resolvedIds.push(tag.id);
+        }
+      }
+      const finalIds = [...new Set(resolvedIds)];
       // Reject unknown ids outright so a stale client cannot silently drop them.
       const known = await tx.tag.findMany({
-        where: { id: { in: uniqueIds } },
+        where: { id: { in: finalIds } },
         select: { id: true },
       });
-      if (known.length !== uniqueIds.length) {
+      if (known.length !== finalIds.length) {
         throw new ValidationError('Um ou mais interesses selecionados não existem', 'TAG_NOT_FOUND');
       }
       await tx.profileTag.deleteMany({ where: { profileId: userId } });
-      if (uniqueIds.length > 0) {
+      if (finalIds.length > 0) {
         await tx.profileTag.createMany({
-          data: uniqueIds.map((tagId) => ({ profileId: userId, tagId })),
+          data: finalIds.map((tagId) => ({ profileId: userId, tagId })),
         });
       }
     });
