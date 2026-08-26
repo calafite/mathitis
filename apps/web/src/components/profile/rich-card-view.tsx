@@ -65,6 +65,11 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
     case 'game':
       return (
         <div className="space-y-1">
+          {card.subtitle && (
+            <p className="font-mono text-xs font-semibold uppercase text-foreground">
+              {card.subtitle}
+            </p>
+          )}
           {Boolean(metadata.steamAppId) && (
             <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
               STEAM APP ID: {String(metadata.steamAppId)}
@@ -91,6 +96,11 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
     case 'project':
       return (
         <div className="space-y-2">
+          {card.subtitle && (
+            <p className="font-mono text-xs font-semibold uppercase text-foreground">
+              {card.subtitle}
+            </p>
+          )}
           {Array.isArray(metadata.techStack) && (metadata.techStack as string[]).length > 0 && (
             <div className="flex flex-wrap gap-1">
               {(metadata.techStack as string[]).slice(0, 3).map((tech) => (

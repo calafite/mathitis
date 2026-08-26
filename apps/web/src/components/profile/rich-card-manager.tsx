@@ -267,15 +267,6 @@ function CardForm({
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">Descrição</label>
-          <textarea
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            rows={2}
-            className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
-          />
-        </div>
-        <div className="sm:col-span-2">
           <label className="mb-1 block text-xs font-medium text-muted-foreground">URL externa</label>
           <Input value={form.externalUrl} onChange={(e) => setForm({ ...form, externalUrl: e.target.value })} placeholder="https://store.steampowered.com/app/…" />
         </div>
