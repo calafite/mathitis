@@ -22,7 +22,7 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
       return (
         <div className="space-y-1">
           {card.subtitle && (
-            <p className="font-mono text-xs font-semibold uppercase text-foreground">
+            <p className="font-mono text-[10px] text-muted-foreground">
               {card.subtitle}
             </p>
           )}
@@ -44,7 +44,7 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
       return (
         <div className="space-y-1">
           {(card.subtitle || year) && (
-            <p className="font-mono text-xs font-semibold uppercase text-foreground">
+            <p className="font-mono text-[10px] text-muted-foreground">
               DIR: {card.subtitle}{card.subtitle && year ? ` (${year})` : year ? `(${year})` : ''}
             </p>
           )}
@@ -66,7 +66,7 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
       return (
         <div className="space-y-1">
           {card.subtitle && (
-            <p className="font-mono text-xs font-semibold uppercase text-foreground">
+            <p className="font-mono text-[10px] text-muted-foreground">
               {card.subtitle}
             </p>
           )}
@@ -97,7 +97,7 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
       return (
         <div className="space-y-2">
           {card.subtitle && (
-            <p className="font-mono text-xs font-semibold uppercase text-foreground">
+            <p className="font-mono text-[10px] text-muted-foreground">
               {card.subtitle}
             </p>
           )}
@@ -135,7 +135,7 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
       return (
         <div className="space-y-1">
           {card.subtitle && (
-            <p className="font-mono text-xs font-semibold uppercase text-foreground">
+            <p className="font-mono text-[10px] text-muted-foreground">
               {card.subtitle}
             </p>
           )}
@@ -151,7 +151,7 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
       return (
         <div className="space-y-1">
           {card.subtitle && (
-            <p className="line-clamp-1 font-mono text-xs font-semibold text-muted-foreground">
+            <p className="font-mono text-[10px] text-muted-foreground">
               {card.subtitle}
             </p>
           )}
