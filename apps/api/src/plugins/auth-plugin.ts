@@ -66,6 +66,7 @@ export interface AuthPluginOptions {
 }
 
 export async function registerAuthPlugin(app: FastifyInstance, options: AuthPluginOptions) {
+  const { userRepository } = options;
   const authService: AuthService = createAuthService({
     userRepository: options.userRepository,
     tokenRepository: options.tokenRepository,
@@ -208,7 +209,15 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
           },
         },
         async (request, reply) => {
-          await authService.verifyEmail(request.params.token);
+          const { userId } = await authService.verifyEmail(request.params.token);
+
+          // Auto-login: hand the freshly verified user a session so they land
+          // straight in the app instead of the login page.
+          const user = await userRepository.findActiveById(userId);
+          if (user) {
+            await setSessionCookie(reply, user.id, user.role, user.handle);
+          }
+
           return reply.send({ ok: true, message: 'E-mail verificado com sucesso' });
         },
       );

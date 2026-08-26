@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/lib/auth-api';
 import { ApiError } from '@/lib/api';
-import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { ErrorPage } from '@/pages/error-page';
 import { usePageMeta } from '@/lib/use-page-meta';
@@ -12,6 +12,8 @@ type VerifyState = 'verifying' | 'success' | 'error';
 export function VerifyEmailPage() {
   usePageMeta('Verificar e-mail', 'Confirmação de e-mail da sua conta Mathitis.');
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const token = searchParams.get('token') ?? '';
   const [state, setState] = useState<VerifyState>('verifying');
   const [message, setMessage] = useState<string | null>(null);
@@ -27,7 +29,12 @@ export function VerifyEmailPage() {
     authApi
       .verifyEmail(token)
       .then(() => {
-        if (!cancelled) setState('success');
+        if (cancelled) return;
+        setState('success');
+        // The API set the session cookie during verification: refresh the
+        // auth cache and go straight into the app — no login detour.
+        void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+        window.setTimeout(() => navigate('/', { replace: true }), 1200);
       })
       .catch((err) => {
         if (cancelled) return;
@@ -40,7 +47,7 @@ export function VerifyEmailPage() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, navigate, queryClient]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -59,11 +66,8 @@ export function VerifyEmailPage() {
           <>
             <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">E-mail verificado</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Sua conta está ativa. Entre para começar a explorar padrinhos.
+              Sua conta está ativa. Estamos te colocando dentro…
             </p>
-            <Link to="/login">
-              <Button className="mt-6">Voltar para o login</Button>
-            </Link>
           </>
         )}
 

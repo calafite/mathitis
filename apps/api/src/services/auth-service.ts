@@ -46,7 +46,7 @@ export interface AuthService {
   getCurrentUser(userId: string): Promise<UserWithProfile>;
   recover(email: string): Promise<void>;
   resetPassword(token: string, newPassword: string): Promise<{ userId: string }>;
-  verifyEmail(token: string): Promise<void>;
+  verifyEmail(token: string): Promise<{ userId: string }>;
 }
 
 export function createAuthService(deps: AuthServiceDeps): AuthService {
@@ -213,7 +213,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
     return { userId: match.userId };
   }
 
-  async function verifyEmail(token: string): Promise<void> {
+  async function verifyEmail(token: string): Promise<{ userId: string }> {
     const parts = token.split(COMPOSITE_TOKEN_SEPARATOR);
     if (parts.length !== 2) {
       throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
@@ -226,7 +226,8 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
     }
     if (candidate.consumedAt !== null) {
-      return;
+      // Already used: idempotent success (link re-clicked / double-fired).
+      return { userId: candidate.userId };
     }
     if (candidate.expiresAt <= new Date()) {
       throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
@@ -241,11 +242,9 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       throw new DomainError('TOKEN_INVALID', 400, 'Token de verificação inválido ou expirado');
     }
 
-    const consumed = await tokenRepository.consume(candidate.id);
-    if (!consumed) {
-      return;
-    }
+    await tokenRepository.consume(candidate.id);
     await userRepository.activate(candidate.userId);
+    return { userId: candidate.userId };
   }
 
   return {
