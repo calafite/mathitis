@@ -9,103 +9,200 @@ const TYPE_CONFIG: Record<string, { label: string; icon: string; linkText: strin
   custom: { label: 'LINK', icon: '✦', linkText: 'ACESSAR' },
 };
 
+function formatDuration(ms: number): string {
+  const totalSec = Math.floor(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return `${min}:${String(sec).padStart(2, '0')}`;
+}
+
+function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<string, unknown> }) {
+  switch (card.cardType) {
+    case 'song':
+      return (
+        <div className="space-y-1">
+          {card.subtitle && (
+            <p className="font-mono text-xs font-semibold uppercase text-foreground">
+              {card.subtitle}
+            </p>
+          )}
+          {typeof metadata.albumName === 'string' && metadata.albumName && (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              ÁLBUM · {metadata.albumName}
+            </p>
+          )}
+          {typeof metadata.durationMs === 'number' && metadata.durationMs > 0 && (
+            <p className="text-right font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              {formatDuration(metadata.durationMs)}
+            </p>
+          )}
+        </div>
+      );
+
+    case 'film': {
+      const year = metadata.year != null ? String(metadata.year) : null;
+      return (
+        <div className="space-y-1">
+          {(card.subtitle || year) && (
+            <p className="font-mono text-xs font-semibold uppercase text-foreground">
+              DIR: {card.subtitle}{card.subtitle && year ? ` (${year})` : year ? `(${year})` : ''}
+            </p>
+          )}
+          {(typeof metadata.rating === 'number' || typeof metadata.rating === 'string') && (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              AVALIAÇÃO: ★ {Number(metadata.rating).toFixed(1)}/10
+            </p>
+          )}
+          {Array.isArray(metadata.genres) && metadata.genres.length > 0 && (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              {(metadata.genres as string[]).join(', ')}
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    case 'game':
+      return (
+        <div className="space-y-1">
+          {Boolean(metadata.steamAppId) && (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              STEAM APP ID: {String(metadata.steamAppId)}
+            </p>
+          )}
+          {typeof metadata.platform === 'string' && metadata.platform && (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              PLATAFORMA: {String(metadata.platform)}
+            </p>
+          )}
+          {card.description && (
+            <p className="line-clamp-2 text-xs leading-relaxed text-foreground/90">
+              {card.description}
+            </p>
+          )}
+          {typeof metadata.hoursPlayed === 'number' && metadata.hoursPlayed > 0 && (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              TEMPO DE JOGO: {metadata.hoursPlayed}H
+            </p>
+          )}
+        </div>
+      );
+
+    case 'project':
+      return (
+        <div className="space-y-2">
+          {Array.isArray(metadata.techStack) && (metadata.techStack as string[]).length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {(metadata.techStack as string[]).slice(0, 3).map((tech) => (
+                <span
+                  key={tech}
+                  className="border border-foreground px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase"
+                >
+                  {tech}
+                </span>
+              ))}
+              {(metadata.techStack as string[]).length > 3 && (
+                <span className="border border-foreground px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase opacity-60">
+                  +{(metadata.techStack as string[]).length - 3}
+                </span>
+              )}
+            </div>
+          )}
+          {typeof metadata.stars === 'number' && metadata.stars > 0 && (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              ★ {metadata.stars.toLocaleString()} STARS
+            </p>
+          )}
+          {card.description && (
+            <p className="line-clamp-2 text-xs leading-relaxed text-foreground/90">
+              {card.description}
+            </p>
+          )}
+        </div>
+      );
+
+    case 'book':
+      return (
+        <div className="space-y-1">
+          {card.subtitle && (
+            <p className="font-mono text-xs font-semibold uppercase text-foreground">
+              {card.subtitle}
+            </p>
+          )}
+          {card.description && (
+            <p className="line-clamp-3 text-xs leading-relaxed text-foreground/90">
+              {card.description}
+            </p>
+          )}
+        </div>
+      );
+
+    default:
+      return (
+        <div className="space-y-1">
+          {card.subtitle && (
+            <p className="line-clamp-1 font-mono text-xs font-semibold text-muted-foreground">
+              {card.subtitle}
+            </p>
+          )}
+          {card.description && (
+            <p className="line-clamp-3 text-xs leading-relaxed text-foreground/90">
+              {card.description}
+            </p>
+          )}
+        </div>
+      );
+  }
+}
+
 export function RichCardView({ card }: { card: RichCard }) {
   const config = TYPE_CONFIG[card.cardType] ?? TYPE_CONFIG.custom!;
-  const isSpotify = card.cardType === 'song' && Boolean(card.embedUrl);
   const metadata = (card.metadata ?? {}) as Record<string, unknown>;
 
   return (
-    <article
-      className="group relative flex w-72 shrink-0 flex-col justify-between border-2 border-foreground bg-card text-foreground snap-start"
-      style={{ minHeight: '320px' }}
-    >
-      {/* Header: Title & Category Badge */}
-      <div className="flex items-start justify-between gap-2 border-b border-foreground/30 p-3">
+    <article className="group relative flex w-72 shrink-0 flex-col border-2 border-foreground bg-card text-foreground snap-start">
+      {/* 1. Header: Title & Category Badge */}
+      <div className="flex items-start justify-between gap-2 border-b-2 border-foreground p-3">
         <h4 className="font-sans text-sm font-bold uppercase leading-tight line-clamp-1">
           {card.title}
         </h4>
-        <span className="shrink-0 border border-foreground/40 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+        <span
+          className="shrink-0 border border-foreground px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-foreground"
+          style={{ backgroundColor: card.accentColor || undefined }}
+        >
           {config.icon} {config.label}
         </span>
       </div>
 
-      {/* Media & Body Content */}
-      <div className="flex flex-1 flex-col justify-center">
-        {isSpotify && card.embedUrl ? (
-          <div className="bg-black p-2">
-            <iframe
-              src={card.embedUrl}
-              title={card.title}
-              width="100%"
-              height="152"
-              loading="lazy"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              style={{
-                colorScheme: 'dark',
-                backgroundColor: 'transparent',
-                border: 0,
-              }}
-            />
-          </div>
+      {/* 2. Cover Art (Full-bleed, 160px) */}
+      <div className="flex h-40 w-full items-center justify-center overflow-hidden border-b-2 border-foreground bg-muted">
+        {card.imageUrl ? (
+          <img
+            src={card.imageUrl}
+            alt=""
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
         ) : (
-          <>
-            {card.imageUrl && (
-              <div className="h-32 w-full overflow-hidden border-b border-foreground/30 bg-muted">
-                <img
-                  src={card.imageUrl}
-                  alt=""
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-            )}
-
-            <div className="space-y-2 p-3">
-              {card.subtitle && (
-                <p className="line-clamp-1 font-mono text-xs font-semibold text-muted-foreground">
-                  {card.subtitle}
-                </p>
-              )}
-              {card.description && (
-                <p className="line-clamp-3 text-xs leading-relaxed text-foreground/90">
-                  {card.description}
-                </p>
-              )}
-
-              {card.cardType === 'game' && Boolean(metadata.steamAppId) && (
-                <p className="font-mono text-[10px] uppercase text-muted-foreground">
-                  STEAM · {String(metadata.steamAppId)}
-                </p>
-              )}
-              {card.cardType === 'film' && Boolean(metadata.year) && (
-                <p className="font-mono text-[10px] uppercase text-muted-foreground">
-                  LANÇAMENTO · {String(metadata.year)}
-                </p>
-              )}
-              {card.cardType === 'project' && Array.isArray(metadata.techStack) && (
-                <div className="flex flex-wrap gap-1 pt-1">
-                  {(metadata.techStack as string[]).slice(0, 3).map((tech) => (
-                    <span
-                      key={tech}
-                      className="border border-foreground/30 px-1 py-0.5 font-mono text-[8px] font-bold uppercase"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            [ SEM IMAGEM ]
+          </span>
         )}
       </div>
 
-      {/* Context-Aware Footer Link */}
+      {/* 3. Metadata Body */}
+      <div className="flex-1 p-3">
+        <CardMetadata card={card} metadata={metadata} />
+      </div>
+
+      {/* 4. Footer: Contextual CTA Link */}
       {card.externalUrl && (
-        <div className="border-t border-foreground/30 bg-muted/20 p-2.5">
+        <div className="border-t-2 border-foreground p-3">
           <a
             href={card.externalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-widest underline underline-offset-4 transition-colors hover:text-primary"
+            className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-widest underline underline-offset-4 transition-colors hover:bg-foreground hover:text-background"
           >
             {config.linkText} <span aria-hidden>↗</span>
           </a>
