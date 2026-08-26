@@ -142,6 +142,7 @@ model Tag {
   category  String   @db.VarChar(60)
   color     String   @db.VarChar(7)
   icon      String?  @db.VarChar(60)
+  embedding Unsupported("float[]")?
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   profiles ProfileTag[]
