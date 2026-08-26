@@ -122,7 +122,7 @@ body {
 /* ---- Profile markdown body ---- */
 .markdown-body {
   line-height: 1.7;
-  color: var(--text, #1e293b);
+  color: var(--color-foreground);
 }
 .markdown-body > :first-child {
   margin-top: 0;
