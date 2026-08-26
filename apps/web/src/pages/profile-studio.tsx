@@ -3,9 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Profile, ThemePalette, UpdateProfileBody } from '@mathitis/schemas';
 import { useAuth } from '@/contexts/auth-context';
 import { profileApi } from '@/lib/profile-api';
-import { discoveryApi } from '@/lib/discovery-api';
 import { ApiError } from '@/lib/api';
-import type { ProfileDraftTag } from '@/components/profile/profile-preview';
+import { DynamicTagInput } from '@/components/profile/dynamic-tag-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ThemePicker } from '@/components/profile/theme-picker';
@@ -66,7 +65,8 @@ function toUpdateBody(draft: ProfileDraft): UpdateProfileBody {
     maxMentees: draft.maxMentees,
     isAcceptingRequests: draft.isAcceptingRequests,
     isDiscoverable: draft.isDiscoverable,
-    tagIds: draft.tags.map((tag) => tag.id),
+    tagIds: draft.tags.filter((t) => !t.id.startsWith('__new__:')).map((t) => t.id),
+    tagNames: draft.tags.filter((t) => t.id.startsWith('__new__:')).map((t) => t.name),
   };
 }
 
@@ -97,11 +97,6 @@ export function ProfileStudioPage() {
   const profileQuery = useQuery({
     queryKey: ['profile', 'me'],
     queryFn: () => profileApi.getMe().then((r) => r.profile),
-  });
-
-  const allTagsQuery = useQuery({
-    queryKey: ['tags', 'all'],
-    queryFn: () => discoveryApi.listTags(false),
   });
 
   const [draft, setDraft] = useState<ProfileDraft | null>(null);
@@ -280,57 +275,11 @@ export function ProfileStudioPage() {
             <p className="text-xs text-muted-foreground">
               Selecione até 15 interesses para aparecer nas buscas da Descoberta.
             </p>
-            {(allTagsQuery.data?.tags ?? []).length > 0 ? (
-              Object.entries(
-                (allTagsQuery.data?.tags ?? []).reduce<Record<string, ProfileDraftTag[]>>(
-                  (groups, tag) => {
-                    (groups[tag.category] ??= []).push(tag);
-                    return groups;
-                  },
-                  {},
-                ),
-              ).map(([category, tags]) => (
-                <div key={category}>
-                  <div className="mb-1.5 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    {category}
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {tags.map((tag) => {
-                      const active = draft.tags.some((t) => t.id === tag.id);
-                      return (
-                        <button
-                          key={tag.id}
-                          type="button"
-                          aria-pressed={active}
-                          onClick={() =>
-                            set({
-                              tags: active
-                                ? draft.tags.filter((t) => t.id !== tag.id)
-                                : [...draft.tags, tag],
-                            })
-                          }
-                          className={`border-2 px-2 py-1 font-mono text-[11px] font-bold uppercase tracking-wide transition-colors ${
-                            active
-                              ? 'border-black bg-[#c9f24c] text-black'
-                              : 'border-white/25 text-foreground hover:border-[#c9ced8]/60'
-                          }`}
-                        >
-                          {tag.icon ? `${tag.icon} ` : ''}
-                          {tag.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="font-mono text-xs text-muted-foreground">Carregando interesses…</p>
-            )}
-            {draft.tags.length >= 15 && (
-              <p role="status" className="font-mono text-[10px] uppercase text-amber-600 dark:text-amber-400">
-                Limite de 15 interesses atingido
-              </p>
-            )}
+            <DynamicTagInput
+              value={draft.tags}
+              onChange={(tags) => set({ tags })}
+              maxTags={15}
+            />
           </section>
 
           <section className="space-y-4 border-2 border-white/15 bg-card p-5">
