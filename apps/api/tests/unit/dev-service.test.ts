@@ -90,7 +90,7 @@ describe('devService.promoteToAdmin', () => {
 });
 
 describe('devService.revokeAdmin', () => {
-  it('demotes by semester (>=5 to senior) and bumps the epoch', async () => {
+  it('demotes by semester (>2 to senior) and bumps the epoch', async () => {
     const h = harness();
     h.prisma.user.findUnique.mockResolvedValue({ ...student, deletedAt: null, role: 'administrator' });
 
@@ -106,9 +106,31 @@ describe('devService.revokeAdmin', () => {
     });
   });
 
-  it('demotes freshmen-stage administrators (<5) to freshman', async () => {
+  it('treats 3rd-semester administrators as veterans (senior)', async () => {
     const h = harness();
-    h.prisma.user.findUnique.mockResolvedValue({ ...student, deletedAt: null, semester: 2, role: 'administrator' });
+    h.prisma.user.findUnique.mockResolvedValue({
+      ...student,
+      deletedAt: null,
+      semester: 3,
+      role: 'administrator',
+    });
+
+    await h.service.revokeAdmin('dev-1', '', 'u-1');
+
+    expect(h.prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'u-1' },
+      data: { role: 'senior' },
+    });
+  });
+
+  it('demotes freshman-stage administrators (<=2) to freshman', async () => {
+    const h = harness();
+    h.prisma.user.findUnique.mockResolvedValue({
+      ...student,
+      deletedAt: null,
+      semester: 2,
+      role: 'administrator',
+    });
 
     await h.service.revokeAdmin('dev-1', '', 'u-1');
 
