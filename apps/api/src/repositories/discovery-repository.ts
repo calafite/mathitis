@@ -34,6 +34,7 @@ export interface DiscoveryRepository {
   listDiscoverableSeniors(filters: DiscoverableFilters): Promise<SeniorRow[]>;
   countDiscoverableSeniors(filters: Omit<DiscoverableFilters, 'limit' | 'offset'>): Promise<number>;
   listTags(options?: { activeOnly?: boolean }): Promise<Tag[]>;
+  suggestTags(q: string, limit?: number): Promise<Tag[]>;
 }
 
 const seniorSelect = {
@@ -133,5 +134,14 @@ export function createDiscoveryRepository(prisma: PrismaClient): DiscoveryReposi
       .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
   }
 
-  return { listDiscoverableSeniors, countDiscoverableSeniors, listTags };
+  async function suggestTags(q: string, limit = 8) {
+    if (!q.trim()) return [];
+    return prisma.tag.findMany({
+      where: { name: { contains: q, mode: 'insensitive' } },
+      orderBy: [{ name: 'asc' }],
+      take: limit,
+    });
+  }
+
+  return { listDiscoverableSeniors, countDiscoverableSeniors, listTags, suggestTags };
 }

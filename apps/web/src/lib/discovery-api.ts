@@ -38,6 +38,11 @@ export const discoveryApi = {
     return apiFetch<TagsResponse>(`/tags${suffix}`);
   },
 
+  async suggestTags(q: string): Promise<TagsResponse> {
+    const params = new URLSearchParams({ q });
+    return apiFetch<TagsResponse>(`/tags/suggest?${params}`);
+  },
+
   async bump(handle: string, replaceHandle?: string): Promise<BumpResponse> {
     return apiFetch<BumpResponse>(`/profiles/${encodeURIComponent(handle)}/bump`, {
       method: 'POST',

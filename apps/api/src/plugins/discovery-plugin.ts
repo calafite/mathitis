@@ -120,6 +120,7 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
     profileRepository,
     bumpRepository,
     mentorshipRepository,
+    prisma,
     systemConfigRepository,
   );
   const bumpService = createBumpService(bumpRepository, userRepository);
@@ -203,6 +204,24 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
           const raw = request.query as { activeOnly?: string | boolean };
           const activeOnly = raw?.activeOnly === 'true' || raw?.activeOnly === true;
           const tags = await discoveryService.listTags({ activeOnly });
+          return reply.send({ tags });
+        },
+      );
+
+      discoveryRoutes.get<{ Querystring: { q?: string } }>(
+        '/tags/suggest',
+        {
+          schema: {
+            querystring: z.object({
+              q: z.string().max(60).default(''),
+            }),
+            response: { 200: tagsResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          const raw = request.query as { q?: string };
+          const q = raw?.q ?? '';
+          const tags = await discoveryService.suggestTags(q);
           return reply.send({ tags });
         },
       );

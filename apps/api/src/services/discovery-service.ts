@@ -1,9 +1,11 @@
 import type { RichCardType, SocialLinks, Tag, ThemePalette } from '@mathitis/schemas';
+import type { PrismaClient } from '@prisma/client';
 import type { DiscoveryRepository, SeniorRow } from '../repositories/discovery-repository.js';
 import type { ProfileRepository } from '../repositories/profile-repository.js';
 import type { BumpRepository } from '../repositories/bump-repository.js';
 import type { MentorshipRepository } from '../repositories/mentorship-repository.js';
 import type { SystemConfigRepository } from '../repositories/system-config-repository.js';
+import { fetchEmbeddings } from '../lib/embeddings.js';
 import { createRecommendationEngine, type ScoredSenior } from './recommendation-engine.js';
 
 export interface SeniorFilters {
@@ -45,6 +47,7 @@ export interface DiscoveryService {
     filters: Omit<SeniorFilters, 'offset'>,
   ): Promise<Array<ScoredSenior<SeniorSummaryResult>>>;
   listTags(options?: { activeOnly?: boolean }): Promise<Tag[]>;
+  suggestTags(q: string, limit?: number): Promise<Tag[]>;
 }
 
 async function mergeCounts(
@@ -90,6 +93,7 @@ export function createDiscoveryService(
   profileRepository: ProfileRepository,
   bumpRepository: BumpRepository,
   mentorshipRepository: MentorshipRepository,
+  prisma: PrismaClient,
   systemConfigRepository?: SystemConfigRepository,
 ): DiscoveryService {
   async function isDiscoveryActive(): Promise<boolean> {
@@ -119,12 +123,31 @@ export function createDiscoveryService(
     const rows = await discoveryRepository.listDiscoverableSeniors({ ...filters, offset: 0 });
     const seniors = await mergeCounts(rows, bumpRepository, mentorshipRepository);
 
-    return createRecommendationEngine().rank(freshmanTags, seniors);
+    // Collect all unique tag IDs and fetch their embeddings in one query.
+    const allTagIds = new Set<string>();
+    for (const tag of freshmanTags) allTagIds.add(tag.id);
+    for (const senior of seniors) {
+      for (const tag of senior.tags) allTagIds.add(tag.id);
+    }
+    const embeddings = await fetchEmbeddings(prisma, [...allTagIds]);
+
+    // Attach embeddings to tag objects for the recommendation engine.
+    const freshmanTagsWithEmb = freshmanTags.map((t) => ({ ...t, embedding: embeddings.get(t.id) }));
+    const seniorsWithEmb = seniors.map((s) => ({
+      ...s,
+      tags: s.tags.map((t) => ({ ...t, embedding: embeddings.get(t.id) })),
+    }));
+
+    return createRecommendationEngine().rank(freshmanTagsWithEmb, seniorsWithEmb);
   }
 
   async function listTags(options?: { activeOnly?: boolean }) {
     return discoveryRepository.listTags(options);
   }
 
-  return { listSeniors, recommend, listTags };
+  async function suggestTags(q: string, limit?: number) {
+    return discoveryRepository.suggestTags(q, limit);
+  }
+
+  return { listSeniors, recommend, listTags, suggestTags };
 }
