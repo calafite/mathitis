@@ -207,7 +207,6 @@ async function scrapeSpotify(
     description: null,
     imageUrl: oembed.thumbnail_url ?? null,
     externalUrl: url.toString(),
-    embedUrl: `https://open.spotify.com/embed/${type}/${id}`,
     accentColor: '#1db954',
     metadata: {
       spotifyUri: `spotify:${type === 'track' ? 'track' : 'album'}:${id}`,

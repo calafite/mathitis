@@ -21,7 +21,6 @@ interface CardFormState {
   title: string;
   subtitle: string;
   description: string;
-  embedUrl: string;
   externalUrl: string;
   imageUrl: string;
   accentColor: string;
@@ -34,7 +33,6 @@ function emptyForm(): CardFormState {
     title: '',
     subtitle: '',
     description: '',
-    embedUrl: '',
     externalUrl: '',
     imageUrl: '',
     accentColor: '#6366f1',
@@ -49,7 +47,6 @@ function cardToForm(card: RichCard): CardFormState {
     title: card.title,
     subtitle: card.subtitle ?? '',
     description: card.description ?? '',
-    embedUrl: card.embedUrl ?? '',
     externalUrl: card.externalUrl ?? '',
     imageUrl: card.imageUrl ?? '',
     accentColor: card.accentColor,
@@ -66,7 +63,6 @@ function scrapedToForm(scraped: ScrapedCardResponse): CardFormState {
     title: scraped.title,
     subtitle: scraped.subtitle ?? '',
     description: scraped.description ?? '',
-    embedUrl: scraped.embedUrl ?? '',
     externalUrl: scraped.externalUrl ?? '',
     imageUrl: scraped.imageUrl ?? '',
     accentColor: scraped.accentColor,
@@ -98,7 +94,6 @@ function buildPayload(form: CardFormState): CreateRichCardBody {
     title: form.title,
     subtitle: form.subtitle || null,
     description: form.description || null,
-    embedUrl: form.embedUrl || null,
     externalUrl: form.externalUrl || null,
     imageUrl: form.imageUrl || null,
     accentColor: form.accentColor,
@@ -279,12 +274,6 @@ function CardForm({
             rows={2}
             className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
           />
-        </div>
-        <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">
-            URL de incorporação <span className="text-muted-foreground">(Spotify / SoundCloud / YouTube / Vimeo)</span>
-          </label>
-          <Input value={form.embedUrl} onChange={(e) => setForm({ ...form, embedUrl: e.target.value })} placeholder="https://open.spotify.com/embed/track/…" />
         </div>
         <div className="sm:col-span-2">
           <label className="mb-1 block text-xs font-medium text-muted-foreground">URL externa</label>
