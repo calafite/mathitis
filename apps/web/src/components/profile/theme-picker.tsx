@@ -1,20 +1,14 @@
-import type { CardStyle, ThemePalette } from '@mathitis/schemas';
+import type { ThemePalette } from '@mathitis/schemas';
 
 export interface ThemePickerProps {
   value: ThemePalette;
   onChange: (value: ThemePalette) => void;
 }
 
-const CARD_STYLES: Array<{ value: CardStyle; label: string }> = [
-  { value: 'glassmorphic', label: 'Vidro fosco' },
-  { value: 'solid', label: 'Sólido' },
-  { value: 'bordered', label: 'com borda' },
-];
-
 const PRESETS: ThemePalette[] = [
-  { primaryColor: '#6366f1', accentColor: '#ec4899', badgeColor: '#3b82f6', cardStyle: 'glassmorphic' },
-  { primaryColor: '#0ea5e9', accentColor: '#22c55e', badgeColor: '#f59e0b', cardStyle: 'solid' },
-  { primaryColor: '#a855f7', accentColor: '#06b6d4', badgeColor: '#ec4899', cardStyle: 'bordered' },
+  { primaryColor: '#6366f1', accentColor: '#ec4899', badgeColor: '#3b82f6' },
+  { primaryColor: '#0ea5e9', accentColor: '#22c55e', badgeColor: '#f59e0b' },
+  { primaryColor: '#a855f7', accentColor: '#06b6d4', badgeColor: '#ec4899' },
 ];
 
 export function ThemePicker({ value, onChange }: ThemePickerProps) {
@@ -61,26 +55,6 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
             className="h-9 w-full cursor-pointer rounded-md border border-input bg-background"
           />
         </label>
-      </div>
-
-      <div>
-        <span className="mb-1 block text-xs font-medium text-muted-foreground">Estilo do cartão</span>
-        <div className="flex gap-2">
-          {CARD_STYLES.map((style) => (
-            <button
-              key={style.value}
-              type="button"
-              onClick={() => onChange({ ...value, cardStyle: style.value })}
-              className={`rounded-md border px-3 py-1.5 text-sm transition ${
-                value.cardStyle === style.value
-                  ? 'border-primary bg-primary/15 text-primary'
-                  : 'border-border text-muted-foreground hover:bg-muted'
-              }`}
-            >
-              {style.label}
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );
