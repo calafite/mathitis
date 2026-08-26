@@ -275,8 +275,8 @@ export function createDevService(deps: {
       throw new ValidationError('O usuário selecionado não é um administrador');
     }
 
-    // Safe demotion fallback: past the 2nd semester a student is a veteran.
-    const fallbackRole = user.semester > 2 ? 'senior' : 'freshman';
+    // Safe demotion fallback: only semester-1 students are freshmen.
+    const fallbackRole = user.semester >= 2 ? 'senior' : 'freshman';
 
     await prisma.user.update({
       where: { id: user.id },

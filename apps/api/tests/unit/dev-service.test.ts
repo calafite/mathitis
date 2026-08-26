@@ -106,12 +106,12 @@ describe('devService.revokeAdmin', () => {
     });
   });
 
-  it('treats 3rd-semester administrators as veterans (senior)', async () => {
+  it('treats 2nd-semester administrators as veterans (senior)', async () => {
     const h = harness();
     h.prisma.user.findUnique.mockResolvedValue({
       ...student,
       deletedAt: null,
-      semester: 3,
+      semester: 2,
       role: 'administrator',
     });
 
@@ -123,12 +123,12 @@ describe('devService.revokeAdmin', () => {
     });
   });
 
-  it('demotes freshman-stage administrators (<=2) to freshman', async () => {
+  it('demotes semester-1 administrators to freshman (only true freshmen)', async () => {
     const h = harness();
     h.prisma.user.findUnique.mockResolvedValue({
       ...student,
       deletedAt: null,
-      semester: 2,
+      semester: 1,
       role: 'administrator',
     });
 
