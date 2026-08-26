@@ -1,5 +1,6 @@
 import { PrismaClient, type UserRole } from '@prisma/client';
 import argon2 from 'argon2';
+import { generateEmbedding } from '../src/lib/embeddings.js';
 
 const prisma = new PrismaClient();
 
@@ -90,11 +91,19 @@ const TEST_USERS: Array<{
 async function seed() {
   console.log('Seeding default tags...');
   for (const tag of DEFAULT_TAGS) {
-    await prisma.tag.upsert({
+    const upserted = await prisma.tag.upsert({
       where: { name: tag.name },
       update: { icon: tag.icon },
       create: tag,
     });
+    // Generate embedding if the tag doesn't have one yet.
+    const row = await prisma.$queryRaw<{ has_embedding: boolean }[]>`
+      SELECT embedding IS NOT NULL as has_embedding FROM tags WHERE id = ${upserted.id}::uuid
+    `;
+    if (!row[0]?.has_embedding) {
+      const embedding = await generateEmbedding(tag.name);
+      await prisma.$executeRaw`UPDATE tags SET embedding = ${embedding}::float[] WHERE id = ${upserted.id}::uuid`;
+    }
   }
 
   console.log('Seeding system config...');
