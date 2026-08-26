@@ -8,7 +8,10 @@ allowBuilds:
   argon2: true
   esbuild: false
   msgpackr-extract: false
+  onnxruntime-node: true
   prisma: true
+  protobufjs: true
+  sharp: set this to true or false
 
 onlyBuiltDependencies:
   - '@prisma/client'
