@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import Fastify, { type FastifyInstance } from 'fastify';
+import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
 import Redis from 'ioredis';
 import cookie from '@fastify/cookie';
 import helmet from '@fastify/helmet';
@@ -189,6 +189,21 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     max: env.RATE_LIMIT_GLOBAL_MAX,
     timeWindow: '1 minute',
     cache: 5000,
+    skipOnError: true,
+    addHeaders: {
+      'x-ratelimit-limit': true,
+      'x-ratelimit-remaining': true,
+      'x-ratelimit-reset': true,
+      'retry-after': true,
+    },
+    // Health and static assets must never be rate-limited for uptime probes
+    // and normal browsing.
+    allowList: (request: FastifyRequest) =>
+      request.url === '/health' || request.url.startsWith('/assets/'),
+    // Default key is per-IP. Per-route configs with user-aware keys (e.g.
+    // discovery bumps) override this for authenticated traffic, avoiding
+    // NAT collateral where many campus users share one egress IP.
+    keyGenerator: (request: FastifyRequest) => request.ip,
   });
 
   const sessionEpoch = createRedisSessionEpoch(redis);
