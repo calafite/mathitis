@@ -157,6 +157,35 @@ export const decisionResponseSchema = z.object({
 export type DecisionResponse = z.infer<typeof decisionResponseSchema>;
 
 // ---------------------------------------------------------------------------
+// Mentorship requests overview (admin dashboard)
+// ---------------------------------------------------------------------------
+
+export const adminMentorshipRequestsQuerySchema = z.object({
+  status: mentorshipRequestStatusSchema.optional(),
+});
+export type AdminMentorshipRequestsQuery = z.infer<typeof adminMentorshipRequestsQuerySchema>;
+
+export const adminMentorshipRequestSchema = z.object({
+  id: z.string().uuid(),
+  freshmanId: z.string().uuid(),
+  seniorId: z.string().uuid(),
+  status: mentorshipRequestStatusSchema,
+  message: z.string(),
+  rejectionReason: z.string().nullable(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  freshman: approvalPartySchema.nullable(),
+  senior: approvalPartySchema.nullable(),
+});
+export type AdminMentorshipRequest = z.infer<typeof adminMentorshipRequestSchema>;
+
+export const adminMentorshipRequestsResponseSchema = z.object({
+  requests: z.array(adminMentorshipRequestSchema),
+  total: z.number(),
+});
+export type AdminMentorshipRequestsResponse = z.infer<typeof adminMentorshipRequestsResponseSchema>;
+
+// ---------------------------------------------------------------------------
 // Audit log viewer
 // ---------------------------------------------------------------------------
 
