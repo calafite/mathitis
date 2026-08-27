@@ -43,3 +43,57 @@ export function RoleGuard({ requiredRole, children }: RoleGuardProps) {
 
   return <>{children}</>;
 }
+
+function isStudentRole(role: UserRole | undefined) {
+  return role === 'freshman' || role === 'senior';
+}
+
+function isOnboarded(user: { role?: UserRole; preferences?: { onboarded?: boolean } | null } | null) {
+  if (!user) return false;
+  if (!isStudentRole(user.role)) return true;
+  return user.preferences?.onboarded === true;
+}
+
+/**
+ * Wraps the main authenticated app. Students who have not finished onboarding
+ * are steered toward the guided flow; other roles skip it entirely.
+ */
+export function OnboardingGate() {
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="flex min-h-screen items-center justify-center">Loading…</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!isOnboarded(user)) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  return <Outlet />;
+}
+
+/**
+ * Guards the `/onboarding` page: only students who have NOT completed the flow
+ * may access it. Admin/developer and already-onboarded students are sent home.
+ */
+export function OnboardingRoute() {
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="flex min-h-screen items-center justify-center">Loading…</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (isOnboarded(user)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
+}
