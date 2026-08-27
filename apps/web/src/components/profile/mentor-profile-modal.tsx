@@ -2,12 +2,13 @@ import { type CSSProperties, useCallback, useEffect, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import type { Profile } from '@mathitis/schemas';
+import type { Profile, RichCardType } from '@mathitis/schemas';
 import { profileApi } from '@/lib/profile-api';
 import { discoveryApi } from '@/lib/discovery-api';
 import { requestsApi, buildIdempotencyKey } from '@/lib/requests-api';
 import { MarkdownPreview } from '@/components/markdown/markdown-preview';
 import { RichCardView } from './rich-card-view';
+import { CARD_TYPE_LABELS, groupCardsByType } from './rich-card-catalog';
 
 interface MentorProfileModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
   const [requestSent, setRequestSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [expandedCards, setExpandedCards] = useState(false);
 
   const { data: profileData, isLoading, refetch } = useQuery({
     queryKey: ['profile', seniorHandle],
@@ -104,6 +106,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
   if (profile?.contactEmail) linkFields.push({ label: 'Email', copyValue: profile.contactEmail });
 
   const richCards = profile?.richCards ?? [];
+  const groupedCards = groupCardsByType(richCards);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -234,19 +237,41 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
               {/* Cards */}
               {richCards.length > 0 && (
                 <section className="px-4 pb-4">
-                  <div className="flex items-center justify-between py-2">
-                    <h3 className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  <div className="mb-2 flex items-center justify-between border-b border-foreground/50 pb-2">
+                    <h3 className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                       Vitrine
                     </h3>
-                    <span className="border border-foreground px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest">
-                      {richCards.length} {richCards.length === 1 ? 'cartão' : 'cartões'}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedCards((prev) => !prev)}
+                      className="border border-foreground px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground hover:text-background focus:outline-none"
+                    >
+                      {expandedCards ? '[ COLAPSAR ]' : `[ VER TODOS (${richCards.length}) ]`}
+                    </button>
                   </div>
-                  <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-1">
-                    {richCards.map((card) => (
-                      <RichCardView key={card.id} card={card} />
-                    ))}
-                  </div>
+
+                  {expandedCards ? (
+                    <div>
+                      {Object.entries(groupedCards).map(([type, typeCards]) => (
+                        <div key={type}>
+                          <h4 className="mb-3 mt-4 border-b border-foreground/30 pb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                            {CARD_TYPE_LABELS[type as RichCardType]}
+                          </h4>
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            {typeCards.map((card) => (
+                              <RichCardView key={card.id} card={card} className="w-full" />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-1">
+                      {richCards.map((card) => (
+                        <RichCardView key={card.id} card={card} className="w-72" />
+                      ))}
+                    </div>
+                  )}
                 </section>
               )}
 

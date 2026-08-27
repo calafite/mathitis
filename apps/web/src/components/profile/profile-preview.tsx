@@ -1,7 +1,8 @@
-import { useState, useCallback, type CSSProperties } from 'react';
-import type { RichCard, ThemePalette } from '@mathitis/schemas';
+import { useState, useCallback, useMemo, type CSSProperties } from 'react';
+import type { RichCard, RichCardType, ThemePalette } from '@mathitis/schemas';
 import { MarkdownPreview } from '@/components/markdown/markdown-preview';
 import { RichCardView } from './rich-card-view';
+import { CARD_TYPE_LABELS, groupCardsByType } from './rich-card-catalog';
 
 export interface ProfileDraftTag {
   id: string;
@@ -56,6 +57,9 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
   } as CSSProperties;
 
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [expandedCards, setExpandedCards] = useState(false);
+
+  const groupedCards = useMemo(() => groupCardsByType(cards), [cards]);
 
   const linkFields: Array<{ label: string; href?: string; copyValue?: string }> = [];
   if (draft.socialLinks.github) linkFields.push({ label: 'GitHub', href: draft.socialLinks.github });
@@ -198,12 +202,41 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
       <div className={`px-4 ${cards.length > 0 ? 'pb-4' : ''}`}>
         {cards.length > 0 ? (
           <>
-            <SectionHeader>Coleção</SectionHeader>
-            <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-1">
-              {cards.map((card) => (
-                <RichCardView key={card.id} card={card} />
-              ))}
+            <div className="mb-1 flex items-center justify-between border-b border-foreground/50 pb-2">
+              <h3 className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Vitrine
+              </h3>
+              <button
+                type="button"
+                onClick={() => setExpandedCards((prev) => !prev)}
+                className="border border-foreground px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground hover:text-background focus:outline-none"
+              >
+                {expandedCards ? '[ COLAPSAR ]' : `[ VER TODOS (${cards.length}) ]`}
+              </button>
             </div>
+
+            {expandedCards ? (
+              <div className="pb-4 pt-1">
+                {Object.entries(groupedCards).map(([type, typeCards]) => (
+                  <div key={type}>
+                    <h4 className="mb-3 mt-4 border-b border-foreground/30 pb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      {CARD_TYPE_LABELS[type as RichCardType]}
+                    </h4>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {typeCards.map((card) => (
+                        <RichCardView key={card.id} card={card} className="w-full" />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-1">
+                {cards.map((card) => (
+                  <RichCardView key={card.id} card={card} className="w-72" />
+                ))}
+              </div>
+            )}
           </>
         ) : null}
       </div>

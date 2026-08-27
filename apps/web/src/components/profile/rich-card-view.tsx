@@ -165,12 +165,14 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
   }
 }
 
-export function RichCardView({ card }: { card: RichCard }) {
+export function RichCardView({ card, className = '' }: { card: RichCard; className?: string }) {
   const config = TYPE_CONFIG[card.cardType] ?? TYPE_CONFIG.custom!;
   const metadata = (card.metadata ?? {}) as Record<string, unknown>;
 
   return (
-    <article className="group relative flex w-72 shrink-0 flex-col border-2 border-foreground bg-card text-foreground snap-start">
+    <article
+      className={`group relative flex shrink-0 flex-col border-2 border-foreground bg-card text-foreground snap-start ${className}`}
+    >
       {/* 1. Header: Title & Category Badge */}
       <div className="flex items-start justify-between gap-2 border-b-2 border-foreground p-3">
         <h4 className="font-sans text-sm font-bold uppercase leading-tight line-clamp-1">
