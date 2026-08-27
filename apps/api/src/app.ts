@@ -88,7 +88,11 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   const app = Fastify({
     logger: createLoggerOptions(env.LOG_LEVEL),
     disableRequestLogging: true,
-    trustProxy: true,
+    // There is exactly one proxy hop in production (nginx). Trust only that
+    // hop so clients cannot prepend a forged X-Forwarded-For address and
+    // evade IP-based limits. Fastify still uses the injected remote address
+    // for direct/dev requests.
+    trustProxy: (_address, hop) => hop === 0,
     // Composite selector.validator tokens are ~101 chars; the default cap of
     // 100 would reject verification links with FST_ERR_MAX_PARAM_LENGTH.
     maxParamLength: 500,
@@ -189,7 +193,12 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     max: env.RATE_LIMIT_GLOBAL_MAX,
     timeWindow: '1 minute',
     cache: 5000,
-    skipOnError: true,
+    // Rate-limit state is security-critical. Failing closed prevents a Redis
+    // outage from turning every process into an unlimited API worker.
+    skipOnError: false,
+    // Redis makes the global and route-specific buckets atomic and shared by
+    // every API replica. The local cache is only used when no store is given.
+    redis,
     addHeaders: {
       'x-ratelimit-limit': true,
       'x-ratelimit-remaining': true,

@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import type { Queue } from 'bullmq';
 import type {
@@ -12,7 +12,7 @@ import {
   notificationsReadAllResponseSchema,
   notificationsResponseSchema,
 } from '@mathitis/schemas';
-import type { SessionManager } from './session.js';
+import { getSessionCookie, type SessionManager } from './session.js';
 import { createRequireAuth } from './auth-guard.js';
 import { createNotificationRepository } from '../repositories/notification-repository.js';
 import { createSystemConfigRepository } from '../repositories/system-config-repository.js';
@@ -39,6 +39,11 @@ export async function registerNotificationsPlugin(
 
   const requireAuth = createRequireAuth(options.session);
 
+  async function notifKeyGenerator(request: FastifyRequest): Promise<string> {
+    const payload = await options.session.verifySessionCookie(getSessionCookie(request));
+    return payload?.sub ? `user:${payload.sub}` : `ip:${request.ip}`;
+  }
+
   app.register(
     async (notificationRoutes) => {
       notificationRoutes.get<{ Querystring: NotificationsQuery }>(
@@ -48,6 +53,9 @@ export async function registerNotificationsPlugin(
           schema: {
             querystring: notificationsQuerySchema,
             response: { 200: notificationsResponseSchema },
+          },
+          config: {
+            rateLimit: { max: 60, timeWindow: '1 minute', keyGenerator: notifKeyGenerator },
           },
         },
         async (request, reply) => {
@@ -69,6 +77,9 @@ export async function registerNotificationsPlugin(
           schema: {
             params: notificationParamsSchema,
             response: { 200: notificationReadResponseSchema },
+          },
+          config: {
+            rateLimit: { max: 60, timeWindow: '1 minute', keyGenerator: notifKeyGenerator },
           },
         },
         async (request, reply) => {
@@ -96,6 +107,9 @@ export async function registerNotificationsPlugin(
           preHandler: requireAuth,
           schema: {
             response: { 200: notificationsReadAllResponseSchema },
+          },
+          config: {
+            rateLimit: { max: 30, timeWindow: '1 minute', keyGenerator: notifKeyGenerator },
           },
         },
         async (request, reply) => {

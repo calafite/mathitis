@@ -15,7 +15,7 @@ import type { SessionEpochStore } from '../lib/session-epoch.js';
 import { createAuditLogRepository } from '../repositories/audit-log-repository.js';
 import type { PrismaClient } from '@prisma/client';
 import { Prisma } from '@prisma/client';
-import type { SessionManager } from './session.js';
+import { getSessionCookie, type SessionManager } from './session.js';
 
 interface AccountPluginOptions {
   prisma: PrismaClient;
@@ -28,9 +28,9 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
   const requireAuth = createRequireAuth(session);
   const auditLogRepository = createAuditLogRepository(prisma);
 
-  function accountKeyGenerator(request: FastifyRequest): string {
-    const sub = (request as unknown as { sessionUser?: { sub: string } }).sessionUser?.sub;
-    return sub ? `user:${sub}` : `ip:${request.ip}`;
+  async function accountKeyGenerator(request: FastifyRequest): Promise<string> {
+    const payload = await session.verifySessionCookie(getSessionCookie(request));
+    return payload?.sub ? `user:${payload.sub}` : `ip:${request.ip}`;
   }
 
   app.addHook('preHandler', requireAuth);

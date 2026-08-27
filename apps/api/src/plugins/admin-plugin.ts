@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import type {
   AdminMentorshipRequestsQuery,
@@ -32,7 +32,7 @@ import {
   moderationBodySchema,
   updateUserStatusBodySchema,
 } from '@mathitis/schemas';
-import type { SessionManager } from './session.js';
+import { getSessionCookie, type SessionManager } from './session.js';
 import { createRequireRole } from './auth-guard.js';
 import { createAdminRepository } from '../repositories/admin-repository.js';
 import { createAuditLogRepository } from '../repositories/audit-log-repository.js';
@@ -104,6 +104,11 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
 
   const requireAdmin = createRequireRole(options.session, ['administrator']);
 
+  async function adminKeyGenerator(request: FastifyRequest): Promise<string> {
+    const payload = await options.session.verifySessionCookie(getSessionCookie(request));
+    return payload?.sub ? `admin:${payload.sub}` : `ip:${request.ip}`;
+  }
+
   app.register(
     async (adminRoutes) => {
       // -- Dynamic system configuration --------------------------------------
@@ -112,6 +117,9 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
         {
           preHandler: requireAdmin,
           schema: { response: { 200: configResponseSchema } },
+          config: {
+            rateLimit: { max: 60, timeWindow: '1 minute', keyGenerator: adminKeyGenerator },
+          },
         },
         async (_request, reply) => {
           const config = await adminService.getConfig();
@@ -126,6 +134,9 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
           schema: {
             body: configPatchSchema,
             response: { 200: configResponseSchema },
+          },
+          config: {
+            rateLimit: { max: 30, timeWindow: '1 minute', keyGenerator: adminKeyGenerator },
           },
         },
         async (request, reply) => {
@@ -147,6 +158,9 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
             querystring: adminUsersQuerySchema,
             response: { 200: adminUsersResponseSchema },
           },
+          config: {
+            rateLimit: { max: 60, timeWindow: '1 minute', keyGenerator: adminKeyGenerator },
+          },
         },
         async (request, reply) => {
           // request.query is the raw string map; re-parse so limit/offset
@@ -165,6 +179,9 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
             params: adminUserParamsSchema,
             body: updateUserStatusBodySchema,
             response: { 200: adminUserResponseSchema },
+          },
+          config: {
+            rateLimit: { max: 30, timeWindow: '1 minute', keyGenerator: adminKeyGenerator },
           },
         },
         async (request, reply) => {
@@ -188,6 +205,9 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
             params: adminUserParamsSchema,
             response: { 200: anonymizeResponseSchema },
           },
+          config: {
+            rateLimit: { max: 10, timeWindow: '1 minute', keyGenerator: adminKeyGenerator },
+          },
         },
         async (request, reply) => {
           const result = await adminService.anonymizeUser(
@@ -208,6 +228,9 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
             params: adminUserParamsSchema,
             body: moderationBodySchema,
             response: { 200: adminUserResponseSchema },
+          },
+          config: {
+            rateLimit: { max: 30, timeWindow: '1 minute', keyGenerator: adminKeyGenerator },
           },
         },
         async (request, reply) => {
@@ -230,6 +253,9 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
             querystring: approvalsQuerySchema,
             response: { 200: approvalsResponseSchema },
           },
+          config: {
+            rateLimit: { max: 60, timeWindow: '1 minute', keyGenerator: adminKeyGenerator },
+          },
         },
         async (request, reply) => {
           const approvals = await adminService.listApprovals(request.query.status);
@@ -245,6 +271,9 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
             params: approvalParamsSchema,
             body: decisionBodySchema,
             response: { 200: decisionResponseSchema },
+          },
+          config: {
+            rateLimit: { max: 30, timeWindow: '1 minute', keyGenerator: adminKeyGenerator },
           },
         },
         async (request, reply) => {
@@ -268,6 +297,9 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
             querystring: adminMentorshipRequestsQuerySchema,
             response: { 200: adminMentorshipRequestsResponseSchema },
           },
+          config: {
+            rateLimit: { max: 60, timeWindow: '1 minute', keyGenerator: adminKeyGenerator },
+          },
         },
         async (request, reply) => {
           const requests = await adminService.listMentorshipRequests(request.query.status);
@@ -283,6 +315,9 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
           schema: {
             querystring: auditLogsQuerySchema,
             response: { 200: auditLogsResponseSchema },
+          },
+          config: {
+            rateLimit: { max: 60, timeWindow: '1 minute', keyGenerator: adminKeyGenerator },
           },
         },
         async (request, reply) => {

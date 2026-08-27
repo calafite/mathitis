@@ -162,6 +162,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
             querystring: seniorsQuerySchema,
             response: { 200: seniorsResponseSchema },
           },
+          config: {
+            rateLimit: {
+              max: 60,
+              timeWindow: '1 minute',
+              keyGenerator: userKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const { seniors, total } = await discoveryService.listSeniors(
@@ -178,6 +185,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
           schema: {
             querystring: seniorsQuerySchema,
             response: { 200: recommendationsResponseSchema },
+          },
+          config: {
+            rateLimit: {
+              max: 30,
+              timeWindow: '1 minute',
+              keyGenerator: userKeyGenerator,
+            },
           },
         },
         async (request, reply) => {
@@ -262,6 +276,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
             params: bumpParamsSchema,
             response: { 200: bumpResponseSchema },
           },
+          config: {
+            rateLimit: {
+              max: app.env.RATE_LIMIT_REQUEST_MAX,
+              timeWindow: '1 hour',
+              keyGenerator: userKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const result = await bumpService.unbump(
@@ -308,6 +329,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
             querystring: requestsQuerySchema,
             response: { 200: requestsResponseSchema },
           },
+          config: {
+            rateLimit: {
+              max: 60,
+              timeWindow: '1 minute',
+              keyGenerator: userKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const viewer = request.sessionUser!;
@@ -328,6 +356,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
             params: requestParamsSchema,
             response: { 200: requestResponseSchema },
           },
+          config: {
+            rateLimit: {
+              max: 60,
+              timeWindow: '1 minute',
+              keyGenerator: userKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const viewer = request.sessionUser!;
@@ -347,6 +382,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
           schema: {
             params: requestParamsSchema,
             response: { 200: requestResponseSchema },
+          },
+          config: {
+            rateLimit: {
+              max: 20,
+              timeWindow: '1 minute',
+              keyGenerator: userKeyGenerator,
+            },
           },
         },
         async (request, reply) => {
@@ -369,6 +411,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
             body: rejectRequestBodySchema,
             response: { 200: requestResponseSchema },
           },
+          config: {
+            rateLimit: {
+              max: 20,
+              timeWindow: '1 minute',
+              keyGenerator: userKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const result = await requestService.reject(
@@ -388,6 +437,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
             params: requestParamsSchema,
             response: { 200: requestResponseSchema },
           },
+          config: {
+            rateLimit: {
+              max: 20,
+              timeWindow: '1 minute',
+              keyGenerator: userKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const result = await requestService.cancel(
@@ -405,6 +461,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
           schema: {
             params: requestParamsSchema,
             response: { 200: requestResponseSchema },
+          },
+          config: {
+            rateLimit: {
+              max: 20,
+              timeWindow: '1 minute',
+              keyGenerator: userKeyGenerator,
+            },
           },
         },
         async (request, reply) => {
@@ -425,6 +488,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
             body: rejectRequestBodySchema,
             response: { 200: requestResponseSchema },
           },
+          config: {
+            rateLimit: {
+              max: 20,
+              timeWindow: '1 minute',
+              keyGenerator: userKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const result = await requestService.denyAdmin(
@@ -441,6 +511,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
         '/lineage',
         {
           schema: { response: { 200: lineageResponseSchema } },
+          config: {
+            rateLimit: {
+              max: 30,
+              timeWindow: '1 minute',
+              keyGenerator: userKeyGenerator,
+            },
+          },
         },
         async (_request, reply) => {
           const graph = await lineageService.getFullGraph();
@@ -454,6 +531,13 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
           schema: {
             params: profileHandleParamsSchema,
             response: { 200: lineageResponseSchema },
+          },
+          config: {
+            rateLimit: {
+              max: 30,
+              timeWindow: '1 minute',
+              keyGenerator: userKeyGenerator,
+            },
           },
         },
         async (request, reply) => {

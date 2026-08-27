@@ -94,6 +94,22 @@ export interface ProfilesPluginOptions {
   redis?: Redis;
 }
 
+function createProfileKeyGenerator(session: SessionManager) {
+  return async (request: FastifyRequest): Promise<string> => {
+    const sid = (request as unknown as { sessionUser?: { sub: string } }).sessionUser?.sub;
+    if (sid) return `user:${sid}`;
+    try {
+      const payload = await session.verifySessionCookie(
+        (request.cookies as Record<string, string | undefined>)?.mathitis_session,
+      );
+      if (payload?.sub) return `user:${payload.sub}`;
+    } catch {
+      // fall through to IP
+    }
+    return `ip:${request.ip}`;
+  };
+}
+
 export async function registerProfilesPlugin(app: FastifyInstance, options: ProfilesPluginOptions) {
   const profileRepository: ProfileRepository = createProfileRepository(options.prisma);
   const richCardRepository: RichCardRepository = createRichCardRepository(options.prisma);
@@ -110,6 +126,7 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
   );
 
   const requireAuth = createRequireAuth(options.session);
+  const profileKeyGenerator = createProfileKeyGenerator(options.session);
 
   async function resolveSession(request: FastifyRequest) {
     const payload = await options.session.verifySessionCookie(getSessionCookie(request));
@@ -156,6 +173,13 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
             params: profileHandleParamsSchema,
             response: { 200: profileResponseSchema },
           },
+          config: {
+            rateLimit: {
+              max: 60,
+              timeWindow: '1 minute',
+              keyGenerator: profileKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const handle = request.params.handle;
@@ -179,6 +203,13 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
         {
           preHandler: requireAuth,
           schema: { response: { 200: profileResponseSchema } },
+          config: {
+            rateLimit: {
+              max: 60,
+              timeWindow: '1 minute',
+              keyGenerator: profileKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const profile = await profileService.getOwnProfile(request.sessionUser!.sub);
@@ -194,6 +225,13 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
             body: updateProfileBodySchema,
             response: { 200: profileResponseSchema },
           },
+          config: {
+            rateLimit: {
+              max: 30,
+              timeWindow: '1 minute',
+              keyGenerator: profileKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const profile = await profileService.updateProfile(
@@ -206,13 +244,33 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
 
       profilesRoutes.post(
         '/me/avatar',
-        { preHandler: requireAuth, schema: { response: { 200: uploadImageResponseSchema } } },
+        {
+          preHandler: requireAuth,
+          schema: { response: { 200: uploadImageResponseSchema } },
+          config: {
+            rateLimit: {
+              max: 20,
+              timeWindow: '1 minute',
+              keyGenerator: profileKeyGenerator,
+            },
+          },
+        },
         (request, reply) => handleImageUpload(request, reply, 'avatar'),
       );
 
       profilesRoutes.post(
         '/me/banner',
-        { preHandler: requireAuth, schema: { response: { 200: uploadImageResponseSchema } } },
+        {
+          preHandler: requireAuth,
+          schema: { response: { 200: uploadImageResponseSchema } },
+          config: {
+            rateLimit: {
+              max: 20,
+              timeWindow: '1 minute',
+              keyGenerator: profileKeyGenerator,
+            },
+          },
+        },
         (request, reply) => handleImageUpload(request, reply, 'banner'),
       );
 
@@ -222,7 +280,13 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
         '/me/cards/scrape',
         {
           preHandler: requireAuth,
-          config: { rateLimit: { max: 15, timeWindow: '1 minute' } },
+          config: {
+            rateLimit: {
+              max: 15,
+              timeWindow: '1 minute',
+              keyGenerator: profileKeyGenerator,
+            },
+          },
           schema: {
             querystring: scrapeCardQuerySchema,
             response: { 200: scrapedCardResponseSchema },
@@ -239,6 +303,13 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
         {
           preHandler: requireAuth,
           schema: { response: { 200: richCardsResponseSchema } },
+          config: {
+            rateLimit: {
+              max: 60,
+              timeWindow: '1 minute',
+              keyGenerator: profileKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const cards = await richCardService.listCards(request.sessionUser!.sub);
@@ -253,6 +324,13 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
           schema: {
             body: createRichCardBodySchema,
             response: { 200: richCardResponseSchema },
+          },
+          config: {
+            rateLimit: {
+              max: 30,
+              timeWindow: '1 minute',
+              keyGenerator: profileKeyGenerator,
+            },
           },
         },
         async (request, reply) => {
@@ -270,6 +348,13 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
             body: updateRichCardBodySchema,
             response: { 200: richCardResponseSchema },
           },
+          config: {
+            rateLimit: {
+              max: 30,
+              timeWindow: '1 minute',
+              keyGenerator: profileKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const card = await richCardService.updateCard(
@@ -286,6 +371,13 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
         {
           preHandler: requireAuth,
           schema: { params: richCardParamsSchema },
+          config: {
+            rateLimit: {
+              max: 30,
+              timeWindow: '1 minute',
+              keyGenerator: profileKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           await richCardService.deleteCard(request.sessionUser!.sub, request.params.id);
@@ -300,6 +392,13 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
           schema: {
             body: reorderRichCardsBodySchema,
             response: { 200: richCardsResponseSchema },
+          },
+          config: {
+            rateLimit: {
+              max: 30,
+              timeWindow: '1 minute',
+              keyGenerator: profileKeyGenerator,
+            },
           },
         },
         async (request, reply) => {
