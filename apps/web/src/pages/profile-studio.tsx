@@ -13,6 +13,7 @@ import { MediaUpload } from '@/components/profile/media-upload';
 import { RichCardManager } from '@/components/profile/rich-card-manager';
 import { ProfilePreview, type ProfileDraft } from '@/components/profile/profile-preview';
 import { usePageMeta } from '@/lib/use-page-meta';
+import { playUiSound } from '@/lib/ui-sounds';
 
 const DEFAULT_THEME: ThemePalette = {
   primaryColor: '#6366f1',
@@ -126,6 +127,7 @@ export function ProfileStudioPage() {
   const saveMutation = useMutation({
     mutationFn: (body: UpdateProfileBody) => profileApi.updateMe(body),
     onSuccess: () => {
+      playUiSound('thud');
       setDirty(false);
       setJustSaved(true);
       window.setTimeout(() => setJustSaved(false), 4000);

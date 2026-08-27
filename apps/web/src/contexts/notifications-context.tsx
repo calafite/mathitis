@@ -11,6 +11,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Notification } from '@mathitis/schemas';
 import { notificationsApi } from '@/lib/notifications-api';
 import { useAuth } from '@/contexts/auth-context';
+import { playUiSound } from '@/lib/ui-sounds';
 
 const POLL_INTERVAL_MS = 30_000;
 const TOAST_TTL_MS = 6_000;
@@ -32,33 +33,10 @@ interface NotificationsContextValue {
   muted: boolean;
   toggleMuted: () => void;
   dismissToast: (id: string) => void;
+  playUiSound: typeof playUiSound;
 }
 
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
-
-function playNotificationSound(): void {
-  try {
-    const AudioContextClass =
-      window.AudioContext ??
-      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const context = new AudioContextClass();
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(880, context.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(660, context.currentTime + 0.15);
-    gain.gain.setValueAtTime(0.08, context.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.35);
-    oscillator.start();
-    oscillator.stop(context.currentTime + 0.4);
-    oscillator.onended = () => void context.close();
-  } catch {
-    // Audio is best-effort; never let a sound failure break the UI.
-  }
-}
 
 export function NotificationsProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -90,7 +68,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       ...current.slice(-2),
       { id: latest.id, title: latest.title, body: latest.body },
     ]);
-    if (!muted) playNotificationSound();
+    if (!muted) playUiSound('clack');
   }, [notificationsQuery.data, muted]);
 
   const dismissToast = useCallback((id: string) => {
@@ -151,6 +129,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       muted,
       toggleMuted,
       dismissToast,
+      playUiSound,
     }),
     [
       notificationsQuery.data,

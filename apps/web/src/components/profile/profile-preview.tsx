@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, type CSSProperties } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { RichCard, RichCardType, ThemePalette } from '@mathitis/schemas';
 import { MarkdownPreview } from '@/components/markdown/markdown-preview';
 import { RichCardView } from './rich-card-view';
@@ -215,28 +216,55 @@ export function ProfilePreview({ draft, avatarUrl, bannerUrl, bannerPreset, card
               </button>
             </div>
 
-            {expandedCards ? (
-              <div className="pb-4 pt-1">
-                {Object.entries(groupedCards).map(([type, typeCards]) => (
-                  <div key={type}>
+            <AnimatePresence initial={false}>
+              {expandedCards ? (
+              <motion.div
+                key="expanded-cards"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.18 }}
+                className="pb-4 pt-1"
+              >
+                {Object.entries(groupedCards).map(([type, typeCards], groupIndex) => (
+                  <motion.div
+                    key={type}
+                    initial={{ opacity: 0, y: 14 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: groupIndex * 0.07, type: 'spring', stiffness: 380, damping: 28 }}
+                  >
                     <h4 className="mb-3 mt-4 border-b border-foreground/30 pb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                       {CARD_TYPE_LABELS[type as RichCardType]}
                     </h4>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {typeCards.map((card) => (
-                        <RichCardView key={card.id} card={card} className="w-full" />
+                      {typeCards.map((card, cardIndex) => (
+                        <motion.div
+                          key={card.id}
+                          initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          transition={{ delay: groupIndex * 0.07 + cardIndex * 0.045, type: 'spring', stiffness: 420, damping: 30 }}
+                        >
+                          <RichCardView card={card} className="w-full" />
+                        </motion.div>
                       ))}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
-            ) : (
-              <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-1">
+              </motion.div>
+              ) : (
+              <motion.div
+                key="collapsed-cards"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-1"
+              >
                 {cards.map((card) => (
                   <RichCardView key={card.id} card={card} className="w-72" />
                 ))}
-              </div>
-            )}
+              </motion.div>
+              )}
+            </AnimatePresence>
           </>
         ) : null}
       </div>

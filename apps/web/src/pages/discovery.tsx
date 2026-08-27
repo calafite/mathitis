@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Eye, ArrowRight } from 'lucide-react';
 import type { SeniorSummary, Tag } from '@mathitis/schemas';
@@ -7,6 +8,7 @@ import { discoveryApi } from '@/lib/discovery-api';
 import { MentorProfileModal } from '@/components/profile/mentor-profile-modal';
 import { ThemedSelect } from '@/components/ui/select';
 import { usePageMeta } from '@/lib/use-page-meta';
+import { playUiSound } from '@/lib/ui-sounds';
 
 const HEADER_BG = '#ececee';
 const BODY_BG = '#b9bdc6';
@@ -137,13 +139,16 @@ function MentorCard({
           {formatCount(senior.profileViews)}
         </div>
         {isFreshman && (
-          <button
+          <motion.button
             type="button"
             disabled={bumping}
             onClick={(e) => {
               e.stopPropagation();
+              playUiSound('bump');
               onBump();
             }}
+            whileTap={{ scale: 0.94, y: 2 }}
+            transition={{ type: 'spring', stiffness: 700, damping: 24 }}
             className="flex items-center gap-1.5 px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-widest transition-colors"
             style={{
               backgroundColor: bumped ? HEADER_BG : INK,
@@ -156,7 +161,7 @@ function MentorCard({
                 Impulsionar <ArrowRight className="h-3.5 w-3.5" aria-hidden />
               </>
             )}
-          </button>
+          </motion.button>
         )}
       </div>
     </div>

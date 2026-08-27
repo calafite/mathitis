@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import type { CreateRichCardBody, RichCard, RichCardType, ScrapedCardResponse } from '@mathitis/schemas';
 import { ApiError } from '@/lib/api';
 import { profileApi } from '@/lib/profile-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { playUiSound } from '@/lib/ui-sounds';
 
 const CARD_TYPES: Array<{ value: RichCardType; label: string }> = [
   { value: 'song', label: 'Música' },
@@ -310,6 +312,7 @@ export function RichCardManager() {
   const createMutation = useMutation({
     mutationFn: (input: CreateRichCardBody) => profileApi.createCard(input),
     onSuccess: async () => {
+      playUiSound('thud');
       setEditing(null);
       await invalidate();
     },
@@ -318,6 +321,7 @@ export function RichCardManager() {
   const updateMutation = useMutation({
     mutationFn: ({ id, input }: { id: string; input: CreateRichCardBody }) => profileApi.updateCard(id, input),
     onSuccess: async () => {
+      playUiSound('thud');
       setEditing(null);
       await invalidate();
     },
@@ -383,8 +387,11 @@ export function RichCardManager() {
 
       <ul className="space-y-2">
         {cards.map((card, index) => (
-          <li
+          <motion.li
             key={card.id}
+            layout
+            transition={{ layout: { type: 'spring', stiffness: 520, damping: 34 } }}
+            whileDrag={{ scale: 1.025, boxShadow: '10px 10px 0 rgba(0, 0, 0, 0.22)', zIndex: 10 }}
             draggable={editing === null}
             onDragStart={() => setDragIndex(index)}
             onDragOver={(e) => e.preventDefault()}
@@ -437,7 +444,7 @@ export function RichCardManager() {
                 </div>
               </>
             )}
-          </li>
+          </motion.li>
         ))}
       </ul>
     </div>
