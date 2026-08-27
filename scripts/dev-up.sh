@@ -13,8 +13,11 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 POSTGRES_CONTAINER="mathitis-postgres"
 REDIS_CONTAINER="mathitis-redis"
+MINIO_CONTAINER="mathitis-minio"
 POSTGRES_PORT=5432
 REDIS_PORT=6379
+MINIO_API_PORT=9000
+MINIO_CONSOLE_PORT=9001
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -24,10 +27,15 @@ info()  { printf '\033[1;34m▸ %s\033[0m\n' "$*"; }
 ok()    { printf '\033[1;32m✔ %s\033[0m\n' "$*"; }
 fail()  { printf '\033[1;31m✘ %s\033[0m\n' "$*"; exit 1; }
 
+API_PID=""
+WEB_PID=""
+
 cleanup() {
   info "Shutting down…"
-  kill "$API_PID" "$WEB_PID" 2>/dev/null || true
-  wait "$API_PID" "$WEB_PID" 2>/dev/null || true
+  [ -n "$API_PID" ] && kill "$API_PID" 2>/dev/null || true
+  [ -n "$WEB_PID" ] && kill "$WEB_PID" 2>/dev/null || true
+  [ -n "$API_PID" ] && wait "$API_PID" 2>/dev/null || true
+  [ -n "$WEB_PID" ] && wait "$WEB_PID" 2>/dev/null || true
 }
 
 kill_port() {
@@ -92,8 +100,8 @@ done
 
 if [ "$FRESH" = true ]; then
   info "Removing existing containers and volumes…"
-  docker rm -f "$POSTGRES_CONTAINER" "$REDIS_CONTAINER" 2>/dev/null || true
-  docker volume rm mathitis_postgres_data 2>/dev/null || true
+  docker rm -f "$POSTGRES_CONTAINER" "$REDIS_CONTAINER" "$MINIO_CONTAINER" 2>/dev/null || true
+  docker volume rm mathitis_postgres_data mathitis_minio_data 2>/dev/null || true
 fi
 
 # ---------------------------------------------------------------------------
@@ -108,6 +116,22 @@ ensure_container "$POSTGRES_CONTAINER" postgres:16-alpine \
 
 ensure_container "$REDIS_CONTAINER" redis:7-alpine \
   -p "$REDIS_PORT:6379"
+
+if docker inspect "$MINIO_CONTAINER" >/dev/null 2>&1; then
+  if [ "$(docker inspect -f '{{.State.Status}}' "$MINIO_CONTAINER")" != "running" ]; then
+    info "Starting existing container $MINIO_CONTAINER…"
+    docker start "$MINIO_CONTAINER" >/dev/null
+  fi
+else
+  info "Creating container $MINIO_CONTAINER…"
+  docker run -d --name "$MINIO_CONTAINER" \
+    -e MINIO_ROOT_USER=minioadmin \
+    -e MINIO_ROOT_PASSWORD=minioadmin \
+    -p "$MINIO_API_PORT:9000" \
+    -p "$MINIO_CONSOLE_PORT:9001" \
+    minio/minio:latest \
+    server /data --console-address ":9001" >/dev/null
+fi
 
 wait_for_postgres
 
@@ -132,6 +156,8 @@ fi
 kill_port 4000
 kill_port 5173
 kill_port 5174
+kill_port 9000
+kill_port 9001
 
 info "Starting API dev server…"
 (cd "$ROOT_DIR" && pnpm --filter @mathitis/api dev) &
@@ -143,8 +169,9 @@ WEB_PID=$!
 
 sleep 3
 ok "Dev environment running"
-echo "  API  → http://localhost:4000"
-echo "  Web  → http://localhost:5173"
+echo "  API    → http://localhost:4000"
+echo "  Web    → http://localhost:5173"
+echo "  MinIO  → http://localhost:9001 (minioadmin/minioadmin)"
 echo ""
 echo "  Press Ctrl+C to stop."
 
