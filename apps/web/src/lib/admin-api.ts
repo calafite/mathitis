@@ -1,5 +1,6 @@
 import { apiFetch } from '@/lib/api';
 import type {
+  AdminMentorshipRequestsResponse,
   AdminUsersResponse,
   AdminUsersQuery,
   AnonymizeResponse,
@@ -58,6 +59,11 @@ export const adminApi = {
   async listApprovals(status?: string): Promise<ApprovalsResponse> {
     const qs = status ? `?status=${status}` : '';
     return apiFetch<ApprovalsResponse>(`/admin/approvals${qs}`);
+  },
+
+  async listMentorshipRequests(status?: string): Promise<AdminMentorshipRequestsResponse> {
+    const qs = status ? `?status=${status}` : '';
+    return apiFetch<AdminMentorshipRequestsResponse>(`/admin/requests${qs}`);
   },
 
   async decideApproval(id: string, body: DecisionBody) {
