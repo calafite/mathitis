@@ -20,7 +20,10 @@
     "audit": "pnpm audit --audit-level=high",
     "db:generate": "pnpm --filter @mathitis/api db:generate",
     "db:migrate": "pnpm --filter @mathitis/api db:migrate",
-    "db:seed": "pnpm --filter @mathitis/api db:seed"
+    "db:seed": "pnpm --filter @mathitis/api db:seed",
+    "env:dev": "./scripts/dev-up.sh",
+    "env:dev:fresh": "./scripts/dev-up.sh --fresh",
+    "env:prod": "./scripts/prod-up.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
