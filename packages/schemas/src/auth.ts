@@ -84,6 +84,12 @@ export const authUserSchema = z.object({
   semester: z.number(),
   status: accountStatusSchema,
   socialName: z.string().nullable(),
+  preferences: z
+    .object({
+      onboarded: z.boolean().optional(),
+    })
+    .nullable()
+    .optional(),
   createdAt: z.date(),
 });
 export type AuthUser = z.infer<typeof authUserSchema>;

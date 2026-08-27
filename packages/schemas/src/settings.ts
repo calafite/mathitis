@@ -18,6 +18,7 @@ export const updateAccountBodySchema = z.object({
       reducedMotion: z.boolean().optional(),
       soundEnabled: z.boolean().optional(),
       emailNotifications: z.boolean().optional(),
+      onboarded: z.boolean().optional(),
     })
     .optional(),
 });
