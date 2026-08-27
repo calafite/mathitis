@@ -8,9 +8,7 @@ import { settingsApi } from '@/lib/settings-api';
 import { ApiError } from '@/lib/api';
 import { OnboardingWizard } from '@/components/onboarding/onboarding-wizard';
 import { FRESHMAN_FLOW, SENIOR_FLOW } from '@/lib/onboarding-flows';
-import {
-  type OnboardingDraft,
-} from '@/lib/onboarding-engine';
+import { type OnboardingDraft } from '@/lib/onboarding-engine';
 import type { TagLike } from '@/components/profile/dynamic-tag-input';
 import { usePageMeta } from '@/lib/use-page-meta';
 

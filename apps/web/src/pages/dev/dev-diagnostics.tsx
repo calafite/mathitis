@@ -19,7 +19,9 @@ function StatusBadge({ ok }: { ok: boolean }) {
   return (
     <span
       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-        ok ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300'
+        ok
+          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+          : 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300'
       }`}
     >
       {ok ? 'ok' : 'erro'}
@@ -95,7 +97,10 @@ function AdminManagementSection() {
         : null;
 
   return (
-    <section className="mt-4 rounded-xl border border-border bg-card p-4" data-testid="admin-management">
+    <section
+      className="mt-4 rounded-xl border border-border bg-card p-4"
+      data-testid="admin-management"
+    >
       <h2 className="font-semibold">Corpo Administrativo (Administradores)</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Promova ou revogue privilégios administrativos. Cada transição gera um registro de auditoria
@@ -130,7 +135,10 @@ function AdminManagementSection() {
         </p>
       ) : null}
       {promoteMutation.isSuccess ? (
-        <p role="status" className="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+        <p
+          role="status"
+          className="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400"
+        >
           Administrador promovido ✓
         </p>
       ) : null}
@@ -207,7 +215,10 @@ function AdminManagementSection() {
 }
 
 export function DevDiagnosticsPage() {
-  usePageMeta('Diagnósticos', 'Telemetria do sistema: saúde dos serviços, filas e exposição de rede.');
+  usePageMeta(
+    'Diagnósticos',
+    'Telemetria do sistema: saúde dos serviços, filas e exposição de rede.',
+  );
   const { logout } = useAuth();
   const navigate = useNavigate();
 

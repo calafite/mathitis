@@ -15,7 +15,11 @@ const knownPrismaCodes = new Map<string, { code: string; status: number; message
   ['P2025', { code: 'NOT_FOUND', status: 404, message: 'O registro solicitado não existe' }],
   [
     'P2003',
-    { code: 'CONFLICT', status: 409, message: 'A operação viola uma restrição de chave estrangeira' },
+    {
+      code: 'CONFLICT',
+      status: 409,
+      message: 'A operação viola uma restrição de chave estrangeira',
+    },
   ],
 ]);
 
@@ -61,9 +65,7 @@ export function buildErrorHandler() {
         })
         .filter((message): message is string => typeof message === 'string' && message.length > 0);
       const message =
-        fieldMessages.length > 0
-          ? fieldMessages.slice(0, 3).join('; ')
-          : 'Falha na validação';
+        fieldMessages.length > 0 ? fieldMessages.slice(0, 3).join('; ') : 'Falha na validação';
       return reply.code(422).send({
         error: {
           code: 'VALIDATION_ERROR',
@@ -85,7 +87,11 @@ export function buildErrorHandler() {
     }
 
     // Preserve 4xx statuses raised by framework plugins (e.g. rate limiting).
-    if (validationError.statusCode && validationError.statusCode >= 400 && validationError.statusCode < 500) {
+    if (
+      validationError.statusCode &&
+      validationError.statusCode >= 400 &&
+      validationError.statusCode < 500
+    ) {
       return reply.code(validationError.statusCode).send({
         error: {
           code: validationError.code ?? 'REQUEST_REJECTED',

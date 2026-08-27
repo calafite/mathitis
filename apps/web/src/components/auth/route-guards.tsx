@@ -48,7 +48,9 @@ function isStudentRole(role: UserRole | undefined) {
   return role === 'freshman' || role === 'senior';
 }
 
-function isOnboarded(user: { role?: UserRole; preferences?: { onboarded?: boolean } | null } | null) {
+function isOnboarded(
+  user: { role?: UserRole; preferences?: { onboarded?: boolean } | null } | null,
+) {
   if (!user) return false;
   if (!isStudentRole(user.role)) return true;
   return user.preferences?.onboarded === true;

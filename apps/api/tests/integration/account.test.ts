@@ -39,7 +39,12 @@ describe('Account management API', () => {
             socialName: `Social ${handle}`,
             tagline: 'test tagline',
             biographyMarkdown: '## About me\nLoving math.',
-            themePalette: { primaryColor: '#6366f1', accentColor: '#ec4899', badgeColor: '#3b82f6', cardStyle: 'glassmorphic' },
+            themePalette: {
+              primaryColor: '#6366f1',
+              accentColor: '#ec4899',
+              badgeColor: '#3b82f6',
+              cardStyle: 'glassmorphic',
+            },
             socialLinks: { github: 'https://github.com/test' },
             isAcceptingRequests: true,
             isDiscoverable: true,

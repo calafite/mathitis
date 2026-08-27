@@ -13,7 +13,10 @@ const CARD_BG = '#d3d7de';
 const INK = '#0b0b0e';
 
 export function LoginPage() {
-  usePageMeta('Entrar', 'Acesse sua conta no Mathitis e continue sua trajetória na linhagem acadêmica.');
+  usePageMeta(
+    'Entrar',
+    'Acesse sua conta no Mathitis e continue sua trajetória na linhagem acadêmica.',
+  );
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,7 +62,8 @@ export function LoginPage() {
             'linear-gradient(#c9ced8 1px, transparent 1px), linear-gradient(90deg, #c9ced8 1px, transparent 1px)',
           backgroundSize: '48px 48px',
           maskImage: 'radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 100%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 100%)',
         }}
       />
 
@@ -121,7 +125,10 @@ export function LoginPage() {
           </div>
 
           {error && (
-            <div className="border-2 border-[#b3261e] bg-[#b3261e]/10 p-3 text-sm text-[#b3261e]" role="alert">
+            <div
+              className="border-2 border-[#b3261e] bg-[#b3261e]/10 p-3 text-sm text-[#b3261e]"
+              role="alert"
+            >
               {error}
             </div>
           )}

@@ -58,7 +58,10 @@ export function createNotificationService(deps: {
     }
 
     try {
-      const enabled = await systemConfigRepository.getBoolean(EMAIL_NOTIFICATIONS_ENABLED_KEY, true);
+      const enabled = await systemConfigRepository.getBoolean(
+        EMAIL_NOTIFICATIONS_ENABLED_KEY,
+        true,
+      );
       if (!enabled) return;
       const to = await notificationRepository.getEmail(input.userId);
       if (!to) return;
@@ -89,9 +92,7 @@ export function createNotificationService(deps: {
     payload?: Record<string, unknown>;
   }) {
     const adminIds = await notificationRepository.listAdministratorIds();
-    await Promise.all(
-      adminIds.map((userId) => dispatch({ userId, ...input })),
-    );
+    await Promise.all(adminIds.map((userId) => dispatch({ userId, ...input })));
   }
 
   async function listForUser(

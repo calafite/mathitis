@@ -62,9 +62,7 @@ export function validateConfigValue(key: string, value: unknown): void {
   }
   if (definition.type === 'number') {
     if (typeof value !== 'number' || !Number.isInteger(value) || value < 1 || value > 100) {
-      throw new ValidationError(
-        `Configuration "${key}" expects an integer between 1 and 100`,
-      );
+      throw new ValidationError(`Configuration "${key}" expects an integer between 1 and 100`);
     }
   }
 }

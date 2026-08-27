@@ -11,21 +11,25 @@ export interface MentorshipCreateInput {
 export interface MentorshipRepository {
   create(input: MentorshipCreateInput, tx?: Prisma.TransactionClient): Promise<void>;
   countActiveBySenior(seniorId: string, tx?: Prisma.TransactionClient): Promise<number>;
-  listLineage(): Promise<Array<{
-    mentorId: string;
-    menteeId: string;
-    academicYear: string;
-    semester: number;
-    mentor: { handle: string; socialName: string | null; semester: number; role: string };
-    mentee: { handle: string; socialName: string | null; semester: number; role: string };
-  }>>;
-  listByUser(userId: string): Promise<Array<{
-    id: string;
-    mentorId: string;
-    menteeId: string;
-    academicYear: string;
-    semester: number;
-  }>>;
+  listLineage(): Promise<
+    Array<{
+      mentorId: string;
+      menteeId: string;
+      academicYear: string;
+      semester: number;
+      mentor: { handle: string; socialName: string | null; semester: number; role: string };
+      mentee: { handle: string; socialName: string | null; semester: number; role: string };
+    }>
+  >;
+  listByUser(userId: string): Promise<
+    Array<{
+      id: string;
+      mentorId: string;
+      menteeId: string;
+      academicYear: string;
+      semester: number;
+    }>
+  >;
 }
 
 export function createMentorshipRepository(prisma: PrismaClient): MentorshipRepository {

@@ -25,7 +25,10 @@ import {
   scrapeCardQuerySchema,
   type ScrapeCardQuery,
 } from '@mathitis/schemas';
-import type { ProfileRepository, ProfileWithRelations } from '../repositories/profile-repository.js';
+import type {
+  ProfileRepository,
+  ProfileWithRelations,
+} from '../repositories/profile-repository.js';
 import { createProfileRepository } from '../repositories/profile-repository.js';
 import type { RichCardRepository } from '../repositories/rich-card-repository.js';
 import { createRichCardRepository } from '../repositories/rich-card-repository.js';
@@ -157,7 +160,9 @@ export async function registerProfilesPlugin(app: FastifyInstance, options: Prof
     const maxBytes = kind === 'avatar' ? AVATAR_MAX_BYTES : BANNER_MAX_BYTES;
     if (buffer.length > maxBytes) {
       const limitMb = Math.round(maxBytes / 1024 / 1024);
-      throw new ValidationError(`${kind === 'avatar' ? 'Avatar' : 'Banner'} exceeds the ${limitMb}MB upload limit`);
+      throw new ValidationError(
+        `${kind === 'avatar' ? 'Avatar' : 'Banner'} exceeds the ${limitMb}MB upload limit`,
+      );
     }
     const result = await profileService.uploadImage(request.sessionUser!.sub, kind, buffer);
     return reply.send(result);

@@ -28,7 +28,10 @@ const requestStatusLabels: Record<string, string> = {
 };
 
 export function AdminDashboardPage() {
-  usePageMeta('Painel Administrativo', 'Visão geral do programa de apadrinhamento: usuários, aprovações e configuração.');
+  usePageMeta(
+    'Painel Administrativo',
+    'Visão geral do programa de apadrinhamento: usuários, aprovações e configuração.',
+  );
   const configQuery = useQuery({
     queryKey: ['admin', 'config'],
     queryFn: () => adminApi.getConfig(),
@@ -95,8 +98,7 @@ export function AdminDashboardPage() {
                   {user.socialName ?? user.handle}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  @{user.handle} · {roleLabels[user.role] ?? user.role} · Semestre{' '}
-                  {user.semester}
+                  @{user.handle} · {roleLabels[user.role] ?? user.role} · Semestre {user.semester}
                 </p>
               </div>
               <span
@@ -137,23 +139,37 @@ export function AdminDashboardPage() {
           Todos os pedidos de calouros para veteranos, independentemente do status.
         </p>
         <div className="mt-3">
-          {requestsQuery.isLoading && <p className="text-sm text-muted-foreground">Carregando pedidos…</p>}
+          {requestsQuery.isLoading && (
+            <p className="text-sm text-muted-foreground">Carregando pedidos…</p>
+          )}
           {requestsQuery.isError && (
             <p className="text-sm text-red-600 dark:text-red-400">Falha ao carregar pedidos.</p>
           )}
-          {!requestsQuery.isLoading && !requestsQuery.isError && (requestsQuery.data?.requests.length ?? 0) === 0 && (
-            <p className="text-sm text-muted-foreground">Nenhum pedido de apadrinhamento ainda.</p>
-          )}
+          {!requestsQuery.isLoading &&
+            !requestsQuery.isError &&
+            (requestsQuery.data?.requests.length ?? 0) === 0 && (
+              <p className="text-sm text-muted-foreground">
+                Nenhum pedido de apadrinhamento ainda.
+              </p>
+            )}
           <ul className="mt-2 divide-y divide-border">
             {(requestsQuery.data?.requests ?? []).map((req) => (
               <li key={req.id} className="py-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-medium text-foreground">
-                    <span className="font-mono text-xs text-muted-foreground">@{req.freshman?.handle ?? '—'}</span>{' '}
-                    <span className="text-muted-foreground">({req.freshman?.socialName ?? 'Calouro'})</span>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      @{req.freshman?.handle ?? '—'}
+                    </span>{' '}
+                    <span className="text-muted-foreground">
+                      ({req.freshman?.socialName ?? 'Calouro'})
+                    </span>
                     <span className="mx-2 text-muted-foreground">→</span>
-                    <span className="font-mono text-xs text-muted-foreground">@{req.senior?.handle ?? '—'}</span>{' '}
-                    <span className="text-muted-foreground">({req.senior?.socialName ?? 'Veterano'})</span>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      @{req.senior?.handle ?? '—'}
+                    </span>{' '}
+                    <span className="text-muted-foreground">
+                      ({req.senior?.socialName ?? 'Veterano'})
+                    </span>
                   </p>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${

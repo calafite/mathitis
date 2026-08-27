@@ -25,7 +25,9 @@ import type { SessionEpochStore } from '../lib/session-epoch.js';
 
 // Tokens are either legacy hex strings or composite `tokenId.secret` pairs.
 const TOKEN_FRAGMENT = '[a-f0-9-]{16,}(?:\\.[a-f0-9]+)?';
-const VERIFY_LINK_PATTERN = new RegExp(`https?:\\/\\/\\S*\\/verify-email\\?token=${TOKEN_FRAGMENT}`);
+const VERIFY_LINK_PATTERN = new RegExp(
+  `https?:\\/\\/\\S*\\/verify-email\\?token=${TOKEN_FRAGMENT}`,
+);
 const RESET_LINK_PATTERN = new RegExp(`https?:\\/\\/\\S*\\/recover\\?token=${TOKEN_FRAGMENT}`);
 
 export interface DevPluginOptions {

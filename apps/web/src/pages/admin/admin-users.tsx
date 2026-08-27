@@ -25,9 +25,16 @@ const statusLabels: Record<string, string> = {
 };
 
 export function AdminUsersPage() {
-  usePageMeta('Gerenciamento de Usuários', 'Modere contas, anonimize usuários e preserve a linhagem acadêmica.');
+  usePageMeta(
+    'Gerenciamento de Usuários',
+    'Modere contas, anonimize usuários e preserve a linhagem acadêmica.',
+  );
   const queryClient = useQueryClient();
-  const [query, setQuery] = useState({ q: '', role: '' as (typeof roleFilters)[number], status: '' as (typeof statusFilters)[number] });
+  const [query, setQuery] = useState({
+    q: '',
+    role: '' as (typeof roleFilters)[number],
+    status: '' as (typeof statusFilters)[number],
+  });
   const [selected, setSelected] = useState<AdminUser | null>(null);
   const [error, setError] = useState('');
 
@@ -49,7 +56,8 @@ export function AdminUsersPage() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
     },
-    onError: (err: unknown) => setError(err instanceof Error ? err.message : 'Falha na solicitação'),
+    onError: (err: unknown) =>
+      setError(err instanceof Error ? err.message : 'Falha na solicitação'),
   });
 
   const anonymizeMutation = useMutation({
@@ -58,17 +66,21 @@ export function AdminUsersPage() {
       setSelected(null);
       void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
     },
-    onError: (err: unknown) => setError(err instanceof Error ? err.message : 'Falha na solicitação'),
+    onError: (err: unknown) =>
+      setError(err instanceof Error ? err.message : 'Falha na solicitação'),
   });
 
   const moderationMutation = useMutation({
     mutationFn: ({ id, action }: { id: string; action: string }) =>
-      adminApi.moderateProfile(id, { action: action as 'clear_banner' | 'clear_biography' | 'clear_contact' | 'clear_rich_cards' }),
+      adminApi.moderateProfile(id, {
+        action: action as 'clear_banner' | 'clear_biography' | 'clear_contact' | 'clear_rich_cards',
+      }),
     onSuccess: () => {
       setSelected(null);
       void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
     },
-    onError: (err: unknown) => setError(err instanceof Error ? err.message : 'Falha na solicitação'),
+    onError: (err: unknown) =>
+      setError(err instanceof Error ? err.message : 'Falha na solicitação'),
   });
 
   function flagError(err: unknown) {
@@ -138,7 +150,9 @@ export function AdminUsersPage() {
               <tr key={user.id}>
                 <td className="px-4 py-3">
                   <p className="font-medium text-foreground">{user.socialName ?? user.handle}</p>
-                  <p className="text-xs text-muted-foreground">@{user.handle} · {user.email}</p>
+                  <p className="text-xs text-muted-foreground">
+                    @{user.handle} · {user.email}
+                  </p>
                 </td>
                 <td className="px-4 py-3 capitalize">{roleLabels[user.role] ?? user.role}</td>
                 <td className="px-4 py-3">{user.semester}</td>
@@ -245,7 +259,9 @@ export function AdminUsersPage() {
               </div>
             </div>
 
-            {error && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{flagError(error)}</p>}
+            {error && (
+              <p className="mt-3 text-sm text-red-600 dark:text-red-400">{flagError(error)}</p>
+            )}
 
             <div className="mt-5 flex justify-end">
               <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>

@@ -20,7 +20,11 @@ export interface DevService {
       createdAt: Date;
     }>
   >;
-  promoteToAdmin(developerId: string, clientIp: string, identifier: string): Promise<{
+  promoteToAdmin(
+    developerId: string,
+    clientIp: string,
+    identifier: string,
+  ): Promise<{
     id: string;
     handle: string;
     email: string;

@@ -22,9 +22,7 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
       return (
         <div className="space-y-1">
           {card.subtitle && (
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {card.subtitle}
-            </p>
+            <p className="font-mono text-[10px] text-muted-foreground">{card.subtitle}</p>
           )}
           {typeof metadata.albumName === 'string' && metadata.albumName && (
             <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -45,7 +43,8 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
         <div className="space-y-1">
           {(card.subtitle || year) && (
             <p className="font-mono text-[10px] text-muted-foreground">
-              DIR: {card.subtitle}{card.subtitle && year ? ` (${year})` : year ? `(${year})` : ''}
+              DIR: {card.subtitle}
+              {card.subtitle && year ? ` (${year})` : year ? `(${year})` : ''}
             </p>
           )}
           {(typeof metadata.rating === 'number' || typeof metadata.rating === 'string') && (
@@ -66,9 +65,7 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
       return (
         <div className="space-y-1">
           {card.subtitle && (
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {card.subtitle}
-            </p>
+            <p className="font-mono text-[10px] text-muted-foreground">{card.subtitle}</p>
           )}
           {Boolean(metadata.steamAppId) && (
             <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -97,9 +94,7 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
       return (
         <div className="space-y-2">
           {card.subtitle && (
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {card.subtitle}
-            </p>
+            <p className="font-mono text-[10px] text-muted-foreground">{card.subtitle}</p>
           )}
           {Array.isArray(metadata.techStack) && (metadata.techStack as string[]).length > 0 && (
             <div className="flex flex-wrap gap-1">
@@ -135,9 +130,7 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
       return (
         <div className="space-y-1">
           {card.subtitle && (
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {card.subtitle}
-            </p>
+            <p className="font-mono text-[10px] text-muted-foreground">{card.subtitle}</p>
           )}
           {card.description && (
             <p className="line-clamp-3 text-xs leading-relaxed text-foreground/90">
@@ -151,9 +144,7 @@ function CardMetadata({ card, metadata }: { card: RichCard; metadata: Record<str
       return (
         <div className="space-y-1">
           {card.subtitle && (
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {card.subtitle}
-            </p>
+            <p className="font-mono text-[10px] text-muted-foreground">{card.subtitle}</p>
           )}
           {card.description && (
             <p className="line-clamp-3 text-xs leading-relaxed text-foreground/90">

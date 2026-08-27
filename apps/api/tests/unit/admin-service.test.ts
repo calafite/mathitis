@@ -230,7 +230,13 @@ describe('AdminService', () => {
     const approved = await service.decideApproval('user-1', null, 'req-1', 'approve');
     expect(approved.status).toBe('accepted');
 
-    const denied = await service.decideApproval('user-1', null, 'req-2', 'deny', 'Not enough effort');
+    const denied = await service.decideApproval(
+      'user-1',
+      null,
+      'req-2',
+      'deny',
+      'Not enough effort',
+    );
     expect(denied.status).toBe('rejected');
     expect(denied.rejectionReason).toBe('Not enough effort');
 

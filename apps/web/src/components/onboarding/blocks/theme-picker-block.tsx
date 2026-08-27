@@ -5,7 +5,10 @@ export function ThemePickerBlock({ step, draft, setDraft, next }: OnboardingBloc
   return (
     <div className="w-full space-y-5">
       <div className="rounded-md border border-border bg-card p-5">
-        <ThemePicker value={draft.themePalette} onChange={(themePalette) => setDraft({ themePalette })} />
+        <ThemePicker
+          value={draft.themePalette}
+          onChange={(themePalette) => setDraft({ themePalette })}
+        />
       </div>
       <button
         type="button"

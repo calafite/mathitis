@@ -41,7 +41,10 @@ const booleanKeys: Array<keyof SystemConfig> = [
 const numberKeys: Array<keyof SystemConfig> = ['MAX_FRESHMAN_REQUESTS', 'MAX_SENIOR_MENTEES'];
 
 export function AdminConfigPage() {
-  usePageMeta('Configuração do Sistema', 'Controle registros, temporada de descoberta e limites do programa.');
+  usePageMeta(
+    'Configuração do Sistema',
+    'Controle registros, temporada de descoberta e limites do programa.',
+  );
   const configQuery = useQuery({
     queryKey: ['admin', 'config'],
     queryFn: () => adminApi.getConfig(),
@@ -92,7 +95,9 @@ export function AdminConfigPage() {
             >
               <span>
                 <span className="block font-medium text-foreground">{configLabels[key].label}</span>
-                <span className="block text-xs text-muted-foreground">{configLabels[key].hint}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {configLabels[key].hint}
+                </span>
               </span>
               <input
                 type="checkbox"
@@ -110,7 +115,9 @@ export function AdminConfigPage() {
             >
               <span>
                 <span className="block font-medium text-foreground">{configLabels[key].label}</span>
-                <span className="block text-xs text-muted-foreground">{configLabels[key].hint}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {configLabels[key].hint}
+                </span>
               </span>
               <input
                 type="number"
@@ -118,9 +125,7 @@ export function AdminConfigPage() {
                 max={100}
                 className="w-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={typeof draft[key] === 'number' ? (draft[key] as number) : 1}
-                onChange={(e) =>
-                  setDraft({ ...draft, [key]: Math.max(1, Number(e.target.value)) })
-                }
+                onChange={(e) => setDraft({ ...draft, [key]: Math.max(1, Number(e.target.value)) })}
               />
             </label>
           ))}
@@ -132,7 +137,9 @@ export function AdminConfigPage() {
             >
               {saveMutation.isPending ? 'Salvando…' : 'Salvar alterações'}
             </Button>
-            {saved && <span className="text-sm text-emerald-600 dark:text-emerald-400">Salvo.</span>}
+            {saved && (
+              <span className="text-sm text-emerald-600 dark:text-emerald-400">Salvo.</span>
+            )}
             {error && <span className="text-sm text-red-600 dark:text-red-400">{error}</span>}
           </div>
         </div>

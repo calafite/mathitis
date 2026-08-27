@@ -18,7 +18,10 @@ const handleSchema = z
   .string()
   .min(3, 'O nome de usuário deve ter pelo menos 3 caracteres')
   .max(32, 'O nome de usuário deve ter no máximo 32 caracteres')
-  .regex(/^[a-z0-9_]+$/, 'O nome de usuário pode conter apenas letras minúsculas, números e underscores');
+  .regex(
+    /^[a-z0-9_]+$/,
+    'O nome de usuário pode conter apenas letras minúsculas, números e underscores',
+  );
 
 const emailSchema = z
   .string()

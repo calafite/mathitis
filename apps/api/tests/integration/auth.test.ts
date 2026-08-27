@@ -12,7 +12,6 @@ describe('Auth API', () => {
     await stopTestEnvironment(ctx);
   });
 
-
   async function loginMailboxAdmin(): Promise<string> {
     // The integration environment does not seed users, so create a dedicated
     // administrator for privileged checks.
@@ -49,7 +48,6 @@ describe('Auth API', () => {
     }
     return adminLogin.cookies[0]!.value;
   }
-
 
   async function activateUser(handle: string) {
     await ctx.prisma.user.update({
@@ -227,7 +225,6 @@ describe('Auth API', () => {
     const verify = await ctx.app.inject({
       method: 'GET',
       url: '/verify-email?token=sample',
-     
     });
     expect(verify.statusCode).toBe(302);
     expect(verify.headers.location).toBe('http://localhost:5173/verify-email?token=sample');
@@ -239,7 +236,6 @@ describe('Auth API', () => {
     const reset = await ctx.app.inject({
       method: 'GET',
       url: '/reset-password?token=abc.def',
-     
     });
     expect(reset.statusCode).toBe(302);
     expect(reset.headers.location).toBe('http://localhost:5173/recover?token=abc.def');
@@ -327,7 +323,10 @@ describe('Auth API', () => {
     const token = await issueKnownToken(user.id, 'email_verification', plainSecret);
     const compositeToken = `${token.id}.${plainSecret}`;
 
-    const res = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${compositeToken}` });
+    const res = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/auth/verify-email/${compositeToken}`,
+    });
     expect(res.statusCode).toBe(200);
 
     const after = await ctx.prisma.user.findUnique({ where: { id: user.id } });
@@ -344,9 +343,14 @@ describe('Auth API', () => {
       where: { userId: user!.id, type: 'email_verification' },
     });
     const compositeToken = `${token!.id}.${'cafebabe'.repeat(8)}`;
-    const again = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${compositeToken}` });
+    const again = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/auth/verify-email/${compositeToken}`,
+    });
     expect(again.statusCode).toBe(200);
-    const userAfter = await ctx.prisma.user.findUnique({ where: { email: 'tokenverify@cs.uni.edu' } });
+    const userAfter = await ctx.prisma.user.findUnique({
+      where: { email: 'tokenverify@cs.uni.edu' },
+    });
     expect(userAfter!.status).toBe('active');
   });
 
@@ -362,10 +366,18 @@ describe('Auth API', () => {
       },
     });
     const plainSecret = 'deadbeef'.repeat(4);
-    const token = await issueKnownToken(user.id, 'email_verification', plainSecret, new Date(Date.now() - 1000));
+    const token = await issueKnownToken(
+      user.id,
+      'email_verification',
+      plainSecret,
+      new Date(Date.now() - 1000),
+    );
     const compositeToken = `${token.id}.${plainSecret}`;
 
-    const res = await ctx.app.inject({ method: 'GET', url: `/api/auth/verify-email/${compositeToken}` });
+    const res = await ctx.app.inject({
+      method: 'GET',
+      url: `/api/auth/verify-email/${compositeToken}`,
+    });
     expect(res.statusCode).toBe(400);
     expect(res.json().error.code).toBe('TOKEN_INVALID');
   });

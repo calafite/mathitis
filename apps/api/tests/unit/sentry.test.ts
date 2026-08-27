@@ -23,7 +23,10 @@ describe('initSentry', () => {
   });
 
   it('initializes the SDK with environment, release and a scrubbing beforeSend', () => {
-    const initialized = initSentry({ dsn: 'https://key@o0.ingest.sentry.io/1', environment: 'staging' });
+    const initialized = initSentry({
+      dsn: 'https://key@o0.ingest.sentry.io/1',
+      environment: 'staging',
+    });
     expect(initialized).toBe(true);
     expect(init).toHaveBeenCalledWith(
       expect.objectContaining({

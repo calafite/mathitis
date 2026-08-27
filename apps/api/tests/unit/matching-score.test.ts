@@ -29,10 +29,7 @@ describe('matching-score', () => {
       });
       // tagOverlap=100, effort=100, views≈100, bumps=100
       const expected =
-        WEIGHTS.tagOverlap * 100 +
-        WEIGHTS.effort * 100 +
-        WEIGHTS.views * 100 +
-        WEIGHTS.bumps * 100;
+        WEIGHTS.tagOverlap * 100 + WEIGHTS.effort * 100 + WEIGHTS.views * 100 + WEIGHTS.bumps * 100;
       expect(score).toBe(Math.round(expected));
     });
   });

@@ -1,6 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { createProfileService } from '../../src/services/profile-service.js';
-import type { ProfileRepository, ProfileWithRelations } from '../../src/repositories/profile-repository.js';
+import type {
+  ProfileRepository,
+  ProfileWithRelations,
+} from '../../src/repositories/profile-repository.js';
 import type { RichCardRepository } from '../../src/repositories/rich-card-repository.js';
 import type { ObjectStorage } from '../../src/storage/storage-service.js';
 import type { UpdateProfileBody } from '@mathitis/schemas';
@@ -67,7 +70,11 @@ describe('createProfileService.updateProfile tag sync', () => {
     await service.updateProfile('user-1', body);
 
     expect(repository.update).toHaveBeenCalledWith('user-1', { tagline: 'Grafos e gentileza' });
-    expect(repository.setTags).toHaveBeenCalledWith('user-1', ['tag-a', 'tag-b', 'tag-c'], undefined);
+    expect(repository.setTags).toHaveBeenCalledWith(
+      'user-1',
+      ['tag-a', 'tag-b', 'tag-c'],
+      undefined,
+    );
   });
 
   it('clears all tags when an empty array is provided', async () => {

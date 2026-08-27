@@ -228,7 +228,10 @@ describe('Discovery, Requests & Lineage API', () => {
   it('lists only tags used by discoverable seniors when activeOnly=true', async () => {
     const res = await ctx.app.inject({ method: 'GET', url: '/api/tags?activeOnly=true' });
     expect(res.statusCode).toBe(200);
-    const names = res.json().tags.map((tag: { name: string }) => tag.name).sort();
+    const names = res
+      .json()
+      .tags.map((tag: { name: string }) => tag.name)
+      .sort();
     // algebra/analysis/geometry are all used by visible seniors...
     expect(names).toEqual(['algebra', 'analysis', 'geometry']);
 
@@ -239,10 +242,12 @@ describe('Discovery, Requests & Lineage API', () => {
     });
 
     const after = await ctx.app.inject({ method: 'GET', url: '/api/tags?activeOnly=true' });
-    expect(after.json().tags.map((t: { name: string }) => t.name).sort()).toEqual([
-      'algebra',
-      'analysis',
-    ]);
+    expect(
+      after
+        .json()
+        .tags.map((t: { name: string }) => t.name)
+        .sort(),
+    ).toEqual(['algebra', 'analysis']);
   });
 
   // -- Discovery catalog ---------------------------------------------------

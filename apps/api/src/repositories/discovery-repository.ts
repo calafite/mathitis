@@ -53,7 +53,9 @@ const seniorSelect = {
   effortScore: true,
   profileViews: true,
   user: { select: { handle: true, semester: true } },
-  tags: { include: { tag: { select: { id: true, name: true, category: true, color: true, icon: true } } } },
+  tags: {
+    include: { tag: { select: { id: true, name: true, category: true, color: true, icon: true } } },
+  },
   richCards: { select: { cardType: true } },
 } satisfies Prisma.ProfileSelect;
 

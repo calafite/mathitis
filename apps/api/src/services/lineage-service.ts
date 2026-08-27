@@ -46,15 +46,31 @@ export function createLineageService(
     }
   }
 
-  function buildGraph(rows: Awaited<ReturnType<MentorshipRepository['listLineage']>>): LineageResponse {
+  function buildGraph(
+    rows: Awaited<ReturnType<MentorshipRepository['listLineage']>>,
+  ): LineageResponse {
     const nodeMap = new Map<string, LineageNode>();
     const edges: LineageResponse['edges'] = [];
     const academicYears = new Set<string>();
 
     for (const row of rows) {
       academicYears.add(row.academicYear);
-      addNode(nodeMap, row.mentorId, row.mentor.handle, row.mentor.socialName, row.mentor.semester, row.mentor.role);
-      addNode(nodeMap, row.menteeId, row.mentee.handle, row.mentee.socialName, row.mentee.semester, row.mentee.role);
+      addNode(
+        nodeMap,
+        row.mentorId,
+        row.mentor.handle,
+        row.mentor.socialName,
+        row.mentor.semester,
+        row.mentor.role,
+      );
+      addNode(
+        nodeMap,
+        row.menteeId,
+        row.mentee.handle,
+        row.mentee.socialName,
+        row.mentee.semester,
+        row.mentee.role,
+      );
       edges.push({
         mentorId: row.mentorId,
         menteeId: row.menteeId,

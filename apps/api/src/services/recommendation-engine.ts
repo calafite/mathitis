@@ -31,10 +31,7 @@ export interface RecommendationEngine {
    * senior with its compatibility score and explainable match reasons,
    * ordered by descending score.
    */
-  rank<T extends RankableSenior>(
-    freshmanTags: RankableTag[],
-    seniors: T[],
-  ): Array<ScoredSenior<T>>;
+  rank<T extends RankableSenior>(freshmanTags: RankableTag[], seniors: T[]): Array<ScoredSenior<T>>;
 }
 
 function buildEmbeddingMap(tags: RankableTag[]): Map<string, number[]> {

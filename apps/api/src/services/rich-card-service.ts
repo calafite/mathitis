@@ -1,9 +1,5 @@
 import type { RichCard } from '@prisma/client';
-import type {
-  CreateRichCardBody,
-  RichCardType,
-  UpdateRichCardBody,
-} from '@mathitis/schemas';
+import type { CreateRichCardBody, RichCardType, UpdateRichCardBody } from '@mathitis/schemas';
 import type { RichCardRepository } from '../repositories/rich-card-repository.js';
 import type { ProfileRepository } from '../repositories/profile-repository.js';
 import { NotFoundError, ValidationError } from '../errors.js';
@@ -43,7 +39,8 @@ export function createRichCardService(
     );
 
     const existing = await richCardRepository.listByProfileId(userId);
-    const nextOrder = existing.length > 0 ? Math.max(...existing.map((c) => c.displayOrder)) + 1 : 0;
+    const nextOrder =
+      existing.length > 0 ? Math.max(...existing.map((c) => c.displayOrder)) + 1 : 0;
 
     const card = await richCardRepository.create(userId, {
       cardType: input.cardType,
@@ -113,9 +110,7 @@ export function createRichCardService(
     if (order.some((id) => !ownedIds.has(id))) {
       throw new ValidationError('A ordem contém um cartão que não pertence a este perfil');
     }
-    await richCardRepository.reorder(
-      order.map((id, index) => ({ id, displayOrder: index })),
-    );
+    await richCardRepository.reorder(order.map((id, index) => ({ id, displayOrder: index })));
     return richCardRepository.listByProfileId(userId);
   }
 

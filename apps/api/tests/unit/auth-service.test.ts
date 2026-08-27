@@ -224,7 +224,9 @@ describe('AuthService.verifyEmail', () => {
     const h = createHarness();
     h.tokenRepository.findById.mockResolvedValue(null);
 
-    await expect(h.service.verifyEmail(`${'a'.repeat(36)}.${'b'.repeat(64)}`)).rejects.toMatchObject({
+    await expect(
+      h.service.verifyEmail(`${'a'.repeat(36)}.${'b'.repeat(64)}`),
+    ).rejects.toMatchObject({
       status: 400,
       code: 'TOKEN_INVALID',
     });

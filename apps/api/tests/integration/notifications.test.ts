@@ -1,10 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import Redis from 'ioredis';
-import {
-  startTestEnvironment,
-  stopTestEnvironment,
-  type TestContext,
-} from './test-environment.js';
+import { startTestEnvironment, stopTestEnvironment, type TestContext } from './test-environment.js';
 import { createEmailQueue } from '../../src/lib/queue.js';
 import { createEmailWorker } from '../../src/lib/worker.js';
 
@@ -61,9 +57,24 @@ describe('Notifications API', () => {
       return String(res.headers['set-cookie']).split(';')[0] ?? '';
     }
 
-    await createUser({ handle: 'notif_senior', email: 'notif_senior@cs.uni.edu', role: 'senior', semester: 8 });
-    await createUser({ handle: 'notif_freshman', email: 'notif_freshman@cs.uni.edu', role: 'freshman', semester: 2 });
-    await createUser({ handle: 'notif_other', email: 'notif_other@cs.uni.edu', role: 'freshman', semester: 3 });
+    await createUser({
+      handle: 'notif_senior',
+      email: 'notif_senior@cs.uni.edu',
+      role: 'senior',
+      semester: 8,
+    });
+    await createUser({
+      handle: 'notif_freshman',
+      email: 'notif_freshman@cs.uni.edu',
+      role: 'freshman',
+      semester: 2,
+    });
+    await createUser({
+      handle: 'notif_other',
+      email: 'notif_other@cs.uni.edu',
+      role: 'freshman',
+      semester: 3,
+    });
 
     seniorCookie = await login('notif_senior');
     freshmanCookie = await login('notif_freshman');

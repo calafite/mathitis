@@ -143,9 +143,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     ],
   );
 
-  return (
-    <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>
-  );
+  return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;
 }
 
 export function useNotifications(): NotificationsContextValue {

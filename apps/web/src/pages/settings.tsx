@@ -89,8 +89,7 @@ export function SettingsPage() {
     enabled: Boolean(user),
   });
 
-  const activeMentorships =
-    requestsQuery.data?.filter((r) => r.status === 'accepted').length ?? 0;
+  const activeMentorships = requestsQuery.data?.filter((r) => r.status === 'accepted').length ?? 0;
 
   const updateMutation = useMutation({
     mutationFn: (patch: {
@@ -133,7 +132,12 @@ export function SettingsPage() {
     const next = !highContrast;
     setHighContrast(next);
     updateMutation.mutate({
-      preferences: { highContrast: next } as { theme?: ThemePreference; reducedMotion?: boolean; soundEnabled?: boolean; emailNotifications?: boolean },
+      preferences: { highContrast: next } as {
+        theme?: ThemePreference;
+        reducedMotion?: boolean;
+        soundEnabled?: boolean;
+        emailNotifications?: boolean;
+      },
     });
   };
 
@@ -168,7 +172,9 @@ export function SettingsPage() {
       await logout();
     },
     onError: (err: unknown) => {
-      setAnonymizeError(err instanceof ApiError ? err.message : 'Não foi possível anonimizar a conta.');
+      setAnonymizeError(
+        err instanceof ApiError ? err.message : 'Não foi possível anonimizar a conta.',
+      );
     },
   });
 
@@ -230,7 +236,9 @@ export function SettingsPage() {
       <div className="mx-auto w-full max-w-4xl px-4 py-8">
         <header className="mb-6 flex items-center gap-3">
           <Settings className="h-6 w-6 text-primary" />
-          <h1 className="font-mono text-xl font-bold uppercase tracking-[0.15em] text-foreground">Configurações</h1>
+          <h1 className="font-mono text-xl font-bold uppercase tracking-[0.15em] text-foreground">
+            Configurações
+          </h1>
         </header>
 
         {notice && (
@@ -255,16 +263,34 @@ export function SettingsPage() {
 
         <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
           <Tabs.List className="mb-6 flex flex-wrap gap-1 border-b border-border">
-            <SettingsTab value="account" label="Conta e Segurança" icon={<UserCog className="h-4 w-4" />} />
+            <SettingsTab
+              value="account"
+              label="Conta e Segurança"
+              icon={<UserCog className="h-4 w-4" />}
+            />
             <SettingsTab value="appearance" label="Aparência" icon={<Sun className="h-4 w-4" />} />
-            <SettingsTab value="notifications" label="Notificações" icon={<Bell className="h-4 w-4" />} />
-            <SettingsTab value="data" label="Dados e Linhagem" icon={<Database className="h-4 w-4" />} />
-            <SettingsTab value="danger" label="Zona de Risco" icon={<ShieldAlert className="h-4 w-4" />} />
+            <SettingsTab
+              value="notifications"
+              label="Notificações"
+              icon={<Bell className="h-4 w-4" />}
+            />
+            <SettingsTab
+              value="data"
+              label="Dados e Linhagem"
+              icon={<Database className="h-4 w-4" />}
+            />
+            <SettingsTab
+              value="danger"
+              label="Zona de Risco"
+              icon={<ShieldAlert className="h-4 w-4" />}
+            />
           </Tabs.List>
 
           <Tabs.Content value="account" className="space-y-6">
             <section className="border-2 border-white/15 bg-card p-6">
-              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Conta e Segurança</h2>
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">
+                Conta e Segurança
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Gerencie seu período acadêmico e suas credenciais de acesso.
               </p>
@@ -312,10 +338,12 @@ export function SettingsPage() {
             </section>
 
             <section className="border-2 border-white/15 bg-card p-6">
-              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Alterar senha</h2>
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">
+                Alterar senha
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Escolha uma senha forte com pelo menos 8 caracteres, uma letra maiúscula, uma
-                letra minúscula e um número.
+                Escolha uma senha forte com pelo menos 8 caracteres, uma letra maiúscula, uma letra
+                minúscula e um número.
               </p>
 
               <form className="mt-5 space-y-4" onSubmit={onPwdSubmit}>
@@ -382,7 +410,9 @@ export function SettingsPage() {
 
           <Tabs.Content value="appearance" className="space-y-6">
             <section className="border-2 border-white/15 bg-card p-6">
-              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Tema</h2>
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">
+                Tema
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Escolha como o Mathitis aparece para você.
               </p>
@@ -413,7 +443,9 @@ export function SettingsPage() {
             </section>
 
             <section className="border-2 border-white/15 bg-card p-6">
-              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Acessibilidade</h2>
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">
+                Acessibilidade
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Ajuste a interface ao seu conforto.
               </p>
@@ -442,7 +474,9 @@ export function SettingsPage() {
 
           <Tabs.Content value="notifications" className="space-y-6">
             <section className="border-2 border-white/15 bg-card p-6">
-              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Alertas</h2>
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">
+                Alertas
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Controle como você é notificado sobre a atividade de apadrinhamento.
               </p>
@@ -466,7 +500,9 @@ export function SettingsPage() {
 
           <Tabs.Content value="data" className="space-y-6">
             <section className="border-2 border-white/15 bg-card p-6">
-              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Seu arquivo de dados</h2>
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">
+                Seu arquivo de dados
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Baixe um arquivo JSON completo do seu perfil, tags, cards avançados, histórico de
                 solicitações e árvore de linhagem.
@@ -478,13 +514,14 @@ export function SettingsPage() {
             </section>
 
             <section className="border-2 border-white/15 bg-card p-6">
-              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Resumo da linhagem</h2>
+              <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">
+                Resumo da linhagem
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Sua árvore de família acadêmica é preservada mesmo se você desativar sua conta.
               </p>
               <p className="mt-4 text-sm text-foreground">
-                Conexões ativas:{' '}
-                <span className="font-semibold">{activeMentorships}</span>
+                Conexões ativas: <span className="font-semibold">{activeMentorships}</span>
               </p>
               <Link
                 to="/lineage"
@@ -500,8 +537,8 @@ export function SettingsPage() {
               <h2 className="text-lg font-semibold text-destructive">Zona de Risco</h2>
               <div className="mt-3 border border-white/15 bg-card p-4 text-sm text-muted-foreground">
                 Desativar sua conta remove suas informações pessoais, bio e cards de vitrine. Seus
-                nós ancestrais no Grafo de Linhagem de Apadrinhamento permanecerão preservados
-                como um ex-aluno anonimizado para manter intacta sua árvore de família acadêmica.
+                nós ancestrais no Grafo de Linhagem de Apadrinhamento permanecerão preservados como
+                um ex-aluno anonimizado para manter intacta sua árvore de família acadêmica.
               </div>
 
               <Button
@@ -528,7 +565,9 @@ export function SettingsPage() {
             className="w-full max-w-md border-2 border-white/15 bg-card p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">Anonimizar conta?</h2>
+            <h2 className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground">
+              Anonimizar conta?
+            </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Isso desativará permanentemente sua conta, removerá suas informações pessoais e o
               preservará como um ex-aluno anonimizado no grafo de linhagem. Esta ação não pode ser
@@ -569,11 +608,7 @@ export function SettingsPage() {
                 >
                   Cancelar
                 </Button>
-                <Button
-                  type="submit"
-                  variant="destructive"
-                  disabled={anonymizeMutation.isPending}
-                >
+                <Button type="submit" variant="destructive" disabled={anonymizeMutation.isPending}>
                   {anonymizeMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Desativando…
@@ -630,9 +665,7 @@ function ThemeOption({
       onClick={onClick}
       aria-pressed={active}
       className={`flex flex-col items-start gap-2 border-2 p-4 text-left transition-colors ${
-        active
-          ? 'border-primary bg-primary/10'
-          : 'border-border bg-background hover:border-input'
+        active ? 'border-primary bg-primary/10' : 'border-border bg-background hover:border-input'
       }`}
     >
       <span className={active ? 'text-primary' : 'text-muted-foreground'}>{icon}</span>
@@ -666,16 +699,12 @@ function ToggleRow({
         aria-label={title}
         onClick={onChange}
         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-none border-2 p-0.5 transition-colors ${
-          checked
-            ? 'border-primary bg-primary'
-            : 'border-[#c9ced8]/40 bg-card'
+          checked ? 'border-primary bg-primary' : 'border-[#c9ced8]/40 bg-card'
         }`}
       >
         <span
           className={`pointer-events-none block h-4 w-4 transform transition-transform ${
-            checked
-              ? 'translate-x-5 bg-black'
-              : 'translate-x-0 bg-[#c9ced8]'
+            checked ? 'translate-x-5 bg-black' : 'translate-x-0 bg-[#c9ced8]'
           }`}
         />
       </button>

@@ -10,11 +10,7 @@ export interface BumpRepository {
    * Atomic "move affinity": deletes a previously bumped senior and inserts the
    * new one within a single transaction.
    */
-  replace(
-    freshmanId: string,
-    removedSeniorId: string,
-    addedSeniorId: string,
-  ): Promise<boolean>;
+  replace(freshmanId: string, removedSeniorId: string, addedSeniorId: string): Promise<boolean>;
 }
 
 export function createBumpRepository(prisma: PrismaClient): BumpRepository {

@@ -92,7 +92,11 @@ describe('devService.promoteToAdmin', () => {
 describe('devService.revokeAdmin', () => {
   it('demotes by semester (>2 to senior) and bumps the epoch', async () => {
     const h = harness();
-    h.prisma.user.findUnique.mockResolvedValue({ ...student, deletedAt: null, role: 'administrator' });
+    h.prisma.user.findUnique.mockResolvedValue({
+      ...student,
+      deletedAt: null,
+      role: 'administrator',
+    });
 
     await h.service.revokeAdmin('dev-1', '10.0.0.2', 'u-1');
 

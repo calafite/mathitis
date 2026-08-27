@@ -23,7 +23,11 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [expandedCards, setExpandedCards] = useState(false);
 
-  const { data: profileData, isLoading, refetch } = useQuery({
+  const {
+    data: profileData,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['profile', seniorHandle],
     queryFn: () => profileApi.getByHandle(seniorHandle).then((r) => r.profile),
     enabled: open && Boolean(seniorHandle),
@@ -115,13 +119,12 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/80" />
-        <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-none border-2 border-foreground bg-background text-foreground"
-        >
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-none border-2 border-foreground bg-background text-foreground">
           {/* Title bar */}
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-foreground bg-background px-4 py-2.5">
             <span className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-foreground">
-              Perfil de Mentor <span className="text-muted-foreground">// @{profile?.handle ?? seniorHandle}</span>
+              Perfil de Mentor{' '}
+              <span className="text-muted-foreground">// @{profile?.handle ?? seniorHandle}</span>
             </span>
             <Dialog.Close
               className="border border-foreground p-1 text-foreground transition-colors hover:bg-foreground hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -132,7 +135,11 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
           </div>
 
           {bannerStyle && (
-            <div className="h-24 border-b border-foreground" style={bannerStyle} role="presentation" />
+            <div
+              className="h-24 border-b border-foreground"
+              style={bannerStyle}
+              role="presentation"
+            />
           )}
 
           {profile && (
@@ -175,7 +182,9 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
               {/* Tagline */}
               {profile.tagline ? (
                 <div className="border-b border-foreground/50 px-4 py-2">
-                  <p className="font-mono text-xs italic uppercase text-foreground">{profile.tagline}</p>
+                  <p className="font-mono text-xs italic uppercase text-foreground">
+                    {profile.tagline}
+                  </p>
                 </div>
               ) : null}
 

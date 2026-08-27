@@ -36,9 +36,9 @@ describe('processImage', () => {
   }
 
   it('rejects non-image payloads', async () => {
-    await expect(processImage(Buffer.from('<script>alert(1)</script>'), 'avatar')).rejects.toBeInstanceOf(
-      ValidationError,
-    );
+    await expect(
+      processImage(Buffer.from('<script>alert(1)</script>'), 'avatar'),
+    ).rejects.toBeInstanceOf(ValidationError);
   });
 
   it('rejects files over the per-kind size limit', async () => {

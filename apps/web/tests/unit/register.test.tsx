@@ -87,6 +87,8 @@ describe('RegisterPage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Criar conta' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível completar o registro');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Não foi possível completar o registro',
+    );
   });
 });

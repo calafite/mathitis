@@ -50,7 +50,8 @@ export interface AuthService {
 }
 
 export function createAuthService(deps: AuthServiceDeps): AuthService {
-  const { userRepository, tokenRepository, systemConfigRepository, mailer, loginGuard, onLockout } = deps;
+  const { userRepository, tokenRepository, systemConfigRepository, mailer, loginGuard, onLockout } =
+    deps;
 
   async function hashPassword(password: string): Promise<string> {
     return argon2.hash(password, ARGON2_OPTIONS);

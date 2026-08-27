@@ -1,10 +1,7 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import type { Queue } from 'bullmq';
-import type {
-  NotificationParams,
-  NotificationsQuery,
-} from '@mathitis/schemas';
+import type { NotificationParams, NotificationsQuery } from '@mathitis/schemas';
 import {
   notificationParamsSchema,
   notificationReadResponseSchema,
@@ -60,7 +57,11 @@ export async function registerNotificationsPlugin(
         },
         async (request, reply) => {
           const viewerId = request.sessionUser!.sub;
-          const raw = request.query as unknown as { unreadOnly?: string; limit?: string; offset?: string };
+          const raw = request.query as unknown as {
+            unreadOnly?: string;
+            limit?: string;
+            offset?: string;
+          };
           const result = await notificationService.listForUser(viewerId, {
             unreadOnly: raw.unreadOnly === 'true',
             limit: Number(raw.limit ?? 20),
@@ -84,10 +85,7 @@ export async function registerNotificationsPlugin(
         },
         async (request, reply) => {
           const viewerId = request.sessionUser!.sub;
-          const notification = await notificationService.markRead(
-            request.params.id,
-            viewerId,
-          );
+          const notification = await notificationService.markRead(request.params.id, viewerId);
           if (!notification) {
             return reply.code(404).send({
               error: {

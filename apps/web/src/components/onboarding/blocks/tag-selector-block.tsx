@@ -13,9 +13,7 @@ export function TagSelectorBlock({ step, draft, setDraft, next }: OnboardingBloc
         className="inline-block border-2 border-foreground bg-[#c9f24c] px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-black shadow-[6px_6px_0_0_#000] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
         disabled={draft.tags.length < minTags}
       >
-        {draft.tags.length < minTags
-          ? `ESCOLHA PELO MENOS ${minTags}`
-          : (step.ctaText ?? 'PRONTO')}
+        {draft.tags.length < minTags ? `ESCOLHA PELO MENOS ${minTags}` : (step.ctaText ?? 'PRONTO')}
       </button>
     </div>
   );

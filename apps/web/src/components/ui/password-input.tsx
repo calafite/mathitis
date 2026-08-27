@@ -10,7 +10,16 @@ export interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputE
 }
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ className, revealLabel = 'Mostrar senha', hideLabel = 'Ocultar senha', type: _type, ...props }, ref) => {
+  (
+    {
+      className,
+      revealLabel = 'Mostrar senha',
+      hideLabel = 'Ocultar senha',
+      type: _type,
+      ...props
+    },
+    ref,
+  ) => {
     const [visible, setVisible] = useState(false);
     return (
       <div className="relative">

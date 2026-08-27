@@ -69,9 +69,6 @@ export function createLoginGuard(
 }
 
 /** Convenience constructor for the real Redis client. */
-export function createRedisLoginGuard(
-  redis: Redis,
-  options: LoginGuardOptions,
-): LoginGuard {
+export function createRedisLoginGuard(redis: Redis, options: LoginGuardOptions): LoginGuard {
   return createLoginGuard(redis, options);
 }

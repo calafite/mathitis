@@ -98,10 +98,7 @@ describe('DevDiagnosticsPage admin management', () => {
     renderPage();
     await screen.findByTestId('admin-management');
 
-    await user.type(
-      screen.getByLabelText('Identificador do novo administrador'),
-      'promote_me',
-    );
+    await user.type(screen.getByLabelText('Identificador do novo administrador'), 'promote_me');
     await user.click(screen.getByRole('button', { name: /promover novo administrador/i }));
 
     await waitFor(() => {

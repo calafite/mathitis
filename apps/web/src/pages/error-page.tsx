@@ -74,10 +74,28 @@ export function ErrorPage({ error, title, message, onRetry }: ErrorPageProps) {
           strokeDasharray="10 8"
         />
         <circle cx="15" cy="100" r="5" fill="var(--color-lineage)" />
-        <circle cx="95" cy="64" r="4" fill="none" stroke="var(--color-foreground)" strokeWidth="1.5" />
+        <circle
+          cx="95"
+          cy="64"
+          r="4"
+          fill="none"
+          stroke="var(--color-foreground)"
+          strokeWidth="1.5"
+        />
         {/* fracture marks */}
-        <path d="M 143 30 L 149 44 M 150 29 L 156 43" stroke="var(--color-destructive)" strokeWidth="2" strokeLinecap="round" />
-        <text x="150" y="70" fontSize="11" fontFamily="monospace" fill="var(--color-muted-foreground)">
+        <path
+          d="M 143 30 L 149 44 M 150 29 L 156 43"
+          stroke="var(--color-destructive)"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <text
+          x="150"
+          y="70"
+          fontSize="11"
+          fontFamily="monospace"
+          fill="var(--color-muted-foreground)"
+        >
           ERR://edge_broken
         </text>
       </svg>

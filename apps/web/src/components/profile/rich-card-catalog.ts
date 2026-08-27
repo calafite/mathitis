@@ -10,10 +10,13 @@ export const CARD_TYPE_LABELS: Record<RichCardType, string> = {
 };
 
 export function groupCardsByType(cards: RichCard[]): Record<string, RichCard[]> {
-  return cards.reduce((acc, card) => {
-    const group = acc[card.cardType] ?? [];
-    group.push(card);
-    acc[card.cardType] = group;
-    return acc;
-  }, {} as Record<string, RichCard[]>);
+  return cards.reduce(
+    (acc, card) => {
+      const group = acc[card.cardType] ?? [];
+      group.push(card);
+      acc[card.cardType] = group;
+      return acc;
+    },
+    {} as Record<string, RichCard[]>,
+  );
 }

@@ -330,11 +330,7 @@ export const devAdminsResponseSchema = z.object({
 export type DevAdminsResponse = z.infer<typeof devAdminsResponseSchema>;
 
 export const promoteAdminBodySchema = z.object({
-  identifier: z
-    .string()
-    .trim()
-    .min(3, 'Informe o nome de usuário ou e-mail')
-    .max(255),
+  identifier: z.string().trim().min(3, 'Informe o nome de usuário ou e-mail').max(255),
 });
 export type PromoteAdminBody = z.infer<typeof promoteAdminBodySchema>;
 

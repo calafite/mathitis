@@ -14,7 +14,13 @@ export interface ThemedSelectProps {
 }
 
 /** Brutalist listbox: native selects can't be fully themed, so we roll our own. */
-export function ThemedSelect({ value, options, onChange, ariaLabel, className = '' }: ThemedSelectProps) {
+export function ThemedSelect({
+  value,
+  options,
+  onChange,
+  ariaLabel,
+  className = '',
+}: ThemedSelectProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +53,9 @@ export function ThemedSelect({ value, options, onChange, ariaLabel, className = 
         className="flex h-9 w-full items-center justify-between border-2 border-[#c9ced8]/40 bg-transparent px-2 font-mono text-xs text-foreground transition-colors hover:border-[#c9ced8]/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c9f24c]"
       >
         <span className="truncate">{selected?.label ?? '—'}</span>
-        <span aria-hidden className="ml-2 text-[10px] text-muted-foreground">▼</span>
+        <span aria-hidden className="ml-2 text-[10px] text-muted-foreground">
+          ▼
+        </span>
       </button>
 
       {open && (

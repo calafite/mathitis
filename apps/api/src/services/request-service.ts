@@ -227,7 +227,10 @@ export function createRequestService(deps: {
 
           const activeCount = await mentorshipRepository.countActiveBySenior(request.seniorId, tx);
           if (activeCount >= seniorProfile.maxMentees) {
-            throw new ConflictError('Senior has reached maximum mentee capacity', 'CAPACITY_EXCEEDED');
+            throw new ConflictError(
+              'Senior has reached maximum mentee capacity',
+              'CAPACITY_EXCEEDED',
+            );
           }
 
           const requireAdminApproval = await systemConfigRepository.getBoolean(
@@ -236,7 +239,12 @@ export function createRequestService(deps: {
           );
 
           if (requireAdminApproval) {
-            await requestRepository.updateStatus(requestId, 'pending_admin_approval', undefined, tx);
+            await requestRepository.updateStatus(
+              requestId,
+              'pending_admin_approval',
+              undefined,
+              tx,
+            );
             notificationService?.dispatchToAdmins({
               type: 'approval_required',
               title: 'Pedido de apadrinhamento aguardando aprovação',
@@ -321,7 +329,10 @@ export function createRequestService(deps: {
   async function approveAdmin(adminId: string, requestId: string) {
     const request = await requireRequest(requestId);
     if (request.status !== 'pending_admin_approval') {
-      throw new ConflictError('Only requests awaiting admin approval can be approved', 'REQUEST_NOT_ACTIVE');
+      throw new ConflictError(
+        'Only requests awaiting admin approval can be approved',
+        'REQUEST_NOT_ACTIVE',
+      );
     }
 
     const freshman = await userRepository.findActiveById(request.freshmanId);
@@ -377,7 +388,10 @@ export function createRequestService(deps: {
   async function denyAdmin(adminId: string, requestId: string, reason?: string) {
     const request = await requireRequest(requestId);
     if (request.status !== 'pending_admin_approval') {
-      throw new ConflictError('Only requests awaiting admin approval can be denied', 'REQUEST_NOT_ACTIVE');
+      throw new ConflictError(
+        'Only requests awaiting admin approval can be denied',
+        'REQUEST_NOT_ACTIVE',
+      );
     }
     await requestRepository.updateStatus(requestId, 'rejected', {
       rejectionReason: reason ?? 'Denied by administrator',

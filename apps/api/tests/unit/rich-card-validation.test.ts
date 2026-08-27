@@ -63,10 +63,11 @@ describe('enrichCardMetadata', () => {
   });
 
   it('coerces string numbers in film metadata (form inputs submit strings)', () => {
-    const meta = enrichCardMetadata(
-      'film',
-      { rating: '8.5', year: '1975', director: 'Stanley Kubrick' },
-    );
+    const meta = enrichCardMetadata('film', {
+      rating: '8.5',
+      year: '1975',
+      director: 'Stanley Kubrick',
+    });
     expect(meta.rating).toBe(8.5);
     expect(meta.year).toBe(1975);
     expect(meta.director).toBe('Stanley Kubrick');

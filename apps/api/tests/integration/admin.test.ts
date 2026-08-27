@@ -1,9 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  startTestEnvironment,
-  stopTestEnvironment,
-  type TestContext,
-} from './test-environment.js';
+import { startTestEnvironment, stopTestEnvironment, type TestContext } from './test-environment.js';
 
 interface TestUser {
   handle: string;
@@ -16,11 +12,41 @@ interface TestUser {
 describe('Admin API', () => {
   let ctx: TestContext;
 
-  const admin: TestUser = { handle: 'root_admin', email: 'root_admin@cs.uni.edu', password: 'Pass12345!', role: 'administrator', semester: 10 };
-  const senior: TestUser = { handle: 'senior_adm', email: 'senior_adm@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 8 };
-  const senior2: TestUser = { handle: 'senior_adm2', email: 'senior_adm2@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 7 };
-  const freshman: TestUser = { handle: 'fresh_adm', email: 'fresh_adm@cs.uni.edu', password: 'Pass12345!', role: 'freshman', semester: 2 };
-  const otherFreshman: TestUser = { handle: 'fresh_adm2', email: 'fresh_adm2@cs.uni.edu', password: 'Pass12345!', role: 'freshman', semester: 3 };
+  const admin: TestUser = {
+    handle: 'root_admin',
+    email: 'root_admin@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'administrator',
+    semester: 10,
+  };
+  const senior: TestUser = {
+    handle: 'senior_adm',
+    email: 'senior_adm@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'senior',
+    semester: 8,
+  };
+  const senior2: TestUser = {
+    handle: 'senior_adm2',
+    email: 'senior_adm2@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'senior',
+    semester: 7,
+  };
+  const freshman: TestUser = {
+    handle: 'fresh_adm',
+    email: 'fresh_adm@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'freshman',
+    semester: 2,
+  };
+  const otherFreshman: TestUser = {
+    handle: 'fresh_adm2',
+    email: 'fresh_adm2@cs.uni.edu',
+    password: 'Pass12345!',
+    role: 'freshman',
+    semester: 3,
+  };
 
   let adminCookie = '';
   let freshmanCookie = '';
@@ -324,7 +350,13 @@ describe('Admin API', () => {
       update: { value: 'true' },
       create: { key: 'DISCOVERY_ACTIVE', value: 'true' },
     });
-    const doomed: TestUser = { handle: 'senior_doomed', email: 'senior_doomed@cs.uni.edu', password: 'Pass12345!', role: 'senior', semester: 6 };
+    const doomed: TestUser = {
+      handle: 'senior_doomed',
+      email: 'senior_doomed@cs.uni.edu',
+      password: 'Pass12345!',
+      role: 'senior',
+      semester: 6,
+    };
     const doomedUser = await createUser(doomed);
 
     const before = await ctx.app.inject({
@@ -386,9 +418,9 @@ describe('Admin API', () => {
       headers: { cookie: adminCookie },
     });
     expect(list.statusCode).toBe(200);
-    const pending = list.json().approvals.filter(
-      (a: { id: string }) => a.id === approvalRequest.id,
-    );
+    const pending = list
+      .json()
+      .approvals.filter((a: { id: string }) => a.id === approvalRequest.id);
     expect(pending).toHaveLength(1);
     expect(pending[0].freshman.handle).toBe('fresh_adm');
 

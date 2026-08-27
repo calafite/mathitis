@@ -37,7 +37,10 @@ function formatDate(value: string | Date) {
 }
 
 export function AdminAuditLogsPage() {
-  usePageMeta('Registro de Auditoria', 'Histórico imutável das ações administrativas da plataforma.');
+  usePageMeta(
+    'Registro de Auditoria',
+    'Histórico imutável das ações administrativas da plataforma.',
+  );
   const [filters, setFilters] = useState({
     action: '',
     entity: '',
@@ -48,10 +51,7 @@ export function AdminAuditLogsPage() {
   const [offset, setOffset] = useState(0);
   const [selected, setSelected] = useState<AuditLog | null>(null);
 
-  const queryKey = useMemo(
-    () => ['admin', 'audit-logs', applied, offset],
-    [applied, offset],
-  );
+  const queryKey = useMemo(() => ['admin', 'audit-logs', applied, offset], [applied, offset]);
 
   const logsQuery = useQuery({
     queryKey,
@@ -88,8 +88,8 @@ export function AdminAuditLogsPage() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Registro de auditoria</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Registro cronológico de alterações administrativas e de estado sensível, com autor, alvo
-          e conteúdos de antes/depois.
+          Registro cronológico de alterações administrativas e de estado sensível, com autor, alvo e
+          conteúdos de antes/depois.
         </p>
       </div>
 
@@ -166,7 +166,9 @@ export function AdminAuditLogsPage() {
         <div className="max-h-[65vh] overflow-y-auto">
           {logs.length === 0 ? (
             <p className="px-4 py-10 text-center text-sm text-muted-foreground">
-              {logsQuery.isLoading ? 'Carregando…' : 'Nenhuma entrada de auditoria corresponde aos filtros.'}
+              {logsQuery.isLoading
+                ? 'Carregando…'
+                : 'Nenhuma entrada de auditoria corresponde aos filtros.'}
             </p>
           ) : (
             <ol className="divide-y divide-border">

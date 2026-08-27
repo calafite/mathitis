@@ -18,7 +18,11 @@ export interface DynamicTagInputProps {
 
 const MAX_TAGS_DEFAULT = 15;
 
-export function DynamicTagInput({ value, onChange, maxTags = MAX_TAGS_DEFAULT }: DynamicTagInputProps) {
+export function DynamicTagInput({
+  value,
+  onChange,
+  maxTags = MAX_TAGS_DEFAULT,
+}: DynamicTagInputProps) {
   const [input, setInput] = useState('');
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -105,9 +109,13 @@ export function DynamicTagInput({ value, onChange, maxTags = MAX_TAGS_DEFAULT }:
           <span
             key={tag.id}
             className="inline-flex items-center gap-1 border border-foreground bg-foreground/5 px-2 py-0.5 font-mono text-[11px] font-bold uppercase"
-            style={{ clipPath: 'polygon(0 4px, 4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px))' }}
+            style={{
+              clipPath:
+                'polygon(0 4px, 4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px))',
+            }}
           >
-            {tag.icon ? `${tag.icon} ` : ''}{tag.name}
+            {tag.icon ? `${tag.icon} ` : ''}
+            {tag.name}
             <button
               type="button"
               onClick={() => removeTag(tag.id)}
@@ -162,7 +170,9 @@ export function DynamicTagInput({ value, onChange, maxTags = MAX_TAGS_DEFAULT }:
                       <>
                         {tag.icon && <span>{tag.icon}</span>}
                         <span className="font-bold uppercase">{tag.name}</span>
-                        <span className="ml-auto text-xs text-muted-foreground">{tag.category}</span>
+                        <span className="ml-auto text-xs text-muted-foreground">
+                          {tag.category}
+                        </span>
                       </>
                     )}
                   </button>

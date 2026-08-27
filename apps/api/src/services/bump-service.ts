@@ -11,11 +11,7 @@ export interface BumpResult {
 }
 
 export interface BumpService {
-  bump(
-    freshmanId: string,
-    seniorHandle: string,
-    replaceHandle?: string,
-  ): Promise<BumpResult>;
+  bump(freshmanId: string, seniorHandle: string, replaceHandle?: string): Promise<BumpResult>;
   unbump(freshmanId: string, seniorHandle: string): Promise<BumpResult>;
 }
 

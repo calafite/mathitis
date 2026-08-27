@@ -190,9 +190,9 @@ describe('RichCardManager', () => {
     );
     await user.click(screen.getByRole('button', { name: 'Autocompletar' }));
 
-    expect(
-      await screen.findByRole('alert'),
-    ).toHaveTextContent('O link fornecido contém conteúdo adulto');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'O link fornecido contém conteúdo adulto',
+    );
     expect(screen.queryByText('✓ Spotify detectado')).not.toBeInTheDocument();
   });
 });

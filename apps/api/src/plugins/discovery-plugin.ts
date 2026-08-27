@@ -57,9 +57,7 @@ import { ValidationError } from '../errors.js';
 function requireIdempotencyKey(request: FastifyRequest): string {
   const key = request.headers['x-idempotency-key'];
   if (!key || typeof key !== 'string' || key.length < 8 || key.length > 128) {
-    throw new ValidationError(
-      'X-Idempotency-Key header is required (8-128 characters)',
-    );
+    throw new ValidationError('X-Idempotency-Key header is required (8-128 characters)');
   }
   return key;
 }
@@ -78,10 +76,12 @@ function coerceSeniorsQuery(query: SeniorsQuery): SeniorsQuery {
     ...query,
     semester: query.semester === undefined ? undefined : Number(query.semester),
     tagIds: (Array.isArray(tagIds) ? tagIds : tagIds ? [tagIds] : undefined) as
-      | string[]
-      | undefined,
-    cardTypes: (Array.isArray(cardTypes) ? cardTypes : cardTypes ? [cardTypes] : undefined) as
-      SeniorsQuery['cardTypes'],
+      string[] | undefined,
+    cardTypes: (Array.isArray(cardTypes)
+      ? cardTypes
+      : cardTypes
+        ? [cardTypes]
+        : undefined) as SeniorsQuery['cardTypes'],
     limit: Number(query.limit ?? 20),
     offset: Number(query.offset ?? 0),
   };
@@ -97,7 +97,10 @@ export interface DiscoveryPluginOptions {
   redis?: Redis;
 }
 
-export async function registerDiscoveryPlugin(app: FastifyInstance, options: DiscoveryPluginOptions) {
+export async function registerDiscoveryPlugin(
+  app: FastifyInstance,
+  options: DiscoveryPluginOptions,
+) {
   const prisma = options.prisma;
 
   const userRepository = createUserRepository(prisma);
@@ -209,7 +212,9 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
         {
           schema: {
             querystring: z.object({
-              activeOnly: z.preprocess((value) => value === 'true' || value === true, z.boolean()).default(false),
+              activeOnly: z
+                .preprocess((value) => value === 'true' || value === true, z.boolean())
+                .default(false),
             }),
             response: { 200: tagsResponseSchema },
           },
@@ -285,10 +290,7 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
           },
         },
         async (request, reply) => {
-          const result = await bumpService.unbump(
-            request.sessionUser!.sub,
-            request.params.handle,
-          );
+          const result = await bumpService.unbump(request.sessionUser!.sub, request.params.handle);
           return reply.send(result);
         },
       );
@@ -312,11 +314,7 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
         },
         async (request, reply) => {
           const key = requireIdempotencyKey(request);
-          const result = await requestService.submit(
-            request.sessionUser!.sub,
-            request.body,
-            key,
-          );
+          const result = await requestService.submit(request.sessionUser!.sub, request.body, key);
           return reply.send({ request: toRequestSchema(result) });
         },
       );
@@ -446,10 +444,7 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
           },
         },
         async (request, reply) => {
-          const result = await requestService.cancel(
-            request.sessionUser!.sub,
-            request.params.id,
-          );
+          const result = await requestService.cancel(request.sessionUser!.sub, request.params.id);
           return reply.send({ request: toRequestSchema(result) });
         },
       );
@@ -550,7 +545,9 @@ export async function registerDiscoveryPlugin(app: FastifyInstance, options: Dis
   );
 }
 
-function toRequestSchema(row: RequestRow & { freshmanProfile?: MentorshipRequest['freshmanProfile'] }): MentorshipRequest {
+function toRequestSchema(
+  row: RequestRow & { freshmanProfile?: MentorshipRequest['freshmanProfile'] },
+): MentorshipRequest {
   const party = (partyRow: RequestRow['freshman'] | RequestRow['senior']) =>
     partyRow.profile
       ? {

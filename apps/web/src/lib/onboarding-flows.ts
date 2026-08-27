@@ -61,7 +61,8 @@ export const FRESHMAN_FLOW: OnboardingFlow = [
     id: 'freshman-tags',
     type: 'tag_selector',
     title: 'Quais são seus interesses?',
-    description: 'Escolha ao menos 1 interesse agora. Você pode adicionar mais depois no estúdio de perfil.',
+    description:
+      'Escolha ao menos 1 interesse agora. Você pode adicionar mais depois no estúdio de perfil.',
     config: { minTags: 1 },
     ctaText: 'VOU EXPLORAR',
   },
@@ -120,7 +121,10 @@ export const SENIOR_FLOW: OnboardingFlow = [
     type: 'profile_input',
     title: 'Seu slogan de padrinho',
     description: 'Uma frase curta que mostre sua área (opcional)',
-    config: { field: 'tagline', placeholder: 'Ex.: Especialista em cálculo e mentoria de calouros' },
+    config: {
+      field: 'tagline',
+      placeholder: 'Ex.: Especialista em cálculo e mentoria de calouros',
+    },
     ctaText: 'CONTINUAR',
   },
   {

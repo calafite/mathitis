@@ -97,7 +97,10 @@ test.describe('settings portal', () => {
       data: { identifier: 'developer', password: 'TestPassword123!' },
     });
     expect(devLogin.status()).toBe(200);
-    const devCookies = (devLogin.headers()['set-cookie'] ?? '').split(',').map((c) => c.split(';')[0]).join('; ');
+    const devCookies = (devLogin.headers()['set-cookie'] ?? '')
+      .split(',')
+      .map((c) => c.split(';')[0])
+      .join('; ');
 
     let token: string | null = null;
     for (let attempt = 0; attempt < 40; attempt++) {
@@ -121,7 +124,10 @@ test.describe('settings portal', () => {
     await login(page, handle, 'StrongPassword123!');
     await page.goto('/settings');
     await page.getByRole('tab', { name: /Zona de Risco/ }).click();
-    await page.getByRole('button', { name: /Anonimizar conta/i }).first().click();
+    await page
+      .getByRole('button', { name: /Anonimizar conta/i })
+      .first()
+      .click();
     await page.getByLabel(/Digite sua senha para confirmar/).fill('StrongPassword123!');
     await page.locator('form').getByRole('button', { name: 'Anonimizar conta' }).click();
 

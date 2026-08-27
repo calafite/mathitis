@@ -32,7 +32,9 @@ export function ProfileInputBlock({ step, draft, setDraft, next }: OnboardingBlo
         </span>
         <Input
           value={value}
-          onChange={(e) => setDraft({ [field]: e.target.value } as Partial<OnboardingBlockProps['draft']>)}
+          onChange={(e) =>
+            setDraft({ [field]: e.target.value } as Partial<OnboardingBlockProps['draft']>)
+          }
           placeholder={String(step.config?.placeholder ?? '')}
           className="font-mono"
           autoFocus

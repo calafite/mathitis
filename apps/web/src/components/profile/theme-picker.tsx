@@ -22,7 +22,9 @@ export function ThemePicker({ value, onChange }: ThemePickerProps) {
             aria-label={`Aplicar predefinição de tema ${index + 1}`}
             onClick={() => onChange(preset)}
             className="h-8 w-8 rounded-full border border-border transition hover:scale-110"
-            style={{ background: `linear-gradient(135deg, ${preset.primaryColor}, ${preset.accentColor})` }}
+            style={{
+              background: `linear-gradient(135deg, ${preset.primaryColor}, ${preset.accentColor})`,
+            }}
           />
         ))}
       </div>

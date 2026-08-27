@@ -1,8 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-  createRichCardScraper,
-  type FetchLike,
-} from '../../src/services/rich-card-scraper.js';
+import { createRichCardScraper, type FetchLike } from '../../src/services/rich-card-scraper.js';
 
 function jsonResponse(body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -241,15 +238,19 @@ describe('createRichCardScraper', () => {
     }
 
     it('rejects non-http protocols', async () => {
-      const scraper = createRichCardScraper({ fetchImpl: async () => new Response('', { status: 200 }) });
+      const scraper = createRichCardScraper({
+        fetchImpl: async () => new Response('', { status: 200 }),
+      });
       await expect(scraper.scrape('ftp://example.com/file')).rejects.toMatchObject({ status: 422 });
     });
 
     it('rejects unresolvable hosts', async () => {
-      const scraper = createRichCardScraper({ fetchImpl: async () => new Response('', { status: 200 }) });
-      await expect(scraper.scrape('http://this-host-does-not-exist-mathitis.invalid/')).rejects.toMatchObject(
-        { status: 422 },
-      );
+      const scraper = createRichCardScraper({
+        fetchImpl: async () => new Response('', { status: 200 }),
+      });
+      await expect(
+        scraper.scrape('http://this-host-does-not-exist-mathitis.invalid/'),
+      ).rejects.toMatchObject({ status: 422 });
     });
 
     it('rejects redirects to a private address before following them', async () => {

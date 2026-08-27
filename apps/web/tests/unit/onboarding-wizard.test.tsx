@@ -11,7 +11,12 @@ function makeDraft(): OnboardingDraft {
 
 const infoFlow = [
   { id: 's1', type: 'info_slide' as const, title: 'Passo um' },
-  { id: 's2', type: 'info_slide' as const, title: 'Passo dois', description: 'Texto do passo dois' },
+  {
+    id: 's2',
+    type: 'info_slide' as const,
+    title: 'Passo dois',
+    description: 'Texto do passo dois',
+  },
 ];
 
 describe('OnboardingWizard', () => {
@@ -63,7 +68,12 @@ describe('OnboardingWizard', () => {
     ];
 
     render(
-      <OnboardingWizard flow={flow} draft={makeDraft()} setDraft={setDraft} onComplete={() => {}} />,
+      <OnboardingWizard
+        flow={flow}
+        draft={makeDraft()}
+        setDraft={setDraft}
+        onComplete={() => {}}
+      />,
     );
 
     const input = screen.getByPlaceholderText('Nome social');

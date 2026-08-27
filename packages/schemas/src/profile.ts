@@ -34,7 +34,10 @@ export type SocialLinks = z.infer<typeof socialLinksSchema>;
 
 export const bannerPresetSchema = z
   .string()
-  .regex(/^[a-z0-9_-]+$/, 'O preset de banner deve ser alfanumérico (minúsculas, traços e underscores)')
+  .regex(
+    /^[a-z0-9_-]+$/,
+    'O preset de banner deve ser alfanumérico (minúsculas, traços e underscores)',
+  )
   .max(40);
 
 const bannerPresetOptionalSchema = bannerPresetSchema.optional();
@@ -64,7 +67,10 @@ export const songMetadataSchema = z.object({
 export type SongMetadata = z.infer<typeof songMetadataSchema>;
 
 export const gameMetadataSchema = z.object({
-  steamAppId: z.string().regex(/^\d{1,8}$/, 'O Steam App ID deve ser numérico').optional(),
+  steamAppId: z
+    .string()
+    .regex(/^\d{1,8}$/, 'O Steam App ID deve ser numérico')
+    .optional(),
   platform: z.string().max(60).optional(),
   hoursPlayed: numericInput(z.coerce.number().int().nonnegative().optional()),
 });
@@ -144,12 +150,20 @@ export const updateProfileBodySchema = z.object({
   bannerPreset: bannerPresetOptionalSchema,
   themePalette: themePaletteSchema.optional(),
   socialLinks: socialLinksSchema.optional(),
-  contactEmail: z.string().email('Informe um e-mail de contato válido').max(255).optional().nullable(),
+  contactEmail: z
+    .string()
+    .email('Informe um e-mail de contato válido')
+    .max(255)
+    .optional()
+    .nullable(),
   maxMentees: z.number().int().min(1).max(10).optional(),
   isDiscoverable: z.boolean().optional(),
   isAcceptingRequests: z.boolean().optional(),
   tagIds: z.array(z.string().uuid()).max(15, 'Selecione no máximo 15 interesses').optional(),
-  tagNames: z.array(z.string().min(1).max(60)).max(15, 'Selecione no máximo 15 interesses').optional(),
+  tagNames: z
+    .array(z.string().min(1).max(60))
+    .max(15, 'Selecione no máximo 15 interesses')
+    .optional(),
 });
 export type UpdateProfileBody = z.infer<typeof updateProfileBodySchema>;
 

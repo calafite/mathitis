@@ -39,14 +39,22 @@ function memoryPrisma(overrides?: { failOnce?: boolean }) {
   return {
     updates,
     profile: {
-      update: vi.fn(async ({ where, data }: { where: { userId: string }; data: { profileViews: { increment: number } } }) => {
-        if (overrides?.failOnce && !failed) {
-          failed = true;
-          throw new Error('deadlock detected');
-        }
-        updates.push({ userId: where.userId, increment: data.profileViews.increment });
-        return {};
-      }),
+      update: vi.fn(
+        async ({
+          where,
+          data,
+        }: {
+          where: { userId: string };
+          data: { profileViews: { increment: number } };
+        }) => {
+          if (overrides?.failOnce && !failed) {
+            failed = true;
+            throw new Error('deadlock detected');
+          }
+          updates.push({ userId: where.userId, increment: data.profileViews.increment });
+          return {};
+        },
+      ),
     },
     $transaction: vi.fn(async (ops: Promise<unknown>[]) => Promise.all(ops)),
   };
@@ -82,7 +90,9 @@ describe('flushProfileViews', () => {
     expect(redis.calls.some((c) => c.startsWith('DEL profile:views:processing:'))).toBe(true);
     // Buffer is empty after flush; processing key removed.
     expect(redis.store.has(VIEWS_BUFFER_KEY)).toBe(false);
-    expect([...redis.store.keys()].some((k) => k.startsWith('profile:views:processing:'))).toBe(false);
+    expect([...redis.store.keys()].some((k) => k.startsWith('profile:views:processing:'))).toBe(
+      false,
+    );
   });
 
   it('preserves new increments that arrive during the flush', async () => {
@@ -113,7 +123,9 @@ describe('flushProfileViews', () => {
     ).rejects.toThrow('deadlock detected');
 
     // The processing key must still hold the data.
-    const processing = [...redis.store.keys()].find((k) => k.startsWith('profile:views:processing:'));
+    const processing = [...redis.store.keys()].find((k) =>
+      k.startsWith('profile:views:processing:'),
+    );
     expect(processing).toBeTruthy();
     expect(redis.store.get(processing!)?.['user-1']).toBe('7');
   });

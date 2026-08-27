@@ -42,9 +42,9 @@ test.describe('Administrative workflow', () => {
     await expect(page.getByText('Salvo.')).toBeVisible({ timeout: 15_000 });
 
     await page.getByRole('link', { name: 'Registro de auditoria' }).click();
-    await expect(
-      page.getByRole('heading', { name: 'Registro de auditoria' }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: 'Registro de auditoria' })).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(
       page.locator('div.w-64.shrink-0.truncate.font-mono.text-xs.text-primary').first(),
     ).toBeVisible({ timeout: 15_000 });

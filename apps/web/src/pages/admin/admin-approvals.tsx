@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button';
 import { usePageMeta } from '@/lib/use-page-meta';
 
 export function AdminApprovalsPage() {
-  usePageMeta('Fila de Aprovação', 'Revise pedidos de apadrinhamento aguardando aprovação administrativa.');
+  usePageMeta(
+    'Fila de Aprovação',
+    'Revise pedidos de apadrinhamento aguardando aprovação administrativa.',
+  );
   const queryClient = useQueryClient();
   const [error, setError] = useState('');
 
@@ -58,20 +61,21 @@ export function AdminApprovalsPage() {
           <p className="text-sm text-muted-foreground">Nenhum pedido aguardando aprovação.</p>
         )}
         {approvals.map((approval) => (
-          <div
-            key={approval.id}
-            className="rounded-xl border border-border bg-card p-4 shadow-sm"
-          >
+          <div key={approval.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="font-medium text-foreground">
-                  {approval.freshman?.socialName ?? approval.freshman?.handle ?? 'Calouro desconhecido'}
+                  {approval.freshman?.socialName ??
+                    approval.freshman?.handle ??
+                    'Calouro desconhecido'}
                   <span className="mx-2 text-muted-foreground">→</span>
-                  {approval.senior?.socialName ?? approval.senior?.handle ?? 'Veterano desconhecido'}
+                  {approval.senior?.socialName ??
+                    approval.senior?.handle ??
+                    'Veterano desconhecido'}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  @{approval.freshman?.handle} (semestre {approval.freshman?.semester}) pediu{' '}
-                  @{approval.senior?.handle} · {new Date(approval.createdAt).toLocaleString()}
+                  @{approval.freshman?.handle} (semestre {approval.freshman?.semester}) pediu @
+                  {approval.senior?.handle} · {new Date(approval.createdAt).toLocaleString()}
                 </p>
               </div>
               <div className="flex gap-2">

@@ -27,9 +27,7 @@ function createUserRepo(): UserRepository {
       return { id, role: 'senior', deletedAt: null, handle } as never;
     },
     async findActiveById(id) {
-      return seniors.has(id)
-        ? ({ id, role: 'senior', status: 'active' } as never)
-        : null;
+      return seniors.has(id) ? ({ id, role: 'senior', status: 'active' } as never) : null;
     },
   } as UserRepository;
 }
@@ -113,8 +111,6 @@ describe('bump service', () => {
       handle: 'me',
     });
     const service = createBumpService(createBumpRepo(), userRepo);
-    await expect(service.bump(FRESHMAN, 'me')).rejects.toThrow(
-      'Você não pode se impulsionar',
-    );
+    await expect(service.bump(FRESHMAN, 'me')).rejects.toThrow('Você não pode se impulsionar');
   });
 });

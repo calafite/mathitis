@@ -41,7 +41,14 @@ export interface OnboardingWizardProps {
   disabled?: boolean;
 }
 
-export function OnboardingWizard({ flow, draft, setDraft, onComplete, accentColor = '#c9f24c', disabled = false }: OnboardingWizardProps) {
+export function OnboardingWizard({
+  flow,
+  draft,
+  setDraft,
+  onComplete,
+  accentColor = '#c9f24c',
+  disabled = false,
+}: OnboardingWizardProps) {
   const [index, setIndex] = useState(0);
 
   if (flow.length === 0) {

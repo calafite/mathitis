@@ -53,10 +53,10 @@ export function PrivacyPage() {
           <p>
             Coletamos dados cadastrais obrigatórios: nome de usuário (handle), e-mail, senha
             armazenada apenas como hash e período acadêmico. Coletamos também dados de perfil
-            voluntários: nome social, pronomes, biografia, links de contato (Discord, GitHub, LinkedIn),
-            cartões de vitrine (livros, jogos, músicas), imagens de avatar e banner e preferências da conta.
-            O fornecimento desses dados é opcional e pode ser alterado ou removido nas áreas correspondentes
-            da plataforma.
+            voluntários: nome social, pronomes, biografia, links de contato (Discord, GitHub,
+            LinkedIn), cartões de vitrine (livros, jogos, músicas), imagens de avatar e banner e
+            preferências da conta. O fornecimento desses dados é opcional e pode ser alterado ou
+            removido nas áreas correspondentes da plataforma.
           </p>
           <p>
             Registramos ainda dados de interação, como pedidos de apadrinhamento, aceites, recusas e
@@ -76,11 +76,11 @@ export function PrivacyPage() {
             aceite de pedidos de apadrinhamento e disponibilizar as funcionalidades essenciais do
             serviço e tratar os dados de perfil fornecidos por você conforme suas escolhas de
             visibilidade. Usamos o legítimo interesse (Art. 7º, IX) para calcular o Match Score,
-            recomendar padrinhos
-            compatíveis e gerar estatísticas internas de uso, sempre de forma proporcional e sem
-            prejudicar seus direitos e liberdades fundamentais; você pode se opor a esse tratamento
-            a qualquer momento (seção 8). Usamos a obrigação legal (Art. 7º, II), quando aplicável,
-            para atender a determinações de autoridade competente e incidentes de segurança.
+            recomendar padrinhos compatíveis e gerar estatísticas internas de uso, sempre de forma
+            proporcional e sem prejudicar seus direitos e liberdades fundamentais; você pode se opor
+            a esse tratamento a qualquer momento (seção 8). Usamos a obrigação legal (Art. 7º, II),
+            quando aplicável, para atender a determinações de autoridade competente e incidentes de
+            segurança.
           </p>
         </section>
 
@@ -125,11 +125,11 @@ export function PrivacyPage() {
             Caso você solicite a exclusão da sua conta pela zona de risco, aplicamos a anonimização,
             nos termos do Art. 12 da LGPD. Seus dados pessoais diretos (e-mail, nome, bio, links,
             imagens) são removidos ou substituídos por valores técnicos, e seu handle é substituído
-            por um identificador irreversível,
-            gerado de forma que não seja possível, por meios técnicos razoáveis disponíveis no
-            momento do tratamento, associá-lo a você. A partir da anonimização, o nó da árvore deixa
-            de ser considerado dado pessoal para os fins da LGPD (Art. 12, §1º), permanecendo apenas
-            como registro estrutural do histórico acadêmico da comunidade.
+            por um identificador irreversível, gerado de forma que não seja possível, por meios
+            técnicos razoáveis disponíveis no momento do tratamento, associá-lo a você. A partir da
+            anonimização, o nó da árvore deixa de ser considerado dado pessoal para os fins da LGPD
+            (Art. 12, §1º), permanecendo apenas como registro estrutural do histórico acadêmico da
+            comunidade.
           </p>
         </section>
 
@@ -150,12 +150,12 @@ export function PrivacyPage() {
           </p>
           <p>
             Você também pode se opor a tratamentos baseados em legítimo interesse, inclusive quanto
-            ao cálculo do Match Score; e a solicitar a revisão, por pessoa natural, de
-            recomendações de Match Score geradas de forma automatizada que afetem seus interesses,
-            com informações claras sobre os critérios e procedimentos utilizados, resguardado o
-            segredo comercial (Art. 20). Por fim, você pode apresentar reclamação sobre o tratamento
-            de seus dados à Autoridade Nacional de Proteção de Dados (ANPD), sem prejuízo do
-            exercício direto dos direitos acima.
+            ao cálculo do Match Score; e a solicitar a revisão, por pessoa natural, de recomendações
+            de Match Score geradas de forma automatizada que afetem seus interesses, com informações
+            claras sobre os critérios e procedimentos utilizados, resguardado o segredo comercial
+            (Art. 20). Por fim, você pode apresentar reclamação sobre o tratamento de seus dados à
+            Autoridade Nacional de Proteção de Dados (ANPD), sem prejuízo do exercício direto dos
+            direitos acima.
           </p>
         </section>
 
@@ -231,9 +231,9 @@ export function PrivacyPage() {
           <p>
             Para exercer seus direitos, tirar dúvidas sobre o tratamento de dados ou relatar um
             possível incidente de segurança, contate nosso encarregado de proteção de dados (DPO)
-            pelo e-mail walter.linhares@academico.ufpb.br. Caso não obtenha
-            resposta satisfatória, você também pode registrar reclamação diretamente junto à
-            Autoridade Nacional de Proteção de Dados (ANPD), pelo site gov.br/anpd.
+            pelo e-mail walter.linhares@academico.ufpb.br. Caso não obtenha resposta satisfatória,
+            você também pode registrar reclamação diretamente junto à Autoridade Nacional de
+            Proteção de Dados (ANPD), pelo site gov.br/anpd.
           </p>
         </section>
       </div>

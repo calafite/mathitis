@@ -103,10 +103,7 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
 
   const session: SessionManager =
     options.session ??
-    createSessionManager(
-      { current: options.jwtSecret, legacy: [] },
-      options.sessionMaxAgeDays,
-    );
+    createSessionManager({ current: options.jwtSecret, legacy: [] }, options.sessionMaxAgeDays);
 
   const requireAuth = createRequireAuth(session);
 

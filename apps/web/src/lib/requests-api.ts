@@ -28,7 +28,10 @@ export const requestsApi = {
     return apiFetch<RequestResponse>(`/requests/${encodeURIComponent(id)}`);
   },
 
-  async create(input: { seniorHandle: string; message: string }, idempotencyKey: string): Promise<RequestResponse> {
+  async create(
+    input: { seniorHandle: string; message: string },
+    idempotencyKey: string,
+  ): Promise<RequestResponse> {
     return apiFetch<RequestResponse>('/requests', {
       method: 'POST',
       headers: { 'X-Idempotency-Key': idempotencyKey },

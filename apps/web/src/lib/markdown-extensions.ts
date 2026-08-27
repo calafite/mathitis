@@ -4,7 +4,12 @@ import type { Root, Text } from 'mdast';
 const COLOR_SPAN_RE = /\[([^\]]+)\]\{color=#([0-9a-fA-F]{6})\}/g;
 const BADGE_SPAN_RE = /\[([^\]]+)\]\{badge=([^}]+)\}/g;
 
-function splitText(text: string, pattern: RegExp, tag: string, valueFor: (m: RegExpMatchArray) => string | null): Text[] {
+function splitText(
+  text: string,
+  pattern: RegExp,
+  tag: string,
+  valueFor: (m: RegExpMatchArray) => string | null,
+): Text[] {
   pattern.lastIndex = 0;
   const nodes: Text[] = [];
   const matches = [...text.matchAll(pattern)];

@@ -39,10 +39,10 @@ export const adminApi = {
   },
 
   async updateUserStatus(id: string, body: UpdateUserStatusBody) {
-    return apiFetch<{ user: AdminUsersResponse['users'][number] }>(
-      `/admin/users/${id}/status`,
-      { method: 'PATCH', body: JSON.stringify(body) },
-    );
+    return apiFetch<{ user: AdminUsersResponse['users'][number] }>(`/admin/users/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
   },
 
   async anonymizeUser(id: string): Promise<AnonymizeResponse> {

@@ -15,7 +15,9 @@ export function NotificationToastStack() {
         >
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-foreground">{toast.title}</p>
-            {toast.body && <p className="mt-0.5 line-clamp-2 text-sm text-foreground/80">{toast.body}</p>}
+            {toast.body && (
+              <p className="mt-0.5 line-clamp-2 text-sm text-foreground/80">{toast.body}</p>
+            )}
           </div>
           <button
             type="button"

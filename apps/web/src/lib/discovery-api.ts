@@ -1,5 +1,10 @@
 import { apiFetch } from '@/lib/api';
-import type { BumpResponse, RecommendationsResponse, SeniorsResponse, TagsResponse } from '@mathitis/schemas';
+import type {
+  BumpResponse,
+  RecommendationsResponse,
+  SeniorsResponse,
+  TagsResponse,
+} from '@mathitis/schemas';
 
 export interface DiscoveryFilters {
   semester?: number;

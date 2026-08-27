@@ -125,9 +125,7 @@ describe('LineagePage year filter', () => {
     renderPage();
 
     await screen.findByText('Filtro de Ano Acadêmico');
-    expect(
-      screen.queryByText(/Aviso: Carregar a linhagem completa/),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Aviso: Carregar a linhagem completa/)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Carregar Histórico Completo' }));
 

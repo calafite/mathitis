@@ -4,7 +4,12 @@ import { AuthProvider } from '@/contexts/auth-context';
 import { NotificationsProvider } from '@/contexts/notifications-context';
 import { ThemeProvider } from '@/contexts/theme-context';
 import { NotificationToastStack } from '@/components/notifications/toast-stack';
-import { ProtectedRoute, RoleGuard, OnboardingGate, OnboardingRoute } from '@/components/auth/route-guards';
+import {
+  ProtectedRoute,
+  RoleGuard,
+  OnboardingGate,
+  OnboardingRoute,
+} from '@/components/auth/route-guards';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { AppLayout } from '@/components/layout/app-layout';
 import { HomePage } from '@/pages/home';

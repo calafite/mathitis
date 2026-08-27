@@ -2,11 +2,7 @@ import type { ThemePalette } from '@mathitis/schemas';
 import type { TagLike } from '@/components/profile/dynamic-tag-input';
 
 export type BlockType =
-  | 'info_slide'
-  | 'profile_input'
-  | 'theme_picker'
-  | 'tag_selector'
-  | 'avatar_upload';
+  'info_slide' | 'profile_input' | 'theme_picker' | 'tag_selector' | 'avatar_upload';
 
 export interface OnboardingStep {
   id: string;

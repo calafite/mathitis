@@ -4,11 +4,7 @@ import sharp from 'sharp';
 import Redis from 'ioredis';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../src/app.js';
-import {
-  startTestEnvironment,
-  stopTestEnvironment,
-  type TestContext,
-} from './test-environment.js';
+import { startTestEnvironment, stopTestEnvironment, type TestContext } from './test-environment.js';
 
 function multipartBody(field: string, filename: string, contentType: string, data: Buffer) {
   const boundary = `----mathitis-${randomUUID().slice(0, 8)}`;
@@ -395,7 +391,11 @@ describe('Profiles API', () => {
         method: 'POST',
         url: '/api/profiles/me/cards',
         headers: { cookie: seniorCookie },
-        payload: { cardType: 'project', title: 'Pagerank notes', metadata: { techStack: ['python'] } },
+        payload: {
+          cardType: 'project',
+          title: 'Pagerank notes',
+          metadata: { techStack: ['python'] },
+        },
       });
       const secondId = second.json().card.id;
 
@@ -453,7 +453,11 @@ describe('Profiles API', () => {
       return buildApp({ env: ctx.env, prisma: ctx.prisma, redis, scrapeFetch });
     }
 
-    async function loginOn(app: FastifyInstance, handle: string, password: string): Promise<string> {
+    async function loginOn(
+      app: FastifyInstance,
+      handle: string,
+      password: string,
+    ): Promise<string> {
       const res = await app.inject({
         method: 'POST',
         url: '/api/auth/login',
@@ -519,7 +523,9 @@ describe('Profiles API', () => {
 
     it('rate limits scraping to 15 requests per minute', async () => {
       const scrapeFetch: typeof fetch = async () =>
-        htmlResponse('<html><head><meta property="og:title" content="Study notes" /></head></html>');
+        htmlResponse(
+          '<html><head><meta property="og:title" content="Study notes" /></head></html>',
+        );
 
       const app = await buildScraperApp(scrapeFetch);
       try {

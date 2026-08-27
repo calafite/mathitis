@@ -131,9 +131,13 @@ export function LineagePage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <header className="mb-6">
-        <h1 className="font-mono text-xl font-bold uppercase tracking-[0.15em] text-foreground">Linhagem de apadrinhamento</h1>
+        <h1 className="font-mono text-xl font-bold uppercase tracking-[0.15em] text-foreground">
+          Linhagem de apadrinhamento
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {handle ? `Subgrafo com raiz em @${handle}` : 'A linhagem completa do CI ao longo dos anos acadêmicos.'}
+          {handle
+            ? `Subgrafo com raiz em @${handle}`
+            : 'A linhagem completa do CI ao longo dos anos acadêmicos.'}
         </p>
       </header>
 

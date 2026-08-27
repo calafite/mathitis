@@ -178,7 +178,9 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
         data.role = semester >= 2 ? 'senior' : 'freshman';
       }
       if (preferences !== undefined) {
-        const existing = (await prisma.user.findUnique({ where: { id: userId }, select: { preferences: true } }))?.preferences as Record<string, unknown> | null;
+        const existing = (
+          await prisma.user.findUnique({ where: { id: userId }, select: { preferences: true } })
+        )?.preferences as Record<string, unknown> | null;
         data.preferences = { ...(existing ?? {}), ...preferences };
       }
 
@@ -203,7 +205,10 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
         },
       },
       schema: {
-        response: { 200: userDataExportSchema, 404: z.object({ ok: z.boolean(), error: z.string() }) },
+        response: {
+          200: userDataExportSchema,
+          404: z.object({ ok: z.boolean(), error: z.string() }),
+        },
       },
     },
     async (request, reply) => {
@@ -213,7 +218,10 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
         prisma.user.findUnique({ where: { id: userId } }),
         prisma.profile.findUnique({ where: { userId } }),
         prisma.tag.findMany({ where: { profiles: { some: { profile: { userId } } } } }),
-        prisma.richCard.findMany({ where: { profile: { userId } }, orderBy: { displayOrder: 'asc' } }),
+        prisma.richCard.findMany({
+          where: { profile: { userId } },
+          orderBy: { displayOrder: 'asc' },
+        }),
         prisma.mentorshipRequest.findMany({
           where: { freshmanId: userId },
           include: { senior: { include: { profile: true } } },
@@ -230,8 +238,18 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
         return reply.code(404).send({ ok: false, error: 'Usuário não encontrado' });
       }
 
-      const ancestors: Array<{ handle: string; socialName: string | null; semester: number; relationship: 'mentor' | 'grand-mentor' | 'great-grand-mentor' }> = [];
-      const descendants: Array<{ handle: string; socialName: string | null; semester: number; relationship: 'pupil' | 'grand-pupil' | 'great-grand-pupil' }> = [];
+      const ancestors: Array<{
+        handle: string;
+        socialName: string | null;
+        semester: number;
+        relationship: 'mentor' | 'grand-mentor' | 'great-grand-mentor';
+      }> = [];
+      const descendants: Array<{
+        handle: string;
+        socialName: string | null;
+        semester: number;
+        relationship: 'pupil' | 'grand-pupil' | 'great-grand-pupil';
+      }> = [];
 
       // Build complete lineage (up to 3 levels) using recursive CTE-style queries
       async function getMentors(freshmanId: string) {
@@ -326,7 +344,14 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
       }
 
       function mapSentRequest(r: unknown) {
-        const rr = r as { id: string; senior: { handle: string; profile: { socialName: string | null } | null }; message: string; status: string; createdAt: Date; updatedAt: Date };
+        const rr = r as {
+          id: string;
+          senior: { handle: string; profile: { socialName: string | null } | null };
+          message: string;
+          status: string;
+          createdAt: Date;
+          updatedAt: Date;
+        };
         const pending = rr.status === 'pending' || rr.status === 'pending_admin_approval';
         return {
           id: rr.id,
@@ -340,7 +365,14 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
       }
 
       function mapReceivedRequest(r: unknown) {
-        const rr = r as { id: string; freshman: { handle: string; profile: { socialName: string | null } | null }; message: string; status: string; createdAt: Date; updatedAt: Date };
+        const rr = r as {
+          id: string;
+          freshman: { handle: string; profile: { socialName: string | null } | null };
+          message: string;
+          status: string;
+          createdAt: Date;
+          updatedAt: Date;
+        };
         const pending = rr.status === 'pending' || rr.status === 'pending_admin_approval';
         return {
           id: rr.id,

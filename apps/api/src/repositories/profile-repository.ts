@@ -26,7 +26,9 @@ export interface ProfileRepository {
 
 const profileInclude = {
   user: { select: { handle: true, role: true, semester: true, deletedAt: true } },
-  tags: { include: { tag: { select: { id: true, name: true, category: true, color: true, icon: true } } } },
+  tags: {
+    include: { tag: { select: { id: true, name: true, category: true, color: true, icon: true } } },
+  },
   richCards: { orderBy: { displayOrder: 'asc' as const } },
 } satisfies Prisma.ProfileInclude;
 
@@ -77,7 +79,10 @@ export function createProfileRepository(prisma: PrismaClient): ProfileRepository
         select: { id: true },
       });
       if (known.length !== finalIds.length) {
-        throw new ValidationError('Um ou mais interesses selecionados não existem', 'TAG_NOT_FOUND');
+        throw new ValidationError(
+          'Um ou mais interesses selecionados não existem',
+          'TAG_NOT_FOUND',
+        );
       }
       await tx.profileTag.deleteMany({ where: { profileId: userId } });
       if (finalIds.length > 0) {

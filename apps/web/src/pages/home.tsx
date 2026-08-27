@@ -13,7 +13,13 @@ const CARD_BG = '#d3d7de';
 const CARD_TEXT = '#0b0b0e';
 const VERMILLION = '#ff4d14';
 
-function PosterCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+function PosterCard({
+  children,
+  className = '',
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div
       className={`rounded-none border-2 border-black p-5 ${className}`}
@@ -150,7 +156,12 @@ function LineageTree({ up, me, down }: { up: TreeNode[]; me: TreeNode; down: Tre
 /** Empty-state illustration: a bare branch waiting for its first connection. */
 function EmptyBranch() {
   return (
-    <svg viewBox="0 0 220 120" className="h-auto w-40 shrink-0" role="img" aria-label="Galho vazio aguardando uma conexão">
+    <svg
+      viewBox="0 0 220 120"
+      className="h-auto w-40 shrink-0"
+      role="img"
+      aria-label="Galho vazio aguardando uma conexão"
+    >
       <path
         d="M 20 100 C 70 96, 90 80, 110 60 C 128 42, 150 34, 196 30"
         fill="none"
@@ -189,7 +200,10 @@ const ROLE_LABEL: Record<string, string> = {
 
 export function HomePage() {
   const { user, logout } = useAuth();
-  usePageMeta('Início', 'Portal de apadrinhamento acadêmico de Ciência da Computação: encontre um padrinho, construa sua linhagem.');
+  usePageMeta(
+    'Início',
+    'Portal de apadrinhamento acadêmico de Ciência da Computação: encontre um padrinho, construa sua linhagem.',
+  );
   const isFreshman = user?.role === 'freshman';
   const isSenior = user?.role === 'senior';
   const [profileModalHandle, setProfileModalHandle] = useState<string | null>(null);
@@ -244,7 +258,8 @@ export function HomePage() {
             'linear-gradient(#c9ced8 1px, transparent 1px), linear-gradient(90deg, #c9ced8 1px, transparent 1px)',
           backgroundSize: '48px 48px',
           maskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%)',
         }}
       />
 
@@ -289,7 +304,11 @@ export function HomePage() {
           <div className="flex w-full justify-center lg:w-auto">
             <LineageTree
               up={treeUp}
-              me={{ label: displayName.charAt(0).toUpperCase() || '?', sub: 'você', tone: 'lineage' }}
+              me={{
+                label: displayName.charAt(0).toUpperCase() || '?',
+                sub: 'você',
+                tone: 'lineage',
+              }}
               down={treeDown}
             />
           </div>
@@ -315,15 +334,22 @@ export function HomePage() {
                 {activeMentorships.map((req) => {
                   const counterpart = isFreshman ? req.senior : req.freshman;
                   return (
-                    <div key={req.id} className="flex items-center gap-3 border-2 border-black bg-white/40 p-3">
+                    <div
+                      key={req.id}
+                      className="flex items-center gap-3 border-2 border-black bg-white/40 p-3"
+                    >
                       <div
                         className="flex h-10 w-10 shrink-0 items-center justify-center font-sans text-sm font-bold text-white"
                         style={{ backgroundColor: VERMILLION }}
                       >
-                        {(counterpart?.socialName ?? counterpart?.handle ?? '?').charAt(0).toUpperCase()}
+                        {(counterpart?.socialName ?? counterpart?.handle ?? '?')
+                          .charAt(0)
+                          .toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-bold">{counterpart?.socialName ?? counterpart?.handle}</p>
+                        <p className="truncate text-sm font-bold">
+                          {counterpart?.socialName ?? counterpart?.handle}
+                        </p>
                         <p className="text-xs opacity-70">
                           @{counterpart?.handle} · Período {counterpart?.semester}
                         </p>
@@ -357,9 +383,13 @@ export function HomePage() {
         <section className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <PosterCard className="flex flex-col">
             <div className="mb-4 flex h-14 w-14 items-center justify-center border-2 border-black">
-              <span className="text-2xl" aria-hidden>◈</span>
+              <span className="text-2xl" aria-hidden>
+                ◈
+              </span>
             </div>
-            <h3 className="font-sans text-lg font-bold uppercase leading-tight">Descoberta de Padrinhos</h3>
+            <h3 className="font-sans text-lg font-bold uppercase leading-tight">
+              Descoberta de Padrinhos
+            </h3>
             <p className="mt-1 flex-1 text-xs opacity-80">
               Encontre veteranos alinhados com os seus interesses e projetos.
             </p>
@@ -393,7 +423,9 @@ export function HomePage() {
 
           <PosterCard className="flex flex-col">
             <div className="mb-4 flex h-14 w-14 items-center justify-center border-2 border-black">
-              <span className="text-2xl" aria-hidden>⑃</span>
+              <span className="text-2xl" aria-hidden>
+                ⑃
+              </span>
             </div>
             <h3 className="font-sans text-lg font-bold uppercase leading-tight">Linhagem</h3>
             <p className="mt-1 flex-1 text-xs opacity-80">
@@ -406,9 +438,13 @@ export function HomePage() {
 
           <PosterCard className="flex flex-col">
             <div className="mb-4 flex h-14 w-14 items-center justify-center border-2 border-black">
-              <span className="text-2xl" aria-hidden>✎</span>
+              <span className="text-2xl" aria-hidden>
+                ✎
+              </span>
             </div>
-            <h3 className="font-sans text-lg font-bold uppercase leading-tight">Estúdio de Perfil</h3>
+            <h3 className="font-sans text-lg font-bold uppercase leading-tight">
+              Estúdio de Perfil
+            </h3>
             <p className="mt-1 flex-1 text-xs opacity-80">
               Conte a sua história com cartões, banners e temas.
             </p>
@@ -422,7 +458,9 @@ export function HomePage() {
         {isFreshman && (
           <PosterCard className="mt-8">
             <div className="flex items-center justify-between">
-              <h2 className="font-sans text-xl font-bold uppercase tracking-tight">Padrinhos sugeridos</h2>
+              <h2 className="font-sans text-xl font-bold uppercase tracking-tight">
+                Padrinhos sugeridos
+              </h2>
               <Link
                 to="/discovery"
                 className="font-mono text-[11px] font-bold uppercase tracking-widest underline hover:no-underline"
@@ -433,13 +471,22 @@ export function HomePage() {
 
             <div className="mt-5 divide-y-2 divide-black/20">
               {recommendationsQuery.isLoading && (
-                <p className="py-6 text-center text-sm opacity-70">Buscando compatibilidades no CI…</p>
+                <p className="py-6 text-center text-sm opacity-70">
+                  Buscando compatibilidades no CI…
+                </p>
               )}
               {recommendationsQuery.data?.slice(0, 3).map((senior) => (
-                <div key={senior.userId} className="flex flex-col gap-3 py-4 first:pt-2 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                  key={senior.userId}
+                  className="flex flex-col gap-3 py-4 first:pt-2 sm:flex-row sm:items-center sm:justify-between"
+                >
                   <div className="flex items-center gap-3">
                     {senior.avatarThumbnailUrl ? (
-                      <img src={senior.avatarThumbnailUrl} alt="" className="h-12 w-12 rounded-none object-cover" />
+                      <img
+                        src={senior.avatarThumbnailUrl}
+                        alt=""
+                        className="h-12 w-12 rounded-none object-cover"
+                      />
                     ) : (
                       <div className="flex h-12 w-12 items-center justify-center border-2 border-black font-sans text-lg font-bold">
                         {(senior.socialName ?? senior.handle).charAt(0).toUpperCase()}
@@ -466,7 +513,9 @@ export function HomePage() {
                       )}
                     </div>
                   </div>
-                  <MonoButton onClick={() => setProfileModalHandle(senior.handle)}>Ver perfil</MonoButton>
+                  <MonoButton onClick={() => setProfileModalHandle(senior.handle)}>
+                    Ver perfil
+                  </MonoButton>
                 </div>
               ))}
               {recommendationsQuery.data?.length === 0 && (
@@ -477,7 +526,6 @@ export function HomePage() {
             </div>
           </PosterCard>
         )}
-
       </div>
 
       <MentorProfileModal

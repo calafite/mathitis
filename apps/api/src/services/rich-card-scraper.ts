@@ -16,7 +16,8 @@ function asStringArray(value: unknown): string[] {
       if (typeof item === 'string') return item;
       if (typeof item === 'object' && item !== null) {
         const record = item as Record<string, unknown>;
-        if ('description' in record && record.description != null) return String(record.description);
+        if ('description' in record && record.description != null)
+          return String(record.description);
         if ('id' in record && record.id != null) return String(record.id);
       }
       return '';
@@ -200,10 +201,7 @@ function truncate(value: string, max: number): string {
 /* Provider extractors                                                 */
 /* ------------------------------------------------------------------ */
 
-async function scrapeSpotify(
-  url: URL,
-  fetchImpl: FetchLike,
-): Promise<ScrapedCardResponse> {
+async function scrapeSpotify(url: URL, fetchImpl: FetchLike): Promise<ScrapedCardResponse> {
   const match = url.pathname.match(/\/(track|album)\/([A-Za-z0-9]+)/);
   if (!match) {
     throw new ValidationError('Link do Spotify inválido: use um link de música ou álbum');
@@ -245,10 +243,7 @@ interface SteamAppDetails {
   };
 }
 
-async function scrapeSteam(
-  url: URL,
-  fetchImpl: FetchLike,
-): Promise<ScrapedCardResponse> {
+async function scrapeSteam(url: URL, fetchImpl: FetchLike): Promise<ScrapedCardResponse> {
   const match = url.pathname.match(/\/app\/(\d+)/);
   if (!match) {
     throw new ValidationError('Link da Steam inválido: use um link de /app/{id}');
@@ -284,10 +279,7 @@ async function scrapeSteam(
   };
 }
 
-async function scrapeGitHub(
-  url: URL,
-  fetchImpl: FetchLike,
-): Promise<ScrapedCardResponse> {
+async function scrapeGitHub(url: URL, fetchImpl: FetchLike): Promise<ScrapedCardResponse> {
   const match = url.pathname.match(/^\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\/?$/);
   if (!match) {
     throw new ValidationError('Link do GitHub inválido: use owner/repo');
@@ -311,10 +303,7 @@ async function scrapeGitHub(
   };
 }
 
-async function scrapeLetterboxd(
-  url: URL,
-  fetchImpl: FetchLike,
-): Promise<ScrapedCardResponse> {
+async function scrapeLetterboxd(url: URL, fetchImpl: FetchLike): Promise<ScrapedCardResponse> {
   // Letterboxd sits behind a bot filter: only a browser-like UA gets the page.
   const html = await fetchWithTimeout(url.toString(), fetchImpl, {
     'user-agent': BROWSER_USER_AGENT,
@@ -332,7 +321,8 @@ async function scrapeLetterboxd(
   // "Directed by" credits block in the page body.
   const director =
     extractMeta(html, 'twitter:data1') ??
-    (html.match(/Directed by<\/h3>[\s\S]*?<a[^>]*>([^<]+)<\/a>/i)?.[1] ?? null);
+    html.match(/Directed by<\/h3>[\s\S]*?<a[^>]*>([^<]+)<\/a>/i)?.[1] ??
+    null;
   const description = extractMeta(html, 'og:description');
   assertContentSafe({ title, description });
   const metadata: Record<string, unknown> = {};
@@ -358,10 +348,7 @@ interface OpenLibraryWork {
   authors?: Array<{ author?: { key?: string } }>;
 }
 
-async function scrapeBooks(
-  url: URL,
-  fetchImpl: FetchLike,
-): Promise<ScrapedCardResponse> {
+async function scrapeBooks(url: URL, fetchImpl: FetchLike): Promise<ScrapedCardResponse> {
   const workMatch = url.pathname.match(/\/works\/(OL\w+)/);
   if (!workMatch) {
     throw new ValidationError('Link da OpenLibrary inválido: use /works/{id}');
@@ -374,9 +361,7 @@ async function scrapeBooks(
     throw new ValidationError('Não foi possível ler este livro na OpenLibrary');
   }
   const description =
-    typeof work.description === 'string'
-      ? work.description
-      : (work.description?.value ?? null);
+    typeof work.description === 'string' ? work.description : (work.description?.value ?? null);
 
   let subtitle: string | null = null;
   const authorKey = work.authors?.[0]?.author?.key;
@@ -407,10 +392,7 @@ async function scrapeBooks(
   };
 }
 
-async function scrapeGeneric(
-  url: URL,
-  fetchImpl: FetchLike,
-): Promise<ScrapedCardResponse> {
+async function scrapeGeneric(url: URL, fetchImpl: FetchLike): Promise<ScrapedCardResponse> {
   const html = await fetchWithTimeout(url.toString(), fetchImpl);
   const title = extractMeta(html, 'og:title') ?? extractMeta(html, 'title');
   if (!title) {
@@ -436,9 +418,7 @@ export interface RichCardScraper {
   scrape(url: string): Promise<ScrapedCardResponse>;
 }
 
-export function createRichCardScraper(options?: {
-  fetchImpl?: FetchLike;
-}): RichCardScraper {
+export function createRichCardScraper(options?: { fetchImpl?: FetchLike }): RichCardScraper {
   const fetchImpl: FetchLike = options?.fetchImpl ?? fetch;
 
   async function scrape(rawUrl: string): Promise<ScrapedCardResponse> {

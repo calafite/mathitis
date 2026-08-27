@@ -68,7 +68,7 @@ export const userDataExportSchema = z.object({
       name: z.string(),
       category: z.string(),
       color: z.string(),
-    })
+    }),
   ),
   richCards: z.array(
     z.object({
@@ -78,7 +78,7 @@ export const userDataExportSchema = z.object({
       payload: z.record(z.unknown()),
       displayOrder: z.number().int(),
       createdAt: z.string(),
-    })
+    }),
   ),
   sentRequests: z.array(
     z.object({
@@ -89,7 +89,7 @@ export const userDataExportSchema = z.object({
       status: z.string(),
       createdAt: z.string(),
       decidedAt: z.string().nullable(),
-    })
+    }),
   ),
   receivedRequests: z.array(
     z.object({
@@ -100,7 +100,7 @@ export const userDataExportSchema = z.object({
       status: z.string(),
       createdAt: z.string(),
       decidedAt: z.string().nullable(),
-    })
+    }),
   ),
   lineage: z.object({
     ancestors: z.array(
@@ -109,7 +109,7 @@ export const userDataExportSchema = z.object({
         socialName: z.string().nullable(),
         semester: z.number().int(),
         relationship: z.enum(['mentor', 'grand-mentor', 'great-grand-mentor']),
-      })
+      }),
     ),
     descendants: z.array(
       z.object({
@@ -117,7 +117,7 @@ export const userDataExportSchema = z.object({
         socialName: z.string().nullable(),
         semester: z.number().int(),
         relationship: z.enum(['pupil', 'grand-pupil', 'great-grand-pupil']),
-      })
+      }),
     ),
   }),
 });

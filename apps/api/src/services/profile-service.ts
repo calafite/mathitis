@@ -1,6 +1,9 @@
 import { nanoid } from 'nanoid';
 import type { UpdateProfileBody, UploadImageResponse, UserRole } from '@mathitis/schemas';
-import type { ProfileRepository, ProfileWithRelations } from '../repositories/profile-repository.js';
+import type {
+  ProfileRepository,
+  ProfileWithRelations,
+} from '../repositories/profile-repository.js';
 import type { RichCardRepository } from '../repositories/rich-card-repository.js';
 import type { ObjectStorage } from '../storage/storage-service.js';
 import { NotFoundError } from '../errors.js';

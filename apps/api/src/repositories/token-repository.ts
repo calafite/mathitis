@@ -63,5 +63,12 @@ export function createTokenRepository(prisma: PrismaClient): TokenRepository {
     return result.count > 0;
   }
 
-  return { createToken, findById, findActiveByType, findActiveByUserAndType, findAllByType, consume };
+  return {
+    createToken,
+    findById,
+    findActiveByType,
+    findActiveByUserAndType,
+    findAllByType,
+    consume,
+  };
 }

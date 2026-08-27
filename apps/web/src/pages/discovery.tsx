@@ -77,7 +77,9 @@ function MentorCard({
         >
           {senior.isAcceptingRequests ? 'Disponível' : 'Lotado'}
         </span>
-        <h3 className="pr-24 font-sans text-xl font-bold uppercase leading-tight tracking-tight">{name}</h3>
+        <h3 className="pr-24 font-sans text-xl font-bold uppercase leading-tight tracking-tight">
+          {name}
+        </h3>
         <p className="font-mono text-xs opacity-70">@{senior.handle}</p>
       </div>
 
@@ -133,7 +135,10 @@ function MentorCard({
       </div>
 
       {/* Footer */}
-      <div className="flex items-stretch border-t-2 border-black" style={{ backgroundColor: HEADER_BG, color: INK }}>
+      <div
+        className="flex items-stretch border-t-2 border-black"
+        style={{ backgroundColor: HEADER_BG, color: INK }}
+      >
         <div className="flex flex-1 items-center gap-1.5 px-3 py-2.5 font-mono text-xs font-bold tabular-nums">
           <Eye className="h-3.5 w-3.5" aria-hidden />
           {formatCount(senior.profileViews)}
@@ -156,7 +161,11 @@ function MentorCard({
               borderLeft: `2px solid ${INK}`,
             }}
           >
-            {bumping ? '…' : bumped ? 'Impulso ✓' : (
+            {bumping ? (
+              '…'
+            ) : bumped ? (
+              'Impulso ✓'
+            ) : (
               <>
                 Impulsionar <ArrowRight className="h-3.5 w-3.5" aria-hidden />
               </>
@@ -250,7 +259,8 @@ export function DiscoveryPage() {
     );
   };
 
-  const hasFilters = semester !== undefined || availability !== undefined || selectedTags.length > 0;
+  const hasFilters =
+    semester !== undefined || availability !== undefined || selectedTags.length > 0;
 
   const filterPanel = (
     <aside className="h-fit border-2 border-[#c9ced8]/40 p-4 lg:sticky lg:top-20">
@@ -281,11 +291,13 @@ export function DiscoveryPage() {
           Disponibilidade
         </div>
         <div className="space-y-1">
-          {([
-            [undefined, 'Todos'],
-            ['accepting', 'Aceitando pedidos'],
-            ['full', 'Lotados'],
-          ] as const).map(([value, label]) => (
+          {(
+            [
+              [undefined, 'Todos'],
+              ['accepting', 'Aceitando pedidos'],
+              ['full', 'Lotados'],
+            ] as const
+          ).map(([value, label]) => (
             <button
               key={label}
               type="button"
@@ -373,7 +385,8 @@ export function DiscoveryPage() {
             'linear-gradient(#c9ced8 1px, transparent 1px), linear-gradient(90deg, #c9ced8 1px, transparent 1px)',
           backgroundSize: '48px 48px',
           maskImage: 'radial-gradient(ellipse 70% 50% at 50% 0%, black 30%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 70% 50% at 50% 0%, black 30%, transparent 100%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 70% 50% at 50% 0%, black 30%, transparent 100%)',
         }}
       />
 

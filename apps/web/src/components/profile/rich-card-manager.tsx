@@ -2,7 +2,12 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
-import type { CreateRichCardBody, RichCard, RichCardType, ScrapedCardResponse } from '@mathitis/schemas';
+import type {
+  CreateRichCardBody,
+  RichCard,
+  RichCardType,
+  ScrapedCardResponse,
+} from '@mathitis/schemas';
 import { ApiError } from '@/lib/api';
 import { profileApi } from '@/lib/profile-api';
 import { Button } from '@/components/ui/button';
@@ -119,8 +124,14 @@ function MetadataFields({
   if (form.cardType === 'song') {
     return (
       <div>
-        <label className="mb-1 block text-xs font-medium text-muted-foreground">Artista (opcional)</label>
-        <Input value={form.metadata['artistName'] ?? ''} onChange={(e) => setMeta('artistName', e.target.value)} placeholder="Mutantes" />
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">
+          Artista (opcional)
+        </label>
+        <Input
+          value={form.metadata['artistName'] ?? ''}
+          onChange={(e) => setMeta('artistName', e.target.value)}
+          placeholder="Mutantes"
+        />
       </div>
     );
   }
@@ -128,7 +139,11 @@ function MetadataFields({
     return (
       <div>
         <label className="mb-1 block text-xs font-medium text-muted-foreground">Steam App ID</label>
-        <Input value={form.metadata['steamAppId'] ?? ''} onChange={(e) => setMeta('steamAppId', e.target.value)} placeholder="1245620" />
+        <Input
+          value={form.metadata['steamAppId'] ?? ''}
+          onChange={(e) => setMeta('steamAppId', e.target.value)}
+          placeholder="1245620"
+        />
       </div>
     );
   }
@@ -136,12 +151,26 @@ function MetadataFields({
     return (
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">Avaliação (0-10)</label>
-          <Input type="number" min={0} max={10} step={0.1} value={form.metadata['rating'] ?? ''} onChange={(e) => setMeta('rating', e.target.value)} placeholder="8.5" />
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">
+            Avaliação (0-10)
+          </label>
+          <Input
+            type="number"
+            min={0}
+            max={10}
+            step={0.1}
+            value={form.metadata['rating'] ?? ''}
+            onChange={(e) => setMeta('rating', e.target.value)}
+            placeholder="8.5"
+          />
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground">Ano</label>
-          <Input value={form.metadata['year'] ?? ''} onChange={(e) => setMeta('year', e.target.value)} placeholder="2024" />
+          <Input
+            value={form.metadata['year'] ?? ''}
+            onChange={(e) => setMeta('year', e.target.value)}
+            placeholder="2024"
+          />
         </div>
       </div>
     );
@@ -149,8 +178,14 @@ function MetadataFields({
   if (form.cardType === 'project') {
     return (
       <div>
-        <label className="mb-1 block text-xs font-medium text-muted-foreground">Stack técnica (separada por vírgulas)</label>
-        <Input value={form.metadata['techStackCsv'] ?? ''} onChange={(e) => setMeta('techStackCsv', e.target.value)} placeholder="Python, NumPy, LaTeX" />
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">
+          Stack técnica (separada por vírgulas)
+        </label>
+        <Input
+          value={form.metadata['techStackCsv'] ?? ''}
+          onChange={(e) => setMeta('techStackCsv', e.target.value)}
+          placeholder="Python, NumPy, LaTeX"
+        />
       </div>
     );
   }
@@ -193,7 +228,10 @@ function CardForm({
     if (form.cardType === 'project') {
       const csv = form.metadata['techStackCsv'] ?? '';
       payload.metadata = {
-        techStack: csv.split(',').map((item) => item.trim()).filter(Boolean),
+        techStack: csv
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean),
       };
     }
     onSubmit(payload);
@@ -218,7 +256,9 @@ function CardForm({
             disabled={scrapeMutation.isPending || scrapeUrl.trim().length === 0}
             className="flex shrink-0 items-center justify-center gap-2 border-2 border-[#c9f24c] bg-[#c9f24c] px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-black transition-colors hover:bg-transparent hover:text-[#c9f24c] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {scrapeMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> : null}
+            {scrapeMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+            ) : null}
             Autocompletar
           </button>
         </div>
@@ -253,14 +293,24 @@ function CardForm({
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground">Título *</label>
-          <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Título do cartão" />
+          <Input
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            placeholder="Título do cartão"
+          />
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-muted-foreground">Subtítulo</label>
-          <Input value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} placeholder="Subtítulo opcional" />
+          <Input
+            value={form.subtitle}
+            onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
+            placeholder="Subtítulo opcional"
+          />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">Cor de destaque</label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">
+            Cor de destaque
+          </label>
           <input
             type="color"
             value={form.accentColor}
@@ -269,12 +319,24 @@ function CardForm({
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">URL externa</label>
-          <Input value={form.externalUrl} onChange={(e) => setForm({ ...form, externalUrl: e.target.value })} placeholder="https://store.steampowered.com/app/…" />
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">
+            URL externa
+          </label>
+          <Input
+            value={form.externalUrl}
+            onChange={(e) => setForm({ ...form, externalUrl: e.target.value })}
+            placeholder="https://store.steampowered.com/app/…"
+          />
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">URL da imagem</label>
-          <Input value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://…" />
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">
+            URL da imagem
+          </label>
+          <Input
+            value={form.imageUrl}
+            onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+            placeholder="https://…"
+          />
         </div>
         <div className="sm:col-span-2">
           <MetadataFields form={form} onChange={setForm} />
@@ -319,7 +381,8 @@ export function RichCardManager() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: CreateRichCardBody }) => profileApi.updateCard(id, input),
+    mutationFn: ({ id, input }: { id: string; input: CreateRichCardBody }) =>
+      profileApi.updateCard(id, input),
     onSuccess: async () => {
       playUiSound('thud');
       setEditing(null);
@@ -410,7 +473,9 @@ export function RichCardManager() {
             ) : (
               <>
                 <div className="flex items-center gap-3">
-                  <span className="text-muted-foreground" aria-hidden>⠿</span>
+                  <span className="text-muted-foreground" aria-hidden>
+                    ⠿
+                  </span>
                   <div>
                     <p className="text-sm font-medium text-foreground">{card.title}</p>
                     <p className="text-xs capitalize text-muted-foreground">{card.cardType}</p>
@@ -438,7 +503,12 @@ export function RichCardManager() {
                   <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(card)}>
                     Editar
                   </Button>
-                  <Button type="button" variant="destructive" size="sm" onClick={() => deleteMutation.mutate(card.id)}>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => deleteMutation.mutate(card.id)}
+                  >
                     Excluir
                   </Button>
                 </div>

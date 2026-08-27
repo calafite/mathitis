@@ -43,14 +43,16 @@ const TOOLS: ToolButton[] = [
   {
     label: 'Clr',
     title: 'Texto colorido',
-    insert: (c, s, e) => `${c.slice(0, s)}[${c.slice(s, e) || 'texto colorido'}]{color=#ec4899}${c.slice(e)}`,
+    insert: (c, s, e) =>
+      `${c.slice(0, s)}[${c.slice(s, e) || 'texto colorido'}]{color=#ec4899}${c.slice(e)}`,
     selectAfter: (ins) => [ins.lastIndexOf('{color=') - 0, ins.lastIndexOf('}')],
   },
   {
     label: 'Emblema',
     title: 'Emblema',
-    insert: (c, s, e) => `${c.slice(0, s)}[${c.slice(s, e) || 'etiqueta'}]{badge=Etiqueta}${c.slice(e)}`,
-    selectAfter: (ins) => [ins.lastIndexOf('{badge=') , ins.lastIndexOf('}')],
+    insert: (c, s, e) =>
+      `${c.slice(0, s)}[${c.slice(s, e) || 'etiqueta'}]{badge=Etiqueta}${c.slice(e)}`,
+    selectAfter: (ins) => [ins.lastIndexOf('{badge='), ins.lastIndexOf('}')],
   },
   {
     label: 'Nota',
@@ -109,7 +111,9 @@ export function BioEditor({ value, onChange }: BioEditorProps) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={10}
-        placeholder={'Conte sua história em markdown…\n\n[Destaque-me]{color=#ec4899}  [fã de matemática]{badge=Álgebra}\n\n> [!TIP]\n> Uma dica que vale a pena compartilhar.'}
+        placeholder={
+          'Conte sua história em markdown…\n\n[Destaque-me]{color=#ec4899}  [fã de matemática]{badge=Álgebra}\n\n> [!TIP]\n> Uma dica que vale a pena compartilhar.'
+        }
         className="w-full resize-y bg-card px-3 py-2 font-mono text-sm text-foreground outline-none placeholder:text-muted-foreground"
       />
     </div>

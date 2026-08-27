@@ -1,56 +1,69 @@
-name: Continuous Integration
+name: CI
 
 on:
-  pull_request:
-    branches: [main, develop]
   push:
-    branches: [main, develop]
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  quality-gate:
+  quality:
+    name: Quality checks
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
-      - name: Checkout
+      - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
+      - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 11.22.0
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: pnpm
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Code Formatting Check
-        run: pnpm format:check
-
-      - name: Static Analysis & Linting
+      - name: Lint
         run: pnpm lint
 
-      - name: Type Checking
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Type check
         run: pnpm typecheck
 
-      - name: Security & Dependency Vulnerability Audit
+      - name: Security audit
         run: pnpm audit --audit-level=high
 
-      - name: Unit & Domain Logic Tests
+      - name: Run unit tests
         run: pnpm test:unit
 
-      - name: API Integration Tests
+      - name: Run API integration tests
         run: pnpm test:integration
 
-      - name: Frontend Component & E2E Tests
+      - name: Run frontend E2E tests
         run: pnpm test:e2e
 
-      - name: Production Build Verification
+      - name: Build packages
         run: pnpm build

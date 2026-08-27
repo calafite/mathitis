@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MentorshipRepository } from '../../src/repositories/mentorship-repository.js';
 import { createLineageService } from '../../src/services/lineage-service.js';
-import { invalidateLineageCache, lineageFullGraphKey, lineageSubgraphKey } from '../../src/lib/lineage-cache.js';
+import {
+  invalidateLineageCache,
+  lineageFullGraphKey,
+  lineageSubgraphKey,
+} from '../../src/lib/lineage-cache.js';
 
 /** In-memory Redis stand-in with SETEX/GET/DEL semantics. */
 function memoryRedis() {
@@ -69,7 +73,9 @@ describe('lineage service cache', () => {
 
     expect(graph.nodes).toHaveLength(4);
     expect(repo.listLineage).toHaveBeenCalledTimes(1);
-    expect(redis.calls.some((c) => c.startsWith(`SETEX ${lineageFullGraphKey()} 86400`))).toBe(true);
+    expect(redis.calls.some((c) => c.startsWith(`SETEX ${lineageFullGraphKey()} 86400`))).toBe(
+      true,
+    );
     expect(redis.dump().get(lineageFullGraphKey())).toContain('ada');
   });
 

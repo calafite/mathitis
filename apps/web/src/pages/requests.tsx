@@ -18,7 +18,8 @@ const STATUS_LABELS: Record<string, string> = {
 
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300',
-  pending_admin_approval: 'bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300',
+  pending_admin_approval:
+    'bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300',
   accepted: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
   rejected: 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300',
   cancelled: 'bg-muted text-muted-foreground',
@@ -57,7 +58,9 @@ function RequestRow({
     <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[request.status] ?? 'bg-muted text-muted-foreground'}`}>
+          <span
+            className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[request.status] ?? 'bg-muted text-muted-foreground'}`}
+          >
             {STATUS_LABELS[request.status] ?? request.status}
           </span>
           <button
@@ -65,9 +68,7 @@ function RequestRow({
             className="text-sm font-semibold text-foreground hover:underline"
             onClick={() => onInspect(request)}
           >
-            {isSenior || isStaff
-              ? partyName(request.freshman)
-              : partyName(request.senior)}
+            {isSenior || isStaff ? partyName(request.freshman) : partyName(request.senior)}
           </button>
         </div>
         <p className="mt-1 line-clamp-2 text-sm text-foreground/80">{request.message}</p>
@@ -75,7 +76,9 @@ function RequestRow({
           {new Date(request.createdAt).toLocaleString('pt-BR')}
         </p>
         {request.rejectionReason && (
-          <p className="mt-1 text-xs text-red-600 dark:text-red-400">Motivo: {request.rejectionReason}</p>
+          <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+            Motivo: {request.rejectionReason}
+          </p>
         )}
       </div>
       <div className="flex shrink-0 flex-col gap-2">
@@ -112,7 +115,10 @@ function RequestRow({
 }
 
 export function RequestsPage() {
-  usePageMeta('Pedidos de apadrinhamento', 'Acompanhe seus pedidos enviados e recebidos de apadrinhamento acadêmico.');
+  usePageMeta(
+    'Pedidos de apadrinhamento',
+    'Acompanhe seus pedidos enviados e recebidos de apadrinhamento acadêmico.',
+  );
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isFreshman = user?.role === 'freshman';
@@ -168,7 +174,9 @@ export function RequestsPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <header className="mb-6 flex items-center justify-between">
-        <h1 className="font-mono text-xl font-bold uppercase tracking-[0.15em] text-foreground">Pedidos de apadrinhamento</h1>
+        <h1 className="font-mono text-xl font-bold uppercase tracking-[0.15em] text-foreground">
+          Pedidos de apadrinhamento
+        </h1>
       </header>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -218,9 +226,7 @@ export function RequestsPage() {
             role={user?.role}
             onInspect={setInspecting}
             onAccept={(r) => void acceptMutation.mutateAsync(r)}
-            onReject={(r) =>
-              void (isFreshman ? cancelMutation : rejectMutation).mutateAsync(r)
-            }
+            onReject={(r) => void (isFreshman ? cancelMutation : rejectMutation).mutateAsync(r)}
             onApprove={(r) => void approveMutation.mutateAsync(r)}
             onDeny={(r) => void denyMutation.mutateAsync(r)}
             busy={busy}
@@ -259,7 +265,11 @@ export function RequestsPage() {
                     />
                   ) : (
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-lg font-bold text-primary">
-                      {(inspecting.freshmanProfile.socialName ?? inspecting.freshman?.handle ?? '?').charAt(0)}
+                      {(
+                        inspecting.freshmanProfile.socialName ??
+                        inspecting.freshman?.handle ??
+                        '?'
+                      ).charAt(0)}
                     </div>
                   )}
                   <div>
@@ -272,7 +282,9 @@ export function RequestsPage() {
                   </div>
                 </div>
                 {inspecting.freshmanProfile.tagline && (
-                  <p className="mt-3 text-sm text-foreground/80">{inspecting.freshmanProfile.tagline}</p>
+                  <p className="mt-3 text-sm text-foreground/80">
+                    {inspecting.freshmanProfile.tagline}
+                  </p>
                 )}
                 {inspecting.freshmanProfile.biographyMarkdown && (
                   <p className="mt-3 line-clamp-4 text-sm text-foreground/80">
@@ -294,7 +306,9 @@ export function RequestsPage() {
                 )}
               </div>
             ) : (
-              <p className="mt-4 text-sm text-muted-foreground">Nenhum perfil detalhado disponível.</p>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Nenhum perfil detalhado disponível.
+              </p>
             )}
           </div>
         </div>

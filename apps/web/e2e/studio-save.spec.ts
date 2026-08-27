@@ -4,7 +4,9 @@ import { login } from './helpers';
 test('studio save persists tagline after reload', async ({ page }) => {
   await login(page, 'alan_loops');
   await page.goto('/profile/studio');
-  await expect(page.getByRole('heading', { name: 'Estúdio de Perfil' })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole('heading', { name: 'Estúdio de Perfil' })).toBeVisible({
+    timeout: 15_000,
+  });
 
   const stamp = `Persist ${Date.now()}`;
   const tagline = page.getByPlaceholder('Uma frase curta');
@@ -26,7 +28,9 @@ test('studio save persists tagline after reload', async ({ page }) => {
 test('studio surfaces a visible error when saving invalid data', async ({ page }) => {
   await login(page, 'alan_loops');
   await page.goto('/profile/studio');
-  await expect(page.getByRole('heading', { name: 'Estúdio de Perfil' })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole('heading', { name: 'Estúdio de Perfil' })).toBeVisible({
+    timeout: 15_000,
+  });
 
   const github = page.getByPlaceholder('https://github.com/you');
   await expect(github).toBeVisible({ timeout: 15_000 });

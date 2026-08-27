@@ -17,10 +17,10 @@ describe('Security hardening: rate limits, CSRF and CORS', () => {
       JWT_SECRET: 'test_jwt_secret_that_is_at_least_32_characters_long',
       COOKIE_SECRET: 'test_cookie_secret_that_is_at_least_32_chars_long',
       SESSION_MAX_AGE_DAYS: 7,
-    // This suite intentionally floods failed logins for rate-limit tests;
-    // keep the account lockout out of the way here (covered in auth.test).
-    LOGIN_MAX_ATTEMPTS: 1000,
-    LOGIN_LOCKOUT_MINUTES: 15,
+      // This suite intentionally floods failed logins for rate-limit tests;
+      // keep the account lockout out of the way here (covered in auth.test).
+      LOGIN_MAX_ATTEMPTS: 1000,
+      LOGIN_LOCKOUT_MINUTES: 15,
       WEB_ORIGIN: undefined,
       RATE_LIMIT_GLOBAL_MAX: 1000,
       RATE_LIMIT_AUTH_MAX: 1000,
@@ -83,7 +83,14 @@ describe('Security hardening: rate limits, CSRF and CORS', () => {
         role: 'senior',
         semester: 8,
         status: 'active',
-        profile: { create: { socialName: 'Sec Senior', isDiscoverable: true, isAcceptingRequests: true, maxMentees: 3 } },
+        profile: {
+          create: {
+            socialName: 'Sec Senior',
+            isDiscoverable: true,
+            isAcceptingRequests: true,
+            maxMentees: 3,
+          },
+        },
       },
     });
     await ctx.prisma.user.create({

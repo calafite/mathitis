@@ -132,7 +132,10 @@ export function createDiscoveryService(
     const embeddings = await fetchEmbeddings(prisma, [...allTagIds]);
 
     // Attach embeddings to tag objects for the recommendation engine.
-    const freshmanTagsWithEmb = freshmanTags.map((t) => ({ ...t, embedding: embeddings.get(t.id) }));
+    const freshmanTagsWithEmb = freshmanTags.map((t) => ({
+      ...t,
+      embedding: embeddings.get(t.id),
+    }));
     const seniorsWithEmb = seniors.map((s) => ({
       ...s,
       tags: s.tags.map((t) => ({ ...t, embedding: embeddings.get(t.id) })),

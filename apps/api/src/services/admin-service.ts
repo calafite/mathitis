@@ -6,7 +6,11 @@ import type {
   SystemConfig,
 } from '@mathitis/schemas';
 import type { AdminRepository, AdminUserFilters } from '../repositories/admin-repository.js';
-import type { AuditLogRepository, AuditLogFilters, AuditLogRow } from '../repositories/audit-log-repository.js';
+import type {
+  AuditLogRepository,
+  AuditLogFilters,
+  AuditLogRow,
+} from '../repositories/audit-log-repository.js';
 import type { SystemConfigRepository } from '../repositories/system-config-repository.js';
 import type { RequestService } from './request-service.js';
 import {
@@ -19,11 +23,29 @@ import { ConflictError, NotFoundError } from '../errors.js';
 
 export interface AdminService {
   getConfig(): Promise<SystemConfig>;
-  updateConfig(actorId: string, ipAddress: string | null, patch: ConfigPatch): Promise<SystemConfig>;
+  updateConfig(
+    actorId: string,
+    ipAddress: string | null,
+    patch: ConfigPatch,
+  ): Promise<SystemConfig>;
   listUsers(filters: AdminUserFilters): Promise<{ users: AdminUser[]; total: number }>;
-  setUserStatus(actorId: string, ipAddress: string | null, id: string, status: string): Promise<AdminUser>;
-  anonymizeUser(actorId: string, ipAddress: string | null, id: string): Promise<{ user: AdminUser; lineagePreserved: boolean }>;
-  moderateProfile(actorId: string, ipAddress: string | null, userId: string, action: ModerationAction): Promise<AdminUser>;
+  setUserStatus(
+    actorId: string,
+    ipAddress: string | null,
+    id: string,
+    status: string,
+  ): Promise<AdminUser>;
+  anonymizeUser(
+    actorId: string,
+    ipAddress: string | null,
+    id: string,
+  ): Promise<{ user: AdminUser; lineagePreserved: boolean }>;
+  moderateProfile(
+    actorId: string,
+    ipAddress: string | null,
+    userId: string,
+    action: ModerationAction,
+  ): Promise<AdminUser>;
   listApprovals(status?: string): ReturnType<AdminRepository['listApprovals']>;
   listMentorshipRequests(status?: string): ReturnType<AdminRepository['listMentorshipRequests']>;
   listAuditLogs(
@@ -104,7 +126,12 @@ export function createAdminService(deps: {
     return { users, total };
   }
 
-  async function setUserStatus(actorId: string, ipAddress: string | null, id: string, status: string) {
+  async function setUserStatus(
+    actorId: string,
+    ipAddress: string | null,
+    id: string,
+    status: string,
+  ) {
     const existing = await adminRepository.findUserById(id);
     if (!existing) {
       throw new NotFoundError('Usuário não encontrado', 'USER_NOT_FOUND');
@@ -182,9 +209,7 @@ export function createAdminService(deps: {
     return adminRepository.listMentorshipRequests(status);
   }
 
-  async function listAuditLogs(
-    filters: AuditLogFilters & { limit: number; offset: number },
-  ) {
+  async function listAuditLogs(filters: AuditLogFilters & { limit: number; offset: number }) {
     const { limit, offset, ...whereFilters } = filters;
     const [auditLogs, total] = await Promise.all([
       auditLogRepository.list({ ...whereFilters, limit, offset }),

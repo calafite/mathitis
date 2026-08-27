@@ -41,7 +41,9 @@ export function VerifyEmailPage() {
         setState('error');
         setError(err);
         setMessage(
-          err instanceof ApiError ? err.message : 'Não foi possível verificar seu e-mail. Tente novamente.',
+          err instanceof ApiError
+            ? err.message
+            : 'Não foi possível verificar seu e-mail. Tente novamente.',
         );
       });
     return () => {
@@ -51,20 +53,27 @@ export function VerifyEmailPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="auth-card-light w-full max-w-md border-2 border-black bg-[#d3d7de] p-8 text-center text-[#0b0b0e]" style={{ boxShadow: '10px 10px 0 0 rgba(201, 206, 216, 0.18)' }}>
+      <div
+        className="auth-card-light w-full max-w-md border-2 border-black bg-[#d3d7de] p-8 text-center text-[#0b0b0e]"
+        style={{ boxShadow: '10px 10px 0 0 rgba(201, 206, 216, 0.18)' }}
+      >
         <header className="mb-6 flex justify-end">
           <ThemeToggle />
         </header>
         {state === 'verifying' && (
           <>
-            <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">Verificando seu e-mail…</h1>
+            <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">
+              Verificando seu e-mail…
+            </h1>
             <p className="mt-2 text-sm text-muted-foreground">Aguarde um momento.</p>
           </>
         )}
 
         {state === 'success' && (
           <>
-            <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">E-mail verificado</h1>
+            <h1 className="font-sans text-2xl font-bold uppercase tracking-tight">
+              E-mail verificado
+            </h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Sua conta está ativa. Estamos te colocando dentro…
             </p>
