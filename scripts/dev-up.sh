@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Dev/test orchestration: start Postgres + Redis, nuke DB, migrate, seed.
-# Usage: ./scripts/dev-up.sh [--fresh]
-#   --fresh  Remove existing containers and volumes before starting
+# Dev/test orchestration: start Postgres + Redis, nuke DB, migrate, seed,
+# then launch API + Web dev servers.
+#
+# Usage: ./scripts/dev-up.sh [--fresh] [--no-seed]
+#   --fresh   Remove existing containers and volumes before starting
+#   --no-seed Skip DB reset/seed (reuse existing data)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -20,6 +23,26 @@ REDIS_PORT=6379
 info()  { printf '\033[1;34m▸ %s\033[0m\n' "$*"; }
 ok()    { printf '\033[1;32m✔ %s\033[0m\n' "$*"; }
 fail()  { printf '\033[1;31m✘ %s\033[0m\n' "$*"; exit 1; }
+
+cleanup() {
+  info "Shutting down…"
+  kill "$API_PID" "$WEB_PID" 2>/dev/null || true
+  wait "$API_PID" "$WEB_PID" 2>/dev/null || true
+}
+
+kill_port() {
+  local port="$1"
+  local pids
+  pids=$(ss -tlnp "sport = :$port" 2>/dev/null | grep -oP 'pid=\K[0-9]+' || true)
+  if [ -n "$pids" ]; then
+    for pid in $pids; do
+      info "Killing process on port $port (PID $pid)"
+      kill -9 "$pid" 2>/dev/null || true
+    done
+    sleep 1
+  fi
+}
+trap cleanup EXIT INT TERM
 
 ensure_container() {
   local name="$1" image="$2"
@@ -54,9 +77,11 @@ wait_for_postgres() {
 # ---------------------------------------------------------------------------
 
 FRESH=false
+NO_SEED=false
 for arg in "$@"; do
   case "$arg" in
-    --fresh) FRESH=true ;;
+    --fresh)   FRESH=true ;;
+    --no-seed) NO_SEED=true ;;
     *) echo "Unknown flag: $arg"; exit 1 ;;
   esac
 done
@@ -90,10 +115,37 @@ wait_for_postgres
 # Database reset + migrate + seed
 # ---------------------------------------------------------------------------
 
-info "Resetting database and applying migrations…"
-(cd "$ROOT_DIR/apps/api" && npx prisma migrate reset --force >/dev/null)
+if [ "$NO_SEED" = false ]; then
+  info "Resetting database and applying migrations…"
+  (cd "$ROOT_DIR/apps/api" && npx prisma migrate reset --force >/dev/null)
 
-info "Seeding database…"
-(cd "$ROOT_DIR" && pnpm --filter @mathitis/api db:seed)
+  info "Seeding database…"
+  (cd "$ROOT_DIR" && pnpm --filter @mathitis/api db:seed)
+else
+  info "Skipping database reset (--no-seed)"
+fi
 
-ok "Dev environment ready  (PostgreSQL :$POSTGRES_PORT  Redis :$REDIS_PORT)"
+# ---------------------------------------------------------------------------
+# Start dev servers
+# ---------------------------------------------------------------------------
+
+kill_port 4000
+kill_port 5173
+kill_port 5174
+
+info "Starting API dev server…"
+(cd "$ROOT_DIR" && pnpm --filter @mathitis/api dev) &
+API_PID=$!
+
+info "Starting Web dev server…"
+(cd "$ROOT_DIR" && pnpm --filter @mathitis/web dev) &
+WEB_PID=$!
+
+sleep 3
+ok "Dev environment running"
+echo "  API  → http://localhost:4000"
+echo "  Web  → http://localhost:5173"
+echo ""
+echo "  Press Ctrl+C to stop."
+
+wait
