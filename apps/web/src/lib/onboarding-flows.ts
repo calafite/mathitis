@@ -66,6 +66,14 @@ export const FRESHMAN_FLOW: OnboardingFlow = [
     ctaText: 'VOU EXPLORAR',
   },
   {
+    id: 'freshman-avatar',
+    type: 'avatar_upload',
+    title: 'Mostre quem você é',
+    description: 'Sua foto de perfil',
+    config: { required: true },
+    ctaText: 'CONTINUAR',
+  },
+  {
     id: 'freshman-theme',
     type: 'theme_picker',
     title: 'Escolha seu visual',
@@ -130,6 +138,14 @@ export const SENIOR_FLOW: OnboardingFlow = [
     description: 'Escolha os assuntos que você domina — é assim que os calouros te encontram.',
     config: { minTags: 1 },
     ctaText: 'TÁ BOM',
+  },
+  {
+    id: 'senior-avatar',
+    type: 'avatar_upload',
+    title: 'Mostre quem você é',
+    description: 'Sua foto de perfil',
+    config: { required: true },
+    ctaText: 'CONTINUAR',
   },
   {
     id: 'senior-theme',

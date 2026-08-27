@@ -20,7 +20,7 @@ describe('onboarding flows', () => {
   });
 
   it('every step references a known block type', () => {
-    const known = ['info_slide', 'profile_input', 'theme_picker', 'tag_selector'];
+    const known = ['info_slide', 'profile_input', 'theme_picker', 'tag_selector', 'avatar_upload'];
     for (const flow of [FRESHMAN_FLOW, SENIOR_FLOW]) {
       for (const step of flow) {
         expect(known).toContain(step.type);
@@ -40,5 +40,14 @@ describe('onboarding flows', () => {
     const last: OnboardingStep | undefined = SENIOR_FLOW[SENIOR_FLOW.length - 1];
     expect(last?.type).toBe('info_slide');
     expect(last?.ctaText).toBe('ABRIR MEU PERFIL');
+  });
+
+  it('both flows require a real photo of yourself (no cartoons)', () => {
+    for (const flow of [FRESHMAN_FLOW, SENIOR_FLOW]) {
+      const avatarStep = flow.find((s) => s.type === 'avatar_upload');
+      expect(avatarStep).toBeDefined();
+      expect(avatarStep?.config?.required).toBe(true);
+      expect(avatarStep?.title).toMatch(/Mostre quem você é/);
+    }
   });
 });

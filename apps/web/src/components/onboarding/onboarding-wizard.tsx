@@ -10,12 +10,14 @@ import { InfoSlideBlock } from '@/components/onboarding/blocks/info-slide-block'
 import { ProfileInputBlock } from '@/components/onboarding/blocks/profile-input-block';
 import { ThemePickerBlock } from '@/components/onboarding/blocks/theme-picker-block';
 import { TagSelectorBlock } from '@/components/onboarding/blocks/tag-selector-block';
+import { AvatarUploadBlock } from '@/components/onboarding/blocks/avatar-upload-block';
 
 const BLOCK_REGISTRY: Record<string, OnboardingBlockComponent> = {
   info_slide: InfoSlideBlock,
   profile_input: ProfileInputBlock,
   theme_picker: ThemePickerBlock,
   tag_selector: TagSelectorBlock,
+  avatar_upload: AvatarUploadBlock,
 };
 
 function UnsupportedBlock(_props: OnboardingBlockProps) {

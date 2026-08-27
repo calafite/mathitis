@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import type { ThemePalette, UpdateProfileBody } from '@mathitis/schemas';
 import { useAuth } from '@/contexts/auth-context';
@@ -25,6 +25,7 @@ function toDraft(profile: {
   tagline?: string | null;
   biographyMarkdown?: string | null;
   themePalette?: ThemePalette | null;
+  avatarUrl?: string | null;
   tags?: TagLike[];
 }): OnboardingDraft {
   return {
@@ -39,6 +40,7 @@ function toDraft(profile: {
       color: t.color,
       icon: t.icon ?? null,
     })),
+    avatarUrl: profile.avatarUrl ?? null,
   };
 }
 
@@ -56,6 +58,7 @@ function toUpdateBody(draft: OnboardingDraft): UpdateProfileBody {
 export function OnboardingPage() {
   usePageMeta('Bem-vindo(a)', 'Complete seu perfil para começar.');
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
 
   const profileQuery = useQuery({
@@ -87,17 +90,24 @@ export function OnboardingPage() {
         preferences: { onboarded: true },
       });
     },
-    onSuccess: () => navigate('/', { replace: true }),
+    onSuccess: async () => {
+      queryClient.setQueryData(['auth', 'me'], (old: unknown) => {
+        if (!old || typeof old !== 'object') return old;
+        const prev = old as Record<string, unknown>;
+        const prevPrefs = (prev.preferences as Record<string, unknown> | null) ?? {};
+        return { ...prev, preferences: { ...prevPrefs, onboarded: true } };
+      });
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      await queryClient.invalidateQueries({ queryKey: ['profile', 'me'] });
+      navigate('/', { replace: true });
+    },
     onError: (err: unknown) => {
       console.error('onboarding save failed', err);
     },
   });
 
-  const [saving, setSaving] = useState(false);
-
   const handleComplete = () => {
     if (!draft) return;
-    setSaving(true);
     finishMutation.mutate(toUpdateBody(draft));
   };
 
@@ -132,14 +142,14 @@ export function OnboardingPage() {
           draft={draft}
           setDraft={set}
           onComplete={handleComplete}
-          disabled={saving}
+          disabled={finishMutation.isPending}
         />
 
         <button
           type="button"
           onClick={() => navigate('/', { replace: true })}
           className="mt-10 font-mono text-[11px] uppercase tracking-widest text-white/40 hover:text-white/70"
-          disabled={saving}
+          disabled={finishMutation.isPending}
         >
           Sair e completar depois
         </button>

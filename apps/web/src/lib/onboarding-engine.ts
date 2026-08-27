@@ -5,7 +5,8 @@ export type BlockType =
   | 'info_slide'
   | 'profile_input'
   | 'theme_picker'
-  | 'tag_selector';
+  | 'tag_selector'
+  | 'avatar_upload';
 
 export interface OnboardingStep {
   id: string;
@@ -24,6 +25,7 @@ export interface OnboardingDraft {
   biographyMarkdown: string;
   themePalette: ThemePalette;
   tags: TagLike[];
+  avatarUrl: string | null;
 }
 
 export function emptyOnboardingDraft(): OnboardingDraft {
@@ -37,6 +39,7 @@ export function emptyOnboardingDraft(): OnboardingDraft {
       badgeColor: '#c9f24c',
     },
     tags: [],
+    avatarUrl: null,
   };
 }
 
