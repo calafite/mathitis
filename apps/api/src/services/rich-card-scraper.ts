@@ -5,6 +5,7 @@ import { ValidationError } from '../errors.js';
 import { assertContentSafe } from './nsfw-filter.js';
 
 const FETCH_TIMEOUT_MS = 10_000;
+const MAX_REDIRECTS = 3;
 const USER_AGENT = 'MathitisCardBot/1.0 (+https://pasteldemiolos.xyz)';
 
 /** Coerces a possibly-malformed JSON field into a string array. */
@@ -127,15 +128,33 @@ async function fetchWithTimeout(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetchImpl(url, {
-      signal: controller.signal,
-      headers: { 'user-agent': USER_AGENT, accept: 'text/html,application/json', ...extraHeaders },
-      redirect: 'follow',
-    });
-    if (!res.ok) {
-      throw new ValidationError('Não foi possível ler o conteúdo deste link');
+    let currentUrl = url;
+    for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects += 1) {
+      const res = await fetchImpl(currentUrl, {
+        signal: controller.signal,
+        headers: {
+          'user-agent': USER_AGENT,
+          accept: 'text/html,application/json',
+          ...extraHeaders,
+        },
+        // Redirects are validated one hop at a time to preserve the SSRF boundary.
+        redirect: 'manual',
+      });
+      if (res.status >= 300 && res.status < 400) {
+        const location = res.headers.get('location');
+        if (!location || redirects === MAX_REDIRECTS) {
+          throw new ValidationError('Não foi possível ler o conteúdo deste link');
+        }
+        currentUrl = new URL(location, currentUrl).toString();
+        await assertPublicUrl(currentUrl);
+        continue;
+      }
+      if (!res.ok) {
+        throw new ValidationError('Não foi possível ler o conteúdo deste link');
+      }
+      return await res.text();
     }
-    return await res.text();
+    throw new ValidationError('Não foi possível ler o conteúdo deste link');
   } catch (err) {
     if (err instanceof ValidationError) throw err;
     throw new ValidationError('Não foi possível ler o conteúdo deste link');

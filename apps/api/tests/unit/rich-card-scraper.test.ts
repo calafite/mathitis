@@ -251,6 +251,22 @@ describe('createRichCardScraper', () => {
         { status: 422 },
       );
     });
+
+    it('rejects redirects to a private address before following them', async () => {
+      const fetchImpl = vi.fn(
+        async () =>
+          new Response('', {
+            status: 302,
+            headers: { location: 'http://127.0.0.1:8080/admin' },
+          }),
+      );
+      const scraper = createRichCardScraper({ fetchImpl });
+
+      await expect(scraper.scrape('http://203.0.113.10/redirect')).rejects.toMatchObject({
+        status: 422,
+      });
+      expect(fetchImpl).toHaveBeenCalledOnce();
+    });
   });
 
   describe('timeout handling', () => {

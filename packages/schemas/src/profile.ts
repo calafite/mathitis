@@ -4,6 +4,15 @@ const hexColorSchema = z
   .string()
   .regex(/^#[0-9a-fA-F]{6}$/, 'A cor deve ser um valor hexadecimal válido, como #6366f1');
 
+/** URLs rendered as links or remote media must never use executable schemes. */
+function httpUrlSchema(maxLength?: number, urlMessage = 'Informe uma URL válida') {
+  const schema = z.string().url(urlMessage);
+  return (maxLength ? schema.max(maxLength) : schema).refine((value) => {
+    const protocol = new URL(value).protocol;
+    return protocol === 'http:' || protocol === 'https:';
+  }, 'A URL deve usar http ou https');
+}
+
 export const cardStyleSchema = z.enum(['glassmorphic', 'solid', 'bordered']);
 export type CardStyle = z.infer<typeof cardStyleSchema>;
 
@@ -16,10 +25,10 @@ export const themePaletteSchema = z.object({
 export type ThemePalette = z.infer<typeof themePaletteSchema>;
 
 export const socialLinksSchema = z.object({
-  github: z.string().url('Informe uma URL válida do GitHub').max(255).optional(),
+  github: httpUrlSchema(255, 'Informe uma URL válida do GitHub').optional(),
   discord: z.string().max(255).optional(),
-  linkedin: z.string().url('Informe uma URL válida do LinkedIn').max(255).optional(),
-  website: z.string().url('Informe uma URL válida do site').max(255).optional(),
+  linkedin: httpUrlSchema(255, 'Informe uma URL válida do LinkedIn').optional(),
+  website: httpUrlSchema(255, 'Informe uma URL válida do site').optional(),
 });
 export type SocialLinks = z.infer<typeof socialLinksSchema>;
 
@@ -72,7 +81,7 @@ export type FilmMetadata = z.infer<typeof filmMetadataSchema>;
 export const projectMetadataSchema = z.object({
   techStack: z.array(z.string().max(60)).max(20).optional(),
   stars: z.number().int().nonnegative().optional(),
-  repository: z.string().url('Informe uma URL de repositório válida').max(255).optional(),
+  repository: httpUrlSchema(255, 'Informe uma URL de repositório válida').optional(),
 });
 export type ProjectMetadata = z.infer<typeof projectMetadataSchema>;
 
@@ -82,9 +91,9 @@ export const richCardSchema = z.object({
   title: z.string(),
   subtitle: z.string().nullable(),
   description: z.string().nullable(),
-  imageUrl: z.string().nullable(),
-  externalUrl: z.string().nullable(),
-  embedUrl: z.string().nullable(),
+  imageUrl: httpUrlSchema().nullable(),
+  externalUrl: httpUrlSchema().nullable(),
+  embedUrl: httpUrlSchema().nullable(),
   accentColor: z.string(),
   metadata: z.record(z.unknown()).nullable(),
   displayOrder: z.number(),
@@ -162,9 +171,9 @@ export const createRichCardBodySchema = z.object({
   title: z.string().trim().min(1, 'O título é obrigatório').max(150),
   subtitle: z.string().trim().max(150).optional().nullable(),
   description: z.string().max(5_000).optional().nullable(),
-  imageUrl: z.string().url('Informe uma URL de imagem válida').max(512).optional().nullable(),
-  externalUrl: z.string().url('Informe uma URL externa válida').max(512).optional().nullable(),
-  embedUrl: z.string().url('Informe uma URL de incorporação válida').max(512).optional().nullable(),
+  imageUrl: httpUrlSchema(512, 'Informe uma URL de imagem válida').optional().nullable(),
+  externalUrl: httpUrlSchema(512, 'Informe uma URL externa válida').optional().nullable(),
+  embedUrl: httpUrlSchema(512, 'Informe uma URL de incorporação válida').optional().nullable(),
   accentColor: hexColorSchema.default('#6366f1'),
   metadata: z.record(z.unknown()).default({}),
 });
@@ -202,7 +211,7 @@ export const profileHandleParamsSchema = z.object({
 });
 export type ProfileHandleParams = z.infer<typeof profileHandleParamsSchema>;
 export const scrapeCardQuerySchema = z.object({
-  url: z.string().url('Informe uma URL válida').max(512),
+  url: httpUrlSchema(512),
 });
 export type ScrapeCardQuery = z.infer<typeof scrapeCardQuerySchema>;
 
@@ -211,9 +220,9 @@ export const scrapedCardResponseSchema = z.object({
   title: z.string().min(1).max(150),
   subtitle: z.string().max(150).nullable().optional(),
   description: z.string().max(5000).nullable().optional(),
-  imageUrl: z.string().url().max(512).nullable().optional(),
-  externalUrl: z.string().url().max(512).nullable().optional(),
-  embedUrl: z.string().url().max(512).nullable().optional(),
+  imageUrl: httpUrlSchema(512).nullable().optional(),
+  externalUrl: httpUrlSchema(512).nullable().optional(),
+  embedUrl: httpUrlSchema(512).nullable().optional(),
   accentColor: hexColorSchema.default('#6366f1'),
   metadata: z.record(z.unknown()).default({}),
 });
