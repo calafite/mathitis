@@ -1,4 +1,4 @@
-import type { FastifyInstance, FastifyReply } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import {
   genericSuccessResponseSchema,
   loginBodySchema,
@@ -68,6 +68,28 @@ export interface AuthPluginOptions {
   onLockout?: (userId: string) => Promise<void>;
 }
 
+function authKeyGenerator(request: FastifyRequest): string {
+  // Prefer per-identifier bucket (IP + login identifier) to avoid NAT collateral
+  // where many campus users share one egress IP. Falls back to IP alone.
+  const body = (request.body as Record<string, unknown> | undefined) ?? {};
+  const identifier =
+    (body.identifier as string | undefined) ??
+    (body.handle as string | undefined) ??
+    (body.email as string | undefined) ??
+    (body.token as string | undefined);
+  const base = request.ip;
+  if (identifier && typeof identifier === 'string' && identifier.length >= 3) {
+    return `${base}:${identifier.toLowerCase()}`;
+  }
+  // For /verify-email the token is in params, not body
+  const params = (request.params as Record<string, unknown> | undefined) ?? {};
+  const token = params.token as string | undefined;
+  if (token && typeof token === 'string') {
+    return `${base}:${token.slice(0, 16)}`;
+  }
+  return base;
+}
+
 export async function registerAuthPlugin(app: FastifyInstance, options: AuthPluginOptions) {
   const { userRepository } = options;
   const authService: AuthService = createAuthService({
@@ -114,7 +136,13 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
             body: registerBodySchema,
             response: { 200: genericSuccessResponseSchema },
           },
-          config: { rateLimit: { max: app.env.RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
+          config: {
+            rateLimit: {
+              max: app.env.RATE_LIMIT_AUTH_MAX,
+              timeWindow: '1 minute',
+              keyGenerator: authKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const { handle, email, password, semester, socialName } = request.body;
@@ -130,7 +158,13 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
             body: loginBodySchema,
             response: { 200: loginResponseSchema },
           },
-          config: { rateLimit: { max: app.env.RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
+          config: {
+            rateLimit: {
+              max: app.env.RATE_LIMIT_AUTH_MAX,
+              timeWindow: '1 minute',
+              keyGenerator: authKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const { identifier, password } = request.body;
@@ -146,7 +180,13 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
           schema: {
             response: { 200: genericSuccessResponseSchema },
           },
-          config: { rateLimit: { max: app.env.RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
+          config: {
+            rateLimit: {
+              max: app.env.RATE_LIMIT_AUTH_MAX,
+              timeWindow: '1 minute',
+              keyGenerator: authKeyGenerator,
+            },
+          },
         },
         async (_request, reply) => {
           session.clearSession(reply);
@@ -162,6 +202,13 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
           schema: {
             response: { 200: meResponseSchema },
           },
+          config: {
+            rateLimit: {
+              max: app.env.RATE_LIMIT_GLOBAL_MAX,
+              timeWindow: '1 minute',
+              keyGenerator: authKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const user = await authService.getCurrentUser(request.sessionUser!.sub);
@@ -176,7 +223,13 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
             body: recoverBodySchema,
             response: { 200: genericSuccessResponseSchema },
           },
-          config: { rateLimit: { max: app.env.RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
+          config: {
+            rateLimit: {
+              max: app.env.RATE_LIMIT_AUTH_MAX,
+              timeWindow: '1 minute',
+              keyGenerator: authKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const { email } = request.body;
@@ -192,7 +245,13 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
             body: resetPasswordBodySchema,
             response: { 200: genericSuccessResponseSchema },
           },
-          config: { rateLimit: { max: app.env.RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
+          config: {
+            rateLimit: {
+              max: app.env.RATE_LIMIT_AUTH_MAX,
+              timeWindow: '1 minute',
+              keyGenerator: authKeyGenerator,
+            },
+          },
         },
         async (request, reply) => {
           const { token, password } = request.body;
@@ -209,6 +268,13 @@ export async function registerAuthPlugin(app: FastifyInstance, options: AuthPlug
           schema: {
             params: verifyEmailParamsSchema,
             response: { 200: genericSuccessResponseSchema },
+          },
+          config: {
+            rateLimit: {
+              max: app.env.RATE_LIMIT_AUTH_MAX,
+              timeWindow: '1 minute',
+              keyGenerator: authKeyGenerator,
+            },
           },
         },
         async (request, reply) => {

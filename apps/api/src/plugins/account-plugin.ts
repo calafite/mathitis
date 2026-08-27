@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import argon2 from 'argon2';
 import {
@@ -23,19 +23,28 @@ interface AccountPluginOptions {
   sessionEpoch?: SessionEpochStore;
 }
 
-const RATE_LIMIT_AUTH_MAX = 10;
-
 export async function registerAccountPlugin(app: FastifyInstance, options: AccountPluginOptions) {
   const { prisma, session, sessionEpoch } = options;
   const requireAuth = createRequireAuth(session);
   const auditLogRepository = createAuditLogRepository(prisma);
+
+  function accountKeyGenerator(request: FastifyRequest): string {
+    const sub = (request as unknown as { sessionUser?: { sub: string } }).sessionUser?.sub;
+    return sub ? `user:${sub}` : `ip:${request.ip}`;
+  }
 
   app.addHook('preHandler', requireAuth);
 
   app.post<{ Body: ChangePasswordBody }>(
     '/api/account/change-password',
     {
-      config: { rateLimit: { max: RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
+      config: {
+        rateLimit: {
+          max: app.env.RATE_LIMIT_AUTH_MAX,
+          timeWindow: '1 minute',
+          keyGenerator: accountKeyGenerator,
+        },
+      },
       schema: {
         body: changePasswordBodySchema,
         response: { 200: z.object({ ok: z.boolean() }) },
@@ -105,6 +114,13 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
   app.get(
     '/api/account/settings',
     {
+      config: {
+        rateLimit: {
+          max: 60,
+          timeWindow: '1 minute',
+          keyGenerator: accountKeyGenerator,
+        },
+      },
       schema: {
         response: {
           200: z.object({
@@ -140,6 +156,13 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
   app.patch<{ Body: UpdateAccountBody }>(
     '/api/account',
     {
+      config: {
+        rateLimit: {
+          max: 30,
+          timeWindow: '1 minute',
+          keyGenerator: accountKeyGenerator,
+        },
+      },
       schema: {
         body: updateAccountBodySchema,
         response: { 200: z.object({ ok: z.boolean() }) },
@@ -172,6 +195,13 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
   app.get(
     '/api/account/export',
     {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '1 minute',
+          keyGenerator: accountKeyGenerator,
+        },
+      },
       schema: {
         response: { 200: userDataExportSchema, 404: z.object({ ok: z.boolean(), error: z.string() }) },
       },
@@ -371,7 +401,13 @@ export async function registerAccountPlugin(app: FastifyInstance, options: Accou
   app.post<{ Body: AnonymizeAccountBody }>(
     '/api/account/anonymize',
     {
-      config: { rateLimit: { max: RATE_LIMIT_AUTH_MAX, timeWindow: '1 minute' } },
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '1 minute',
+          keyGenerator: accountKeyGenerator,
+        },
+      },
       schema: {
         body: anonymizeAccountBodySchema,
         response: { 200: z.object({ ok: z.boolean() }) },
