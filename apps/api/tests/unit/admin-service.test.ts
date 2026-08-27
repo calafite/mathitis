@@ -97,6 +97,9 @@ function createFakes() {
     async listApprovals() {
       return [];
     },
+    async listMentorshipRequests() {
+      return [];
+    },
   };
 
   const requestService = {
