@@ -38,7 +38,9 @@ function toAuthUser(user: {
   semester: number;
   status: AuthUser['status'];
   profile?: { socialName: string | null } | null;
+  preferences?: unknown;
 }): AuthUser {
+  const prefs = user.preferences as Record<string, unknown> | null | undefined;
   return {
     id: user.id,
     handle: user.handle,
@@ -47,6 +49,7 @@ function toAuthUser(user: {
     semester: user.semester,
     status: user.status,
     socialName: user.profile?.socialName ?? null,
+    preferences: prefs ?? null,
     createdAt: new Date(),
   };
 }
