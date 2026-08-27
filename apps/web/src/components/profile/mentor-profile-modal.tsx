@@ -38,8 +38,11 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
     try {
       await discoveryApi.bump(seniorHandle);
       setBumped(true);
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao impulsionar');
+      const msg = err instanceof Error ? err.message : 'Falha ao impulsionar';
+      setError(msg);
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -47,8 +50,11 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
     try {
       await discoveryApi.removeBump(seniorHandle);
       setBumped(false);
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha ao remover impulso');
+      const msg = err instanceof Error ? err.message : 'Falha ao remover impulso';
+      setError(msg);
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -63,7 +69,9 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
       setRequestSent(true);
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha no pedido');
+      const msg = err instanceof Error ? err.message : 'Falha no pedido';
+      setError(msg);
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -278,9 +286,11 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                       Não aceitando pedidos
                     </button>
                   )}
-                  {error && (
-                    <p className="mt-1.5 font-mono text-[10px] uppercase tracking-wide text-destructive">{error}</p>
-                  )}
+                  <div className="h-6">
+                    {error && (
+                      <p className="font-mono text-[10px] uppercase tracking-wide text-destructive">{error}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </>
