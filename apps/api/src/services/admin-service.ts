@@ -25,6 +25,7 @@ export interface AdminService {
   anonymizeUser(actorId: string, ipAddress: string | null, id: string): Promise<{ user: AdminUser; lineagePreserved: boolean }>;
   moderateProfile(actorId: string, ipAddress: string | null, userId: string, action: ModerationAction): Promise<AdminUser>;
   listApprovals(status?: string): ReturnType<AdminRepository['listApprovals']>;
+  listMentorshipRequests(status?: string): ReturnType<AdminRepository['listMentorshipRequests']>;
   listAuditLogs(
     filters: AuditLogFilters & { limit: number; offset: number },
   ): Promise<{ auditLogs: AuditLogRow[]; total: number }>;
@@ -177,6 +178,10 @@ export function createAdminService(deps: {
     return adminRepository.listApprovals(status ?? 'pending_admin_approval');
   }
 
+  async function listMentorshipRequests(status?: string) {
+    return adminRepository.listMentorshipRequests(status);
+  }
+
   async function listAuditLogs(
     filters: AuditLogFilters & { limit: number; offset: number },
   ) {
@@ -224,6 +229,7 @@ export function createAdminService(deps: {
     anonymizeUser,
     moderateProfile,
     listApprovals,
+    listMentorshipRequests,
     listAuditLogs,
     decideApproval,
   };

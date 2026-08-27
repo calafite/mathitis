@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import type {
+  AdminMentorshipRequestsQuery,
   AdminUserParams,
   AdminUsersQuery,
   ApprovalParams,
@@ -12,6 +13,8 @@ import type {
   UpdateUserStatusBody,
 } from '@mathitis/schemas';
 import {
+  adminMentorshipRequestsQuerySchema,
+  adminMentorshipRequestsResponseSchema,
   adminUserParamsSchema,
   adminUserResponseSchema,
   adminUsersQuerySchema,
@@ -253,6 +256,22 @@ export async function registerAdminPlugin(app: FastifyInstance, options: AdminPl
             request.body.reason,
           );
           return reply.send({ request: result });
+        },
+      );
+
+      // -- Mentorship requests overview (all freshman -> senior, any status) ---
+      adminRoutes.get<{ Querystring: AdminMentorshipRequestsQuery }>(
+        '/requests',
+        {
+          preHandler: requireAdmin,
+          schema: {
+            querystring: adminMentorshipRequestsQuerySchema,
+            response: { 200: adminMentorshipRequestsResponseSchema },
+          },
+        },
+        async (request, reply) => {
+          const requests = await adminService.listMentorshipRequests(request.query.status);
+          return reply.send({ requests, total: requests.length });
         },
       );
 

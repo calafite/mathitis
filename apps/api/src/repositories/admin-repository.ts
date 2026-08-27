@@ -47,6 +47,31 @@ export interface ApprovalRow {
   } | null;
 }
 
+export interface AdminMentorshipRequestRow {
+  id: string;
+  freshmanId: string;
+  seniorId: string;
+  status: string;
+  message: string;
+  rejectionReason: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  freshman: {
+    userId: string;
+    handle: string;
+    socialName: string | null;
+    semester: number;
+    avatarThumbnailUrl: string | null;
+  } | null;
+  senior: {
+    userId: string;
+    handle: string;
+    socialName: string | null;
+    semester: number;
+    avatarThumbnailUrl: string | null;
+  } | null;
+}
+
 export interface AdminRepository {
   listUsers(filters: AdminUserFilters): Promise<AdminUserRow[]>;
   countUsers(filters: Omit<AdminUserFilters, 'limit' | 'offset'>): Promise<number>;
@@ -55,6 +80,7 @@ export interface AdminRepository {
   anonymizeUser(id: string): Promise<AdminUserRow>;
   clearProfileField(userId: string, action: ModerationAction): Promise<void>;
   listApprovals(status: string): Promise<ApprovalRow[]>;
+  listMentorshipRequests(status?: string): Promise<AdminMentorshipRequestRow[]>;
 }
 
 function toAdminUserRow(row: {
@@ -255,6 +281,64 @@ export function createAdminRepository(prisma: PrismaClient): AdminRepository {
     }));
   }
 
+  async function listMentorshipRequests(status?: string) {
+    const rows = await prisma.mentorshipRequest.findMany({
+      where: status ? { status: status as never } : {},
+      include: {
+        freshman: {
+          select: {
+            id: true,
+            handle: true,
+            semester: true,
+            profile: {
+              select: { userId: true, socialName: true, avatarThumbnailUrl: true },
+            },
+          },
+        },
+        senior: {
+          select: {
+            id: true,
+            handle: true,
+            semester: true,
+            profile: {
+              select: { userId: true, socialName: true, avatarThumbnailUrl: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return rows.map((row) => ({
+      id: row.id,
+      freshmanId: row.freshmanId,
+      seniorId: row.seniorId,
+      status: row.status,
+      message: row.message,
+      rejectionReason: row.rejectionReason,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      freshman: row.freshman.profile
+        ? {
+            userId: row.freshman.profile.userId,
+            handle: row.freshman.handle,
+            socialName: row.freshman.profile.socialName,
+            semester: row.freshman.semester,
+            avatarThumbnailUrl: row.freshman.profile.avatarThumbnailUrl,
+          }
+        : null,
+      senior: row.senior.profile
+        ? {
+            userId: row.senior.profile.userId,
+            handle: row.senior.handle,
+            socialName: row.senior.profile.socialName,
+            semester: row.senior.semester,
+            avatarThumbnailUrl: row.senior.profile.avatarThumbnailUrl,
+          }
+        : null,
+    }));
+  }
+
   return {
     listUsers,
     countUsers,
@@ -263,5 +347,6 @@ export function createAdminRepository(prisma: PrismaClient): AdminRepository {
     anonymizeUser,
     clearProfileField,
     listApprovals,
+    listMentorshipRequests,
   };
 }
