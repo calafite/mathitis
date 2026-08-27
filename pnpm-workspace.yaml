@@ -2,6 +2,11 @@ packages:
   - apps/*
   - packages/*
 
+overrides:
+  adm-zip: 0.6.0
+  deepmerge-ts: 8.0.2
+  sharp: 0.35.4
+
 allowBuilds:
   '@prisma/client': true
   '@prisma/engines': false
@@ -11,7 +16,7 @@ allowBuilds:
   onnxruntime-node: true
   prisma: true
   protobufjs: true
-  sharp: set this to true or false
+  sharp: true
 
 onlyBuiltDependencies:
   - '@prisma/client'

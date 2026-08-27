@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,9 +9,9 @@ import { ApiError } from '@/lib/api';
 import { PasswordInput } from '@/components/ui/password-input';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { usePageMeta } from '@/lib/use-page-meta';
+import { ArrowUpRight, Fingerprint, GitBranch, MoveRight } from 'lucide-react';
 
 const CARD_BG = '#d3d7de';
-const INK = '#0b0b0e';
 
 export function LoginPage() {
   usePageMeta(
@@ -52,8 +53,7 @@ export function LoginPage() {
     'h-10 w-full border-2 border-black bg-white px-3 text-sm text-black placeholder:text-black/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c9f24c]';
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
-      {/* Blueprint grid backdrop */}
+    <div className="relative min-h-screen overflow-hidden bg-background px-5 py-6 text-foreground sm:px-8 lg:px-12">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.12]"
         aria-hidden
@@ -61,97 +61,194 @@ export function LoginPage() {
           backgroundImage:
             'linear-gradient(#c9ced8 1px, transparent 1px), linear-gradient(90deg, #c9ced8 1px, transparent 1px)',
           backgroundSize: '48px 48px',
-          maskImage: 'radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 100%)',
+          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 40%, black 30%, transparent 100%)',
           WebkitMaskImage:
-            'radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 100%)',
+            'radial-gradient(ellipse 80% 80% at 50% 40%, black 30%, transparent 100%)',
         }}
       />
 
-      <div
-        className="relative w-full max-w-md border-2 border-black p-8"
-        style={{
-          backgroundColor: CARD_BG,
-          color: INK,
-          boxShadow: '10px 10px 0 0 rgba(201, 206, 216, 0.18)',
-        }}
-      >
-        <header className="-mb-2 flex items-start justify-between">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] opacity-60">
-            Portal de apadrinhamento
-          </p>
-          <ThemeToggle />
-        </header>
-
-        <h1 className="mt-4 font-sans text-3xl font-bold uppercase leading-none tracking-tight">
-          Mathitis
-        </h1>
-        <p className="mt-2 text-sm opacity-80">
-          Encontre seu padrinho na Ciência da Computação e entre para a linhagem.
+      <header className="relative mx-auto flex max-w-7xl items-center justify-between">
+        <Link to="/login" className="font-mono text-xs font-bold uppercase tracking-[0.3em]">
+          Mathitis<span className="text-[#c9f24c]">.</span>
+        </Link>
+        <p className="hidden font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground sm:block">
+          CACIC · UFPB / 2026
         </p>
+      </header>
 
-        <form className="mt-6 space-y-4" onSubmit={onSubmit}>
-          <div>
-            <label htmlFor="identifier" className={labelCls}>
-              Nome ou email
-            </label>
-            <input
-              id="identifier"
-              autoComplete="username"
-              className={inputCls}
-              {...register('identifier')}
-            />
-            {errors.identifier?.message && (
-              <p className="mt-1 text-sm text-[#b3261e]" role="alert">
-                {errors.identifier.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="password" className={labelCls}>
-              Senha
-            </label>
-            <PasswordInput
-              id="password"
-              autoComplete="current-password"
-              className={inputCls}
-              {...register('password')}
-            />
-            {errors.password?.message && (
-              <p className="mt-1 text-sm text-[#b3261e]" role="alert">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
-
-          {error && (
-            <div
-              className="border-2 border-[#b3261e] bg-[#b3261e]/10 p-3 text-sm text-[#b3261e]"
-              role="alert"
-            >
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full border-2 border-black bg-black px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#c9f24c] hover:text-black disabled:opacity-50"
-            style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.35)' }}
+      <main className="relative mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-12 py-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20 lg:py-16">
+        <section className="max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, x: -18 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.55 }}
+            className="mb-8 flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground"
           >
-            {isSubmitting ? 'Entrando…' : 'Entrar'}
-          </button>
-        </form>
+            <span className="h-2 w-2 bg-[#c9f24c]" />
+            Portal de apadrinhamento acadêmico
+          </motion.div>
 
-        <div className="mt-5 flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-widest">
-          <Link to="/register" className="underline hover:no-underline">
-            Criar conta
-          </Link>
-          <Link to="/recover" className="opacity-70 hover:opacity-100">
-            Esqueceu a senha?
-          </Link>
-        </div>
-      </div>
+          <motion.h1
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, delay: 0.1 }}
+            className="max-w-3xl font-sans text-5xl font-bold uppercase leading-[0.9] tracking-tight sm:text-7xl lg:text-8xl"
+          >
+            Toda trajetória
+            <br />
+            começa com uma{' '}
+            <span className="relative inline-block text-[#c9f24c]">
+              conexão
+              <motion.span
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.7, delay: 0.7, ease: 'easeOut' }}
+                className="absolute -bottom-1 left-0 h-1 w-full origin-left bg-[#c9f24c] sm:h-2"
+              />
+            </span>
+            .
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.3 }}
+            className="mt-8 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg"
+          >
+            Entre para uma rede de estudantes de Computação. Encontre quem já percorreu o caminho,
+            compartilhe o que você sabe e deixe sua própria marca na linhagem.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.45 }}
+            className="mt-12 grid max-w-xl grid-cols-3 border-y border-border py-5"
+          >
+            <div className="border-r border-border pr-4">
+              <Fingerprint className="mb-3 h-5 w-5 text-[#c9f24c]" />
+              <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Identidade
+              </p>
+              <p className="mt-1 text-sm">Seu espaço</p>
+            </div>
+            <div className="border-r border-border px-4">
+              <GitBranch className="mb-3 h-5 w-5 text-[#c9f24c]" />
+              <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Linhagem
+              </p>
+              <p className="mt-1 text-sm">Sua história</p>
+            </div>
+            <div className="pl-4">
+              <MoveRight className="mb-3 h-5 w-5 text-[#c9f24c]" />
+              <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Conexão
+              </p>
+              <p className="mt-1 text-sm">Seu próximo passo</p>
+            </div>
+          </motion.div>
+        </section>
+
+        <motion.div
+          initial={{ opacity: 0, y: 24, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.65, delay: 0.2 }}
+          className="relative mx-auto w-full max-w-md lg:mx-0 lg:justify-self-end"
+        >
+          <div
+            className="absolute -right-3 -top-3 h-full w-full border-2 border-[#c9f24c]"
+            aria-hidden
+          />
+          <div
+            className="auth-card-light relative border-2 border-black p-7 text-[#0b0b0e] sm:p-9"
+            style={{ backgroundColor: CARD_BG, boxShadow: '8px 8px 0 0 rgba(201, 206, 216, 0.2)' }}
+          >
+            <header className="flex items-start justify-between">
+              <div>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] opacity-60">
+                  Acesso restrito
+                </p>
+                <h2 className="mt-3 font-sans text-3xl font-bold uppercase leading-none tracking-tight">
+                  Bem-vindo de volta
+                </h2>
+              </div>
+              <ThemeToggle />
+            </header>
+            <p className="mt-3 max-w-xs text-sm leading-relaxed opacity-70">
+              Continue de onde parou. Sua linhagem está esperando.
+            </p>
+
+            <form className="mt-7 space-y-4" onSubmit={onSubmit} noValidate>
+              <div>
+                <label htmlFor="identifier" className={labelCls}>
+                  Nome ou email
+                </label>
+                <input
+                  id="identifier"
+                  autoComplete="username"
+                  className={inputCls}
+                  {...register('identifier')}
+                />
+                {errors.identifier?.message && (
+                  <p className="mt-1 text-sm text-[#b3261e]" role="alert">
+                    {errors.identifier.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="password" className={labelCls}>
+                  Senha
+                </label>
+                <PasswordInput
+                  id="password"
+                  autoComplete="current-password"
+                  className={inputCls}
+                  {...register('password')}
+                />
+                {errors.password?.message && (
+                  <p className="mt-1 text-sm text-[#b3261e]" role="alert">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              {error && (
+                <div
+                  className="border-2 border-[#b3261e] bg-[#b3261e]/10 p-3 text-sm text-[#b3261e]"
+                  role="alert"
+                >
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="group flex w-full items-center justify-center gap-2 border-2 border-black bg-black px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#c9f24c] hover:text-black disabled:opacity-50"
+                style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.35)' }}
+              >
+                {isSubmitting ? 'Entrando…' : 'Entrar na rede'}
+                {!isSubmitting && (
+                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6 flex items-center justify-between border-t border-black/20 pt-5 font-mono text-[11px] font-bold uppercase tracking-widest">
+              <Link
+                to="/register"
+                className="underline decoration-[#c9f24c] decoration-2 underline-offset-4 hover:no-underline"
+              >
+                Criar conta
+              </Link>
+              <Link to="/recover" className="opacity-60 hover:opacity-100">
+                Recuperar acesso
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      </main>
     </div>
   );
 }

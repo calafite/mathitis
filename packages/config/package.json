@@ -8,6 +8,6 @@
     "api.json"
   ],
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.3"
   }
 }
