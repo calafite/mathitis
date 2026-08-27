@@ -32,6 +32,9 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
   useEffect(() => {
     if (open) {
       refetch();
+    } else {
+      setExpandedCards(false);
+      setCopiedField(null);
     }
   }, [open, refetch]);
 
@@ -282,7 +285,12 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
               </div>
 
               {/* Action bar */}
-              <div className="flex flex-col gap-3 border-t border-foreground bg-muted/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="relative flex flex-col gap-3 border-t border-foreground bg-muted/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+                {error && (
+                  <p className="absolute -top-4 left-4 bg-background px-2 font-mono text-[10px] uppercase tracking-wide text-destructive">
+                    {error}
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={bumped ? handleRemoveBump : handleBump}
@@ -311,11 +319,6 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
                       Não aceitando pedidos
                     </button>
                   )}
-                  <div className="h-6">
-                    {error && (
-                      <p className="font-mono text-[10px] uppercase tracking-wide text-destructive">{error}</p>
-                    )}
-                  </div>
                 </div>
               </div>
             </>
