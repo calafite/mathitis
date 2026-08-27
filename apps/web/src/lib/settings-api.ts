@@ -13,6 +13,7 @@ export interface AccountSettingsResponse {
     reducedMotion?: boolean;
     soundEnabled?: boolean;
     emailNotifications?: boolean;
+    onboarded?: boolean;
   } | null;
 }
 
@@ -28,6 +29,7 @@ export interface UpdateAccountInput {
     reducedMotion?: boolean;
     soundEnabled?: boolean;
     emailNotifications?: boolean;
+    onboarded?: boolean;
   };
 }
 
