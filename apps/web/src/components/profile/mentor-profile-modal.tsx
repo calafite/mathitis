@@ -19,6 +19,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
   const [bumped, setBumped] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const { data: profileData, isLoading, refetch } = useQuery({
     queryKey: ['profile', seniorHandle],
@@ -66,6 +67,13 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
     }
   };
 
+  const handleCopy = useCallback((label: string, value: string) => {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopiedField(label);
+      setTimeout(() => setCopiedField(null), 1200);
+    });
+  }, []);
+
   if (!open) return null;
 
   const profile = profileData as Profile | undefined;
@@ -79,8 +87,6 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
       }
     : undefined;
 
-  const [copiedField, setCopiedField] = useState<string | null>(null);
-
   const socialLinks = profile?.socialLinks as Record<string, string | undefined> | null;
   const linkFields: Array<{ label: string; href?: string; copyValue?: string }> = [];
   if (socialLinks?.github) linkFields.push({ label: 'GitHub', href: socialLinks.github });
@@ -88,13 +94,6 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
   if (socialLinks?.discord) linkFields.push({ label: 'Discord', copyValue: socialLinks.discord });
   if (socialLinks?.website) linkFields.push({ label: 'Site', href: socialLinks.website });
   if (profile?.contactEmail) linkFields.push({ label: 'Email', copyValue: profile.contactEmail });
-
-  const handleCopy = useCallback((label: string, value: string) => {
-    navigator.clipboard.writeText(value).then(() => {
-      setCopiedField(label);
-      setTimeout(() => setCopiedField(null), 1200);
-    });
-  }, []);
 
   const richCards = profile?.richCards ?? [];
 
