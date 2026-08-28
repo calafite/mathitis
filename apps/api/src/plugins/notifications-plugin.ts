@@ -58,14 +58,14 @@ export async function registerNotificationsPlugin(
         async (request, reply) => {
           const viewerId = request.sessionUser!.sub;
           const raw = request.query as unknown as {
-            unreadOnly?: string;
-            limit?: string;
-            offset?: string;
+            unreadOnly?: boolean;
+            limit?: number;
+            offset?: number;
           };
           const result = await notificationService.listForUser(viewerId, {
-            unreadOnly: raw.unreadOnly === 'true',
-            limit: Number(raw.limit ?? 20),
-            offset: Number(raw.offset ?? 0),
+            unreadOnly: raw.unreadOnly ?? false,
+            limit: raw.limit ?? 20,
+            offset: raw.offset ?? 0,
           });
           return reply.send(result);
         },

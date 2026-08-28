@@ -8,8 +8,12 @@ const hexColorSchema = z
 function httpUrlSchema(maxLength?: number, urlMessage = 'Informe uma URL válida') {
   const schema = z.string().url(urlMessage);
   return (maxLength ? schema.max(maxLength) : schema).refine((value) => {
-    const protocol = new URL(value).protocol;
-    return protocol === 'http:' || protocol === 'https:';
+    try {
+      const protocol = new URL(value).protocol;
+      return protocol === 'http:' || protocol === 'https:';
+    } catch {
+      return false;
+    }
   }, 'A URL deve usar http ou https');
 }
 

@@ -26,7 +26,8 @@ export const systemConfigSchema = z.object({
 });
 export type SystemConfig = z.infer<typeof systemConfigSchema>;
 
-export const configPatchSchema = systemConfigSchema.partial();
+// Reject misspelled keys instead of silently accepting an empty patch.
+export const configPatchSchema = systemConfigSchema.partial().strict();
 export type ConfigPatch = z.infer<typeof configPatchSchema>;
 
 export const configResponseSchema = z.object({
