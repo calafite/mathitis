@@ -12,8 +12,8 @@ const CONTAINER = `mathitis-test-pg-${randomUUID().slice(0, 8)}`;
 const REDIS_CONTAINER = `mathitis-test-redis-${randomUUID().slice(0, 8)}`;
 const POSTGRES_IMAGE = 'postgres:16-alpine';
 const REDIS_IMAGE = 'redis:7-alpine';
-const PORT = 55000 + Math.floor(Math.random() * 500);
-const REDIS_PORT = 56000 + Math.floor(Math.random() * 500);
+let port: number;
+let redisPort: number;
 const DB_USER = 'mathitis_app';
 const DB_PASS = 'test_password';
 const DB_NAME = 'mathitis_test';
@@ -39,12 +39,26 @@ export async function startTestEnvironment(
 ): Promise<TestContext> {
   if (!started) {
     execSync(
-      `docker run -d --name ${CONTAINER} -e POSTGRES_USER=${DB_USER} -e POSTGRES_PASSWORD=${DB_PASS} -e POSTGRES_DB=${DB_NAME} -p ${PORT}:5432 ${POSTGRES_IMAGE}`,
+      `docker run -d --name ${CONTAINER} -e POSTGRES_USER=${DB_USER} -e POSTGRES_PASSWORD=${DB_PASS} -e POSTGRES_DB=${DB_NAME} -p 0:5432 ${POSTGRES_IMAGE}`,
       { stdio: 'pipe' },
     );
-    execSync(`docker run -d --name ${REDIS_CONTAINER} -p ${REDIS_PORT}:6379 ${REDIS_IMAGE}`, {
-      stdio: 'pipe',
-    });
+    try {
+      execSync(`docker run -d --name ${REDIS_CONTAINER} -p 0:6379 ${REDIS_IMAGE}`, {
+        stdio: 'pipe',
+      });
+    } catch (error) {
+      execSync(`docker rm -f ${CONTAINER}`, { stdio: 'pipe' });
+      throw error;
+    }
+
+    const publishedPort = (containerPort: string): number => {
+      const output = execSync(`docker port ${containerPort}`, { encoding: 'utf8' });
+      const match = output.match(/:(\d+)\s*$/m);
+      if (!match) throw new Error(`Could not determine published port for ${containerPort}`);
+      return Number(match[1]);
+    };
+    port = publishedPort(`${CONTAINER} 5432/tcp`);
+    redisPort = publishedPort(`${REDIS_CONTAINER} 6379/tcp`);
     started = true;
 
     const deadline = Date.now() + 30_000;
@@ -66,8 +80,8 @@ export async function startTestEnvironment(
     }
   }
 
-  const databaseUrl = `postgresql://${DB_USER}:${DB_PASS}@localhost:${PORT}/${DB_NAME}`;
-  const redisUrl = `redis://localhost:${REDIS_PORT}`;
+  const databaseUrl = `postgresql://${DB_USER}:${DB_PASS}@localhost:${port}/${DB_NAME}`;
+  const redisUrl = `redis://localhost:${redisPort}`;
   const prisma = createPrismaClient(databaseUrl);
   const redis = new Redis(redisUrl);
 
@@ -119,7 +133,8 @@ export async function startTestEnvironment(
   return { app, prisma, redis, env };
 }
 
-export async function stopTestEnvironment(context: TestContext) {
+export async function stopTestEnvironment(context: TestContext | undefined) {
+  if (!context) return;
   await context.app.close();
   await context.prisma.$disconnect();
 }
