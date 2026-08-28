@@ -113,9 +113,9 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
         }));
         const error = new Error('Validation failed') as Error & { validation: typeof errors };
         error.validation = errors;
-        throw error;
+        return { error };
       }
-      return result.data;
+      return { value: result.data };
     };
   });
 
