@@ -55,7 +55,7 @@ describe('devService.promoteToAdmin', () => {
   });
 
   it('updates the role, emits an audit log and bumps the session epoch', async () => {
-  const admin = await h.service.promoteToAdmin('dev-1', '10.0.0.1', 'nycodemonius');
+    const admin = await h.service.promoteToAdmin('dev-1', '10.0.0.1', 'nycodemonius');
 
     expect(h.prisma.user.update).toHaveBeenCalledWith({
       where: { id: 'u-1' },
@@ -83,7 +83,9 @@ describe('devService.promoteToAdmin', () => {
 
   it('rejects users that already hold administrative privileges', async () => {
     const existing = harness({ ...student, role: 'administrator', deletedAt: null });
-    await expect(existing.service.promoteToAdmin('dev-1', '', 'nycodemonius')).rejects.toMatchObject({
+    await expect(
+      existing.service.promoteToAdmin('dev-1', '', 'nycodemonius'),
+    ).rejects.toMatchObject({
       status: 409,
     });
   });
