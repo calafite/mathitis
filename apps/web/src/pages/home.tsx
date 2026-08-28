@@ -274,16 +274,16 @@ export function HomePage() {
               {ROLE_LABEL[user?.role ?? ''] ?? user?.role} · Período {user?.semester}
             </p>
             <h1 className="font-sans text-5xl font-bold uppercase leading-[0.95] tracking-tight text-[#c9ced8] sm:text-6xl lg:text-7xl">
-              Conectando
+              🐈‍⬛ Unindo
               <br />
               gerações de
               <br />
-              programadores
+              alunos
             </h1>
             <p className="text-sm text-muted-foreground">
               {isFreshman
                 ? `Bem-vindo(a), ${displayName}. Todos nós já estivemos no marco zero...`
-                : `Bem-vindo(a), ${displayName}. Seus dias de riso já passaram; desista, asídesiples.`}
+                : `Bem-vindo(a), ${displayName}. Asídesiples.`}
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <MonoButton to={isFreshman ? '/discovery' : '/requests'}>

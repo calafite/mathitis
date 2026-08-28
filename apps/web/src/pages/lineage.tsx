@@ -137,7 +137,7 @@ export function LineagePage() {
         <p className="mt-1 text-sm text-muted-foreground">
           {handle
             ? `Subgrafo com raiz em @${handle}`
-            : 'A linhagem completa do CI ao longo dos anos acadêmicos.'}
+            : 'Linhagem do CI ao longo dos períodos!'}
         </p>
       </header>
 

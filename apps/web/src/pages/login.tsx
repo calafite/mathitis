@@ -85,7 +85,7 @@ export function LoginPage() {
             className="mb-8 flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground"
           >
             <span className="h-2 w-2 bg-[#c9f24c]" />
-            Portal de apadrinhamento acadêmico
+            Portal de apadrinhamento do curso
           </motion.div>
 
           <motion.h1
@@ -94,11 +94,8 @@ export function LoginPage() {
             transition={{ duration: 0.65, delay: 0.1 }}
             className="max-w-3xl font-sans text-5xl font-bold uppercase leading-[0.9] tracking-tight sm:text-7xl lg:text-8xl"
           >
-            Toda trajetória
-            <br />
-            começa com uma{' '}
-            <span className="relative inline-block text-[#c9f24c]">
-              conexão
+            <span className="relative inline-block whitespace-nowrap text-[#c9f24c]">
+              apenas comece
               <motion.span
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
@@ -106,7 +103,6 @@ export function LoginPage() {
                 className="absolute -bottom-1 left-0 h-1 w-full origin-left bg-[#c9f24c] sm:h-2"
               />
             </span>
-            .
           </motion.h1>
 
           <motion.p
@@ -115,8 +111,8 @@ export function LoginPage() {
             transition={{ duration: 0.55, delay: 0.3 }}
             className="mt-8 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg"
           >
-            Entre para uma rede de estudantes de Computação. Encontre quem já percorreu o caminho,
-            compartilhe o que você sabe e deixe sua própria marca na linhagem.
+            Bem vindo(a) ao apadrinhamento. Conecte-se com pessoas com as quais contar, faça
+            amizades e torne-se parte da linhagem histórica do curso.
           </motion.p>
 
           <motion.div
@@ -130,14 +126,14 @@ export function LoginPage() {
               <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Identidade
               </p>
-              <p className="mt-1 text-sm">Seu espaço</p>
+              <p className="mt-1 text-sm">Nosso espaço</p>
             </div>
             <div className="border-r border-border px-4">
               <GitBranch className="mb-3 h-5 w-5 text-[#c9f24c]" />
               <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Linhagem
               </p>
-              <p className="mt-1 text-sm">Sua história</p>
+              <p className="mt-1 text-sm">Nossa história</p>
             </div>
             <div className="pl-4">
               <MoveRight className="mb-3 h-5 w-5 text-[#c9f24c]" />
@@ -155,6 +151,15 @@ export function LoginPage() {
           transition={{ duration: 0.65, delay: 0.2 }}
           className="relative mx-auto w-full max-w-md lg:mx-0 lg:justify-self-end"
         >
+          <motion.div
+            initial={{ opacity: 0, y: 12, rotate: -4 }}
+            animate={{ opacity: 1, y: 0, rotate: 0 }}
+            transition={{ duration: 0.5, delay: 0.45 }}
+            className="pointer-events-none absolute -top-20 right-5 z-0 text-7xl leading-none drop-shadow-[4px_4px_0_rgba(201,242,76,0.8)] sm:-top-24 sm:right-10 sm:text-8xl"
+            aria-hidden="true"
+          >
+            🦍
+          </motion.div>
           <div
             className="absolute -right-3 -top-3 h-full w-full border-2 border-[#c9f24c]"
             aria-hidden
@@ -175,7 +180,7 @@ export function LoginPage() {
               <ThemeToggle />
             </header>
             <p className="mt-3 max-w-xs text-sm leading-relaxed opacity-70">
-              Continue de onde parou. Sua linhagem está esperando.
+              Continue de onde parou. Estamos esperando.
             </p>
 
             <form className="mt-7 space-y-4" onSubmit={onSubmit} noValidate>
