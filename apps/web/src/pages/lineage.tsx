@@ -135,9 +135,7 @@ export function LineagePage() {
           Linhagem de apadrinhamento
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {handle
-            ? `Subgrafo com raiz em @${handle}`
-            : 'Linhagem do CI ao longo dos períodos!'}
+          {handle ? `Subgrafo com raiz em @${handle}` : 'Linhagem do CI ao longo dos períodos!'}
         </p>
       </header>
 
