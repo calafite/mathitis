@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import Fastify, { type FastifyInstance, type FastifyRequest } from 'fastify';
+import Fastify, { type FastifyInstance, type FastifyRequest, LogController } from 'fastify';
 import Redis from 'ioredis';
 import cookie from '@fastify/cookie';
 import helmet from '@fastify/helmet';
@@ -87,7 +87,9 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
 
   const app = Fastify({
     logger: createLoggerOptions(env.LOG_LEVEL),
-    disableRequestLogging: true,
+    logController: new LogController({
+      disableRequestLogging: true,
+    }),
     // There is exactly one proxy hop in production (nginx). Trust only that
     // hop so clients cannot prepend a forged X-Forwarded-For address and
     // evade IP-based limits. Fastify still uses the injected remote address
@@ -95,7 +97,9 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
     trustProxy: (_address, hop) => hop === 0,
     // Composite selector.validator tokens are ~101 chars; the default cap of
     // 100 would reject verification links with FST_ERR_MAX_PARAM_LENGTH.
-    maxParamLength: 500,
+    routerOptions: {
+      maxParamLength: 500,
+    },
   });
 
   initSentry({ dsn: env.SENTRY_DSN, environment: env.NODE_ENV });
