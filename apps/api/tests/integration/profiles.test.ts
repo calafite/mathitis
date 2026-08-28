@@ -234,10 +234,10 @@ describe('Profiles API', () => {
         biographyMarkdown: '## Sobre mim\n\nGosto de teoria dos números.',
         tagline: 'Provando teoremas desde 2019',
         socialLinks: {
-          github: 'https://github.com/ada',
-          discord: 'ada#0001',
-          linkedin: 'https://linkedin.com/in/ada',
-          website: 'https://ada.dev',
+          github: 'https://github.com/satanyahu',
+          discord: 'satanyahu#0001',
+          linkedin: 'https://linkedin.com/in/satanyahu',
+          website: 'https://satanyahu.dev',
         },
       },
     });
@@ -253,10 +253,10 @@ describe('Profiles API', () => {
     const profile = fetched.json().profile;
     expect(profile.biographyMarkdown).toContain('teoria dos números');
     expect(profile.tagline).toBe('Provando teoremas desde 2019');
-    expect(profile.socialLinks.github).toBe('https://github.com/ada');
-    expect(profile.socialLinks.discord).toBe('ada#0001');
-    expect(profile.socialLinks.linkedin).toBe('https://linkedin.com/in/ada');
-    expect(profile.socialLinks.website).toBe('https://ada.dev');
+    expect(profile.socialLinks.github).toBe('https://github.com/satanyahu');
+    expect(profile.socialLinks.discord).toBe('satanyahu#0001');
+    expect(profile.socialLinks.linkedin).toBe('https://linkedin.com/in/satanyahu');
+    expect(profile.socialLinks.website).toBe('https://satanyahu.dev');
   });
 
   it('uploads an avatar through the server-side pipeline', async () => {

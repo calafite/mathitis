@@ -3,7 +3,7 @@ import { login } from './helpers';
 
 test.describe('Senior mentorship flow', () => {
   test('accepts an incoming mentorship request', async ({ page }) => {
-    await login(page, 'ada_math');
+    await login(page, 'satanyahu');
 
     await page.getByRole('link', { name: 'Pedidos', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Pedidos de apadrinhamento' })).toBeVisible();
@@ -12,7 +12,7 @@ test.describe('Senior mentorship flow', () => {
     await expect(incoming).toBeVisible();
     await incoming.click();
 
-    const row = page.locator('div.rounded-xl').filter({ hasText: 'Alan' }).first();
+    const row = page.locator('div.rounded-xl').filter({ hasText: 'Joaopedrosasa' }).first();
     await expect(row.getByText('Pendente')).toBeVisible({ timeout: 15_000 });
 
     await row.getByRole('button', { name: 'Aceitar' }).click();

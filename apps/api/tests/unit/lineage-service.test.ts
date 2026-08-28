@@ -38,15 +38,15 @@ function memoryRedis() {
 const ROWS = [
   {
     mentorId: 'm1',
-    mentor: { handle: 'ada', socialName: 'Ada', semester: 8, role: 'senior' },
+    mentor: { handle: 'satanyahu', socialName: 'Satanyahu', semester: 8, role: 'senior' },
     menteeId: 'f1',
-    mentee: { handle: 'alan', socialName: 'Alan', semester: 2, role: 'freshman' },
+    mentee: { handle: 'joaopedrosasa', socialName: 'Joaopedrosasa', semester: 2, role: 'freshman' },
     academicYear: '2025/2026',
     semester: 1,
   },
   {
     mentorId: 'm2',
-    mentor: { handle: 'grace', socialName: 'Grace', semester: 9, role: 'senior' },
+    mentor: { handle: 'nycodemonius', socialName: 'Nycodemonius', semester: 9, role: 'senior' },
     menteeId: 'f2',
     mentee: { handle: 'linus', socialName: 'Linus', semester: 3, role: 'freshman' },
     academicYear: '2024/2025',
@@ -76,7 +76,7 @@ describe('lineage service cache', () => {
     expect(redis.calls.some((c) => c.startsWith(`SETEX ${lineageFullGraphKey()} 86400`))).toBe(
       true,
     );
-    expect(redis.dump().get(lineageFullGraphKey())).toContain('ada');
+    expect(redis.dump().get(lineageFullGraphKey())).toContain('satanyahu');
   });
 
   it('serves the full graph from the cache without hitting the database', async () => {
@@ -92,13 +92,13 @@ describe('lineage service cache', () => {
 
   it('caches handle-scoped subgraphs under lineage:subgraph:{handle}', async () => {
     const service = createLineageService(repo as MentorshipRepository, redis);
-    const sub = await service.getSubgraph('ada');
+    const sub = await service.getSubgraph('satanyahu');
 
-    expect(sub.nodes.map((n) => n.handle).sort()).toEqual(['ada', 'alan']);
-    expect(redis.dump().has(lineageSubgraphKey('ada'))).toBe(true);
+    expect(sub.nodes.map((n) => n.handle).sort()).toEqual(['joaopedrosasa', 'satanyahu']);
+    expect(redis.dump().has(lineageSubgraphKey('satanyahu'))).toBe(true);
 
     repo.listLineage.mockClear();
-    const cached = await service.getSubgraph('ada');
+    const cached = await service.getSubgraph('satanyahu');
     expect(repo.listLineage).not.toHaveBeenCalled();
     expect(cached.nodes).toHaveLength(2);
   });
@@ -122,10 +122,10 @@ describe('invalidateLineageCache', () => {
   it('deletes the full graph key and the given handle subgraphs', async () => {
     const redis = memoryRedis();
     redis.dump().set(lineageFullGraphKey(), '{}');
-    redis.dump().set(lineageSubgraphKey('ada'), '{}');
+    redis.dump().set(lineageSubgraphKey('satanyahu'), '{}');
     redis.dump().set(lineageSubgraphKey('user_abcd'), '{}');
 
-    await invalidateLineageCache(redis as never, ['ada', 'user_abcd']);
+    await invalidateLineageCache(redis as never, ['satanyahu', 'user_abcd']);
 
     expect(redis.dump().size).toBe(0);
   });
@@ -133,11 +133,11 @@ describe('invalidateLineageCache', () => {
   it('deletes only the full key when no handles are given', async () => {
     const redis = memoryRedis();
     redis.dump().set(lineageFullGraphKey(), '{}');
-    redis.dump().set(lineageSubgraphKey('ada'), '{}');
+    redis.dump().set(lineageSubgraphKey('satanyahu'), '{}');
 
     await invalidateLineageCache(redis as never);
 
     expect(redis.dump().has(lineageFullGraphKey())).toBe(false);
-    expect(redis.dump().has(lineageSubgraphKey('ada'))).toBe(true);
+    expect(redis.dump().has(lineageSubgraphKey('satanyahu'))).toBe(true);
   });
 });

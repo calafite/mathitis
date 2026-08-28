@@ -9,7 +9,7 @@ test.describe('email enumeration prevention (UI)', () => {
   }) => {
     await page.goto('/register');
     await page.getByLabel(/Nome de usuário/).fill(`e2e_dup_${Date.now()}`);
-    await page.getByLabel(/Email Acadêmico/).fill('ada@cs.uni.edu');
+    await page.getByLabel(/Email Acadêmico/).fill('satanyahu@cs.uni.edu');
     await page.getByLabel(/^Período/).fill('2');
     await page.getByLabel(/^Senha/).fill('StrongPassword123!');
     await page.getByRole('button', { name: 'Criar conta' }).click();
@@ -37,7 +37,7 @@ test.describe('email enumeration prevention (UI)', () => {
       timeout: 15_000,
     });
 
-    await page.getByLabel(/E-mail/).fill('ada@cs.uni.edu');
+    await page.getByLabel(/E-mail/).fill('satanyahu@cs.uni.edu');
     await page.getByRole('button', { name: /Enviar link de redefinição/i }).click();
     await expect(page.getByText('um link de redefinição foi enviado')).toBeVisible({
       timeout: 15_000,
@@ -56,7 +56,7 @@ test.describe('email enumeration prevention (UI)', () => {
 
   test('rejects invalid credentials with a visible error', async ({ page }) => {
     await page.goto('/login');
-    await page.getByLabel(/Nome ou email/).fill('alan_loops');
+    await page.getByLabel(/Nome ou email/).fill('joaopedrosasa');
     await page.getByLabel(/Senha/).fill('WrongPassword123!');
     await page.getByRole('button', { name: 'Entrar' }).click();
 
@@ -65,7 +65,7 @@ test.describe('email enumeration prevention (UI)', () => {
   });
 
   test('signs in a seeded active user', async ({ page }) => {
-    await login(page, 'alan_loops');
+    await login(page, 'joaopedrosasa');
     await expect(page.getByText(/Bem-vindo/)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/Calouro/).first()).toBeVisible({ timeout: 15_000 });
   });

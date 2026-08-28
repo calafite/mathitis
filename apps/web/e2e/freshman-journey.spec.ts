@@ -3,10 +3,10 @@ import { login } from './helpers';
 
 test.describe('Freshman journey', () => {
   test('bumps a senior and submits a mentorship request', async ({ page }) => {
-    await login(page, 'alan_loops');
+    await login(page, 'joaopedrosasa');
     await page.getByRole('link', { name: 'Descoberta de Padrinhos' }).first().click();
 
-    const seniorCard = page.locator('div[role="button"]').filter({ hasText: 'Ada' }).first();
+    const seniorCard = page.locator('div[role="button"]').filter({ hasText: 'Satanyahu' }).first();
     await expect(seniorCard).toBeVisible({ timeout: 15_000 });
 
     // Click the card to open the mentor profile modal (the whole card is clickable)
@@ -24,13 +24,13 @@ test.describe('Freshman journey', () => {
 
     await page.goto('/requests');
     await expect(page.getByRole('heading', { name: 'Pedidos de apadrinhamento' })).toBeVisible();
-    const row = page.locator('div.rounded-xl').filter({ hasText: 'Ada' }).first();
+    const row = page.locator('div.rounded-xl').filter({ hasText: 'Satanyahu' }).first();
     await expect(row).toBeVisible({ timeout: 15_000 });
     await expect(row.getByText('Pendente')).toBeVisible();
   });
 
   test('customizes the profile via the studio', async ({ page }) => {
-    await login(page, 'alan_loops');
+    await login(page, 'joaopedrosasa');
     await page.getByRole('navigation').getByRole('link', { name: 'Estúdio' }).click();
 
     const textarea = page.getByPlaceholder(/Conte sua história/);

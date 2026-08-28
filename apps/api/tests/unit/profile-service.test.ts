@@ -11,7 +11,7 @@ import type { UpdateProfileBody } from '@mathitis/schemas';
 function makeProfile(): ProfileWithRelations {
   return {
     userId: 'user-1',
-    socialName: 'Ada',
+    socialName: 'Satanyahu',
     pronouns: null,
     tagline: null,
     biographyMarkdown: null,
@@ -30,7 +30,7 @@ function makeProfile(): ProfileWithRelations {
     effortScore: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
-    user: { handle: 'ada', role: 'senior', semester: 8, deletedAt: null },
+    user: { handle: 'satanyahu', role: 'senior', semester: 8, deletedAt: null },
     tags: [],
     richCards: [],
   } as unknown as ProfileWithRelations;

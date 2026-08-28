@@ -29,7 +29,7 @@ function makeCard(id: string, cardType: RichCardType, title: string): RichCard {
 
 function makeDraft(): ProfileDraft {
   return {
-    socialName: 'Ada Lovelace',
+    socialName: 'Satanyahu Lovelace',
     pronouns: 'ela/dela',
     tagline: 'Matemática & computação',
     biographyMarkdown: '',

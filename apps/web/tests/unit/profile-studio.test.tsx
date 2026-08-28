@@ -9,7 +9,7 @@ import { discoveryApi } from '@/lib/discovery-api';
 
 vi.mock('@/contexts/auth-context', () => ({
   useAuth: () => ({
-    user: { handle: 'ada_math', role: 'senior', semester: 8 },
+    user: { handle: 'satanyahu', role: 'senior', semester: 8 },
     isAuthenticated: true,
     isLoading: false,
   }),
@@ -46,10 +46,10 @@ const allTags = {
 
 const profile = {
   userId: 'user-1',
-  handle: 'ada_math',
+  handle: 'satanyahu',
   role: 'senior' as const,
   semester: 8,
-  socialName: 'Ada',
+  socialName: 'Satanyahu',
   pronouns: null,
   tagline: null,
   biographyMarkdown: null,

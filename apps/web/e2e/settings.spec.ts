@@ -5,7 +5,7 @@ test.describe('settings portal', () => {
   test('updates semester and appearance preferences with persistence across reloads', async ({
     page,
   }) => {
-    await login(page, 'alan_loops');
+    await login(page, 'joaopedrosasa');
     await page.goto('/settings');
     await expect(page.getByRole('heading', { name: 'Configurações' })).toBeVisible();
 
@@ -36,7 +36,7 @@ test.describe('settings portal', () => {
   });
 
   test('changes password and verifies login with the new password', async ({ page }) => {
-    await login(page, 'ada_math');
+    await login(page, 'satanyahu');
     await page.goto('/settings');
 
     await page.getByLabel(/Senha atual/).fill('TestPassword123!');
@@ -52,7 +52,7 @@ test.describe('settings portal', () => {
     });
 
     await page.goto('/login');
-    await page.getByLabel(/Nome ou email/).fill('ada_math');
+    await page.getByLabel(/Nome ou email/).fill('satanyahu');
     await page.getByLabel(/Senha/).fill('FreshPassword456!');
     await page.getByRole('button', { name: 'Entrar' }).click();
     await expect(page.getByText(/Bem-vindo/)).toBeVisible({
@@ -68,7 +68,7 @@ test.describe('settings portal', () => {
   });
 
   test('downloads the data export from the Dados e Linhagem tab', async ({ page }) => {
-    await login(page, 'alan_loops');
+    await login(page, 'joaopedrosasa');
     await page.goto('/settings');
     await page.getByRole('tab', { name: /Dados e Linhagem/ }).click();
 

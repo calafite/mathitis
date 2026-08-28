@@ -20,7 +20,7 @@ describe('session epoch invalidation', () => {
     const cookie = await manager.createSessionCookie({
       sub: 'u1',
       role: 'freshman',
-      handle: 'ada',
+      handle: 'satanyahu',
     });
     const payload = await manager.verifySessionCookie(cookie);
     expect(payload?.sub).toBe('u1');
@@ -31,7 +31,7 @@ describe('session epoch invalidation', () => {
     const oldCookie = await manager.createSessionCookie({
       sub: 'u1',
       role: 'freshman',
-      handle: 'ada',
+      handle: 'satanyahu',
     });
 
     await epoch.bump('u1'); // password changed elsewhere
@@ -63,7 +63,7 @@ describe('session epoch invalidation', () => {
     const legacyCookie = await legacyManager.createSessionCookie({
       sub: 'u1',
       role: 'freshman',
-      handle: 'ada',
+      handle: 'satanyahu',
     });
 
     const manager = makeManager(epoch.get);
