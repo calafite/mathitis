@@ -104,7 +104,8 @@ export const SENIOR_FLOW: OnboardingFlow = [
     id: 'senior-bio',
     type: 'profile_input',
     title: 'Compartilhe sua trajetória',
-    description: 'Escreva uma breve biografia com sua experiência e os assuntos em que pode ajudar.',
+    description:
+      'Escreva uma breve biografia com sua experiência e os assuntos em que pode ajudar.',
     config: { field: 'biographyMarkdown', multiline: true },
     ctaText: 'CONTINUAR',
   },
