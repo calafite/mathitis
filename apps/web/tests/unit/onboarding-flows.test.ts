@@ -7,16 +7,14 @@ function ids(flow: OnboardingFlow) {
 }
 
 describe('onboarding flows', () => {
-  it('freshman flow teaches discovery, bumps and the 4-bump limit in order', () => {
+  it('freshman flow explains discovery and bumps', () => {
     const order = ids(FRESHMAN_FLOW);
 
     expect(order).toContain('what-is-discovery');
     expect(order).toContain('bump-explained');
     expect(order.indexOf('what-is-discovery')).toBeLessThan(order.indexOf('bump-explained'));
-    expect(order.indexOf('bump-explained')).toBeLessThan(order.indexOf('four-bump-limit'));
-
-    const limit = FRESHMAN_FLOW.find((s) => s.id === 'four-bump-limit');
-    expect(limit?.description).toMatch(/4 impulsos/);
+    const bumps = FRESHMAN_FLOW.find((s) => s.id === 'bump-explained');
+    expect(bumps?.description).toMatch(/4 impulsos/);
   });
 
   it('every step references a known block type', () => {
@@ -47,7 +45,7 @@ describe('onboarding flows', () => {
       const avatarStep = flow.find((s) => s.type === 'avatar_upload');
       expect(avatarStep).toBeDefined();
       expect(avatarStep?.config?.required).toBe(true);
-      expect(avatarStep?.title).toMatch(/Mostre quem você é/);
+      expect(avatarStep?.title).toMatch(/Adicione uma foto/);
     }
   });
 });

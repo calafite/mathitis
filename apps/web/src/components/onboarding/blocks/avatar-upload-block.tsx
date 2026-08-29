@@ -20,10 +20,8 @@ export function AvatarUploadBlock({ step, draft, setDraft, next }: OnboardingBlo
   return (
     <div className="w-full space-y-5">
       <p className="font-mono text-xs leading-relaxed text-muted-foreground">
-        Envie uma foto{' '}
-        <span className="font-bold text-foreground">sua, nítida e bem iluminada</span>. Nada de
-        personagens, desenhos, avatares ou memes — precisamos te reconhecer facilmente no campus e
-        na plataforma. Formatos: JPG, PNG ou WebP até 2MB.
+        Envie uma foto sua, nítida e bem iluminada. Use uma imagem que permita identificar você no
+        campus e na plataforma. Formatos: JPG, PNG ou WebP até 2MB.
       </p>
 
       <div className="rounded-md border border-border bg-card p-5">
