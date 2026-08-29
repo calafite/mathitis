@@ -96,9 +96,17 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
   const profile = profileData as Profile | undefined;
   if (!profile && !isLoading) return null;
 
-  const bannerStyle: CSSProperties | undefined = profile?.bannerUrl
+  const theme = profile?.themePalette ?? {
+    primaryColor: '#6366f1',
+    accentColor: '#ec4899',
+  };
+  const bannerStyle: CSSProperties | undefined = profile
     ? {
-        backgroundImage: `url(${profile.bannerUrl})`,
+        backgroundImage: profile.bannerUrl
+          ? `url(${profile.bannerUrl})`
+          : profile.bannerPreset === 'gradient_cosmic'
+            ? 'linear-gradient(135deg, #6366f1, #ec4899)'
+            : `linear-gradient(135deg, ${theme.primaryColor}, ${theme.accentColor})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }
@@ -119,7 +127,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/80" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-none border-2 border-foreground bg-background text-foreground">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-none border-2 border-foreground bg-background/[0.99] text-foreground">
           {/* Title bar */}
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-foreground bg-background px-4 py-2.5">
             <span className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-foreground">
@@ -136,7 +144,7 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
 
           {bannerStyle && (
             <div
-              className="h-24 border-b border-foreground"
+              className="h-24 border-b border-foreground bg-muted/20"
               style={bannerStyle}
               role="presentation"
             />
@@ -145,21 +153,25 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
           {profile && (
             <>
               {/* Header */}
-              <div className="relative z-10 flex items-end justify-between border-b border-foreground/50 px-4 pb-3">
-                <div className="flex items-end gap-3">
+              <div
+                className={`relative z-10 flex items-end justify-between gap-3 border-b border-foreground/50 px-4 pb-3 ${bannerStyle ? '' : 'pt-3'}`}
+              >
+                <div className="flex min-w-0 items-end gap-3">
                   {profile.avatarUrl ? (
                     <img
                       src={profile.avatarUrl}
                       alt=""
-                      className="-mt-10 h-20 w-20 rounded-full border-2 border-foreground bg-background object-cover"
+                      className={`${bannerStyle ? '-mt-10' : ''} h-20 w-20 shrink-0 rounded-full border-2 border-foreground bg-background object-cover`}
                     />
                   ) : (
-                    <div className="-mt-10 flex h-20 w-20 items-center justify-center rounded-full border-2 border-foreground bg-background font-sans text-3xl font-bold">
+                    <div
+                      className={`${bannerStyle ? '-mt-10' : ''} flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-2 border-foreground bg-background font-sans text-3xl font-bold`}
+                    >
                       {(profile.socialName ?? profile.handle ?? '?').charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <div className="pb-1">
-                    <h2 className="font-sans text-2xl font-bold uppercase leading-tight">
+                  <div className="min-w-0 pb-1">
+                    <h2 className="break-words font-sans text-2xl font-bold uppercase leading-tight">
                       {profile.socialName ?? profile.handle}
                     </h2>
                     <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -198,8 +210,11 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
 
               {/* Tag badges */}
               {profile.tags.length > 0 && (
-                <div className="border-b border-foreground/50 px-4 py-2">
-                  <div className="flex flex-wrap gap-1">
+                <div className="border-b border-foreground/50 px-4 pb-3 pt-2">
+                  <h3 className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Tags
+                  </h3>
+                  <div className="mt-2 flex flex-wrap gap-1">
                     {profile.tags.map((tag) => (
                       <span
                         key={tag.id}
@@ -288,46 +303,48 @@ export function MentorProfileModal({ open, onOpenChange, seniorHandle }: MentorP
               )}
 
               {/* Footer stats */}
-              <div className="flex justify-between border-t border-foreground py-1 pl-2 pr-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+              <div className="flex justify-between gap-4 border-t border-foreground px-4 py-2.5 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
                 <span>Até {profile.maxMentees ?? 3} ferinhas</span>
                 <span>Pontuação de esforço {profile.effortScore ?? 0}</span>
               </div>
 
               {/* Action bar */}
-              <div className="relative flex flex-col gap-3 border-t border-foreground bg-muted/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="border-t border-foreground bg-muted/40 px-4 pb-4 pt-4">
                 {error && (
-                  <p className="absolute -top-4 left-4 bg-background px-2 font-mono text-[10px] uppercase tracking-wide text-destructive">
+                  <p className="mb-3 border border-destructive bg-background px-2 py-2 font-mono text-[10px] uppercase tracking-wide text-destructive">
                     {error}
                   </p>
                 )}
-                <button
-                  type="button"
-                  onClick={bumped ? handleRemoveBump : handleBump}
-                  disabled={isLoading}
-                  className="w-full rounded-none border border-foreground bg-transparent px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-50 sm:w-auto"
-                >
-                  {bumped ? 'Remover impulso' : 'Impulsionar perfil'}
-                </button>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={bumped ? handleRemoveBump : handleBump}
+                    disabled={isLoading}
+                    className="w-full rounded-none border border-[#c9f24c] bg-[#c9f24c]/10 px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-[#c9f24c] hover:bg-[#c9f24c] hover:text-black disabled:opacity-50 sm:w-auto"
+                  >
+                    {bumped ? 'Remover impulso' : 'Impulsionar perfil'}
+                  </button>
 
-                <div className="sm:text-right">
-                  {profile.isAcceptingRequests ? (
-                    <button
-                      type="button"
-                      onClick={handleRequest}
-                      disabled={requestSent || isLoading}
-                      className="w-full rounded-none border border-foreground bg-transparent px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-50 sm:w-auto"
-                    >
-                      {requestSent ? 'Pedido enviado' : 'Pedir apadrinhamento'}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled
-                      className="w-full cursor-not-allowed rounded-none border border-foreground bg-transparent px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground sm:w-auto"
-                    >
-                      Não aceitando pedidos
-                    </button>
-                  )}
+                  <div className="sm:text-right">
+                    {profile.isAcceptingRequests ? (
+                      <button
+                        type="button"
+                        onClick={handleRequest}
+                        disabled={requestSent || isLoading}
+                        className="w-full rounded-none border border-[#ff4d14] bg-[#ff4d14]/10 px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-[#ff8a66] hover:bg-[#ff4d14] hover:text-black disabled:opacity-50 sm:w-auto"
+                      >
+                        {requestSent ? 'Pedido enviado' : 'Pedir apadrinhamento'}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled
+                        className="w-full cursor-not-allowed rounded-none border border-foreground bg-transparent px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground sm:w-auto"
+                      >
+                        Não aceitando pedidos
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </>

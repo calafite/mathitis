@@ -66,21 +66,37 @@ function MentorCard({
       style={{ boxShadow: '6px 6px 0 0 rgba(201, 206, 216, 0.15)' }}
     >
       {/* Header */}
-      <div className="relative p-4" style={{ backgroundColor: HEADER_BG, color: INK }}>
-        <span
-          className="absolute right-3 top-3 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest"
-          style={{
-            backgroundColor: senior.isAcceptingRequests ? INK : 'transparent',
-            color: senior.isAcceptingRequests ? HEADER_BG : INK,
-            border: senior.isAcceptingRequests ? 'none' : `2px solid ${INK}`,
-          }}
-        >
-          {senior.isAcceptingRequests ? 'Disponível' : 'Lotado'}
-        </span>
-        <h3 className="pr-24 font-sans text-xl font-bold uppercase leading-tight tracking-tight">
-          {name}
-        </h3>
-        <p className="font-mono text-xs opacity-70">@{senior.handle}</p>
+      <div
+        className="relative p-4"
+        style={{
+          backgroundColor: HEADER_BG,
+          backgroundImage:
+            'radial-gradient(circle at 100% 0%, rgba(11, 11, 14, 0.18) 0%, rgba(11, 11, 14, 0.08) 35%, rgba(11, 11, 14, 0) 70%)',
+          color: INK,
+        }}
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          {senior.avatarThumbnailUrl || senior.avatarUrl ? (
+            <img
+              src={senior.avatarThumbnailUrl ?? senior.avatarUrl ?? undefined}
+              alt=""
+              className="h-12 w-12 shrink-0 rounded-full border-2 border-black object-cover"
+            />
+          ) : (
+            <div
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-black bg-black font-sans text-xl font-bold text-white"
+              aria-hidden="true"
+            >
+              {name.charAt(0).toUpperCase()}
+            </div>
+          )}
+          <div className="min-w-0">
+            <h3 className="break-words font-sans text-xl font-bold uppercase leading-tight tracking-tight">
+              {name}
+            </h3>
+            <p className="font-mono text-xs opacity-70">@{senior.handle}</p>
+          </div>
+        </div>
       </div>
 
       {/* Body */}
@@ -143,6 +159,16 @@ function MentorCard({
           <Eye className="h-3.5 w-3.5" aria-hidden />
           {formatCount(senior.profileViews)}
         </div>
+        <span
+          className="flex items-center px-2.5 py-2.5 font-mono text-[10px] font-bold uppercase tracking-widest"
+          style={{
+            backgroundColor: senior.isAcceptingRequests ? INK : 'transparent',
+            color: senior.isAcceptingRequests ? HEADER_BG : INK,
+            borderLeft: `2px solid ${INK}`,
+          }}
+        >
+          {senior.isAcceptingRequests ? 'Disponível' : 'Lotado'}
+        </span>
         {isFreshman && (
           <motion.button
             type="button"
