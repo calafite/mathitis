@@ -77,7 +77,7 @@ const TEST_USERS: Array<{
   {
     handle: 'joaopedrosasa',
     email: 'joaopedrosasa@cs.uni.edu',
-    role: 'senior',
+    role: 'freshman',
     semester: 2,
     password: 'TestPassword123!',
     socialName: 'Joaopedrosasa',
@@ -147,6 +147,7 @@ async function seed() {
         role: user.role,
         semester: user.semester,
         status: 'active',
+        preferences: { onboarded: true },
         profile: {
           create: {
             socialName: user.socialName,

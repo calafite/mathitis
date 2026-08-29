@@ -38,7 +38,7 @@ test.describe('Freshman journey', () => {
     await textarea.fill('I solve hard problems.\n\n[Highlight me]{color=#ec4899}');
     await page.getByTitle('Emblema').click();
 
-    await page.getByRole('button', { name: 'Salvar alterações' }).click();
+    await page.locator('header').getByRole('button', { name: 'Salvar alterações' }).click();
     await expect(page.getByRole('button', { name: 'Salvo' })).toBeVisible({ timeout: 15_000 });
   });
 });

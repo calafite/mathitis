@@ -121,6 +121,15 @@ test.describe('settings portal', () => {
       timeout: 15_000,
     });
 
+    const csrfToken = (await page.context().cookies()).find(
+      (cookie) => cookie.name === 'mathitis_csrf',
+    )?.value;
+    const onboard = await page.context().request.patch('http://localhost:4000/api/account', {
+      data: { preferences: { onboarded: true } },
+      headers: { 'x-csrf-token': csrfToken ?? '' },
+    });
+    expect(onboard.status()).toBe(200);
+
     await login(page, handle, 'StrongPassword123!');
     await page.goto('/settings');
     await page.getByRole('tab', { name: /Zona de Risco/ }).click();
