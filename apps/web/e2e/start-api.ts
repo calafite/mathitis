@@ -91,9 +91,13 @@ async function main() {
   });
   execFileSync(apiBin('tsx'), ['prisma/seed.ts'], { cwd: API_DIR, env, stdio: 'inherit' });
 
-  let api: ChildProcess | undefined;
+  const api: ChildProcess = spawn(apiBin('tsx'), ['src/main.ts'], {
+    cwd: API_DIR,
+    env,
+    stdio: 'inherit',
+  });
   const cleanup = () => {
-    api?.kill('SIGTERM');
+    api.kill('SIGTERM');
     try {
       docker(['rm', '-f', PG_CONTAINER, REDIS_CONTAINER], { stdio: 'ignore' });
     } catch {
@@ -103,7 +107,6 @@ async function main() {
   process.once('SIGINT', cleanup);
   process.once('SIGTERM', cleanup);
 
-  api = spawn(apiBin('tsx'), ['src/main.ts'], { cwd: API_DIR, env, stdio: 'inherit' });
   api.once('exit', (code, signal) => {
     cleanup();
     process.exit(code ?? (signal ? 1 : 0));
