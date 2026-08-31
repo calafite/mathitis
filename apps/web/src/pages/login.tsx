@@ -158,7 +158,7 @@ export function LoginPage() {
             className="pointer-events-none absolute -top-20 right-5 z-0 text-7xl leading-none drop-shadow-[4px_4px_0_rgba(201,242,76,0.8)] sm:-top-24 sm:right-10 sm:text-8xl"
             aria-hidden="true"
           >
-            🦍
+            🦍🐈‍⬛
           </motion.div>
           <div
             className="absolute -right-3 -top-3 h-full w-full border-2 border-[#c9f24c]"

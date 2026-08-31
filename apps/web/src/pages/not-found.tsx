@@ -41,7 +41,7 @@ export function NotFoundPage() {
 
       <div className="space-y-2">
         <h1 className="font-display text-5xl font-semibold">404</h1>
-        <p className="font-display text-xl">Este galho não existe na árvore.</p>
+        <p className="font-display text-xl">🐈‍⬛ Este galho não existe na árvore.</p>
         <p className="max-w-md text-sm text-muted-foreground">
           A página que você procura foi movida, renomeada ou nunca foi plantada.
         </p>

@@ -468,7 +468,7 @@ export function DiscoveryPage() {
                   NO_DATA
                 </p>
                 <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground/60">
-                  Nenhum padrinho corresponde aos filtros…
+                  🐈‍⬛ Nenhum padrinho corresponde aos filtros…
                 </p>
               </div>
             )}

@@ -96,7 +96,7 @@ export function ErrorPage({ error, title, message, onRetry }: ErrorPageProps) {
           fontFamily="monospace"
           fill="var(--color-muted-foreground)"
         >
-          ERR://edge_broken
+          ERR://edge_broken 🐈‍⬛
         </text>
       </svg>
 

@@ -363,7 +363,7 @@ export function HomePage() {
                 <EmptyBranch />
                 <div className="space-y-3">
                   <p className="font-sans text-lg font-bold uppercase">
-                    {isFreshman ? 'Sua árvore ainda não tem galhos' : 'Nenhum ramo brotou ainda'}
+                    {isFreshman ? '🐈‍⬛ Sua árvore ainda não tem galhos' : 'Nenhum ramo brotou ainda'}
                   </p>
                   <p className="max-w-md text-sm opacity-80">
                     {isFreshman

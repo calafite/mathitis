@@ -71,7 +71,8 @@ export function AppLayout() {
       <footer className="border-t border-border">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 font-mono text-[11px] uppercase tracking-widest text-muted-foreground sm:flex-row">
           <span>
-            © {new Date().getFullYear()} <span className="font-bold text-foreground">Mathitis</span>
+            © {new Date().getFullYear()} 🐈‍⬛{' '}
+            <span className="font-bold text-foreground">Mathitis</span>
             <span aria-hidden className="mx-2">
               ·
             </span>
